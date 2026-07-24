@@ -1,7 +1,8 @@
 /* =========================================
    INTRO ANIMATION LOGIC
    ========================================= */
-const LOGO_URL = "113187.png"; 
+// Yahan logo ka naya naam updated hai
+const LOGO_URL = "File_00000000fdb082089a8183b3a1cc72c3.png"; 
 
 const tiles = document.getElementById('tiles');
 for (let i = 0; i < 16; i++) {
@@ -42,18 +43,23 @@ for (let i = 0; i < 14; i++) {
   p.appendChild(s);
 }
 
-// Intro Setup & Timeout
+// Fixed Timing & Page Transition Logic
 setTimeout(() => {
   const intro = document.getElementById('intro-container');
   const main = document.getElementById('main-website');
-  intro.style.opacity = '0';
+  
+  // Hide Intro instantly after 6 seconds
+  intro.style.display = 'none';
+  
+  // Show Main Website instantly
   main.style.display = 'block';
   
+  // Apply opacity to trigger CSS fade in
   setTimeout(() => {
-    intro.style.display = 'none';
     main.style.opacity = '1';
-  }, 1000); 
-}, 6000);
+  }, 50); 
+  
+}, 6000); // 6000 milliseconds = 6 seconds wait time for animation
 
 /* =========================================
    ADMIN PLANNER LOGIC (7 Taps + PIN)
@@ -64,6 +70,7 @@ let tapTimeout;
 function handleLogoTap() {
   tapCount++;
   
+  // Reset tap count if gap is more than 2 seconds
   clearTimeout(tapTimeout);
   tapTimeout = setTimeout(() => { tapCount = 0; }, 2000);
 
@@ -76,7 +83,7 @@ function handleLogoTap() {
         alert("Access Denied: Incorrect PIN.");
       }
     }, 100);
-    tapCount = 0; 
+    tapCount = 0; // Reset after successful or failed attempt
   }
 }
 
