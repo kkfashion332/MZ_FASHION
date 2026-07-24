@@ -6,7 +6,7 @@
 html,body{background:var(--bg);color:var(--fg);font-family:'Inter',system-ui,sans-serif;overflow-x:hidden; scroll-behavior: smooth;}
 
 /* =========================================
-   INTRO ANIMATION STYLES (From User)
+   INTRO ANIMATION STYLES
    ========================================= */
 #intro-container {
   position: fixed;
@@ -100,7 +100,8 @@ header {
   width: 60px;
   height: 60px;
   border-radius: 50%;
-  background-image: url('113187.png');
+  /* Yahan logo ka naya naam updated hai */
+  background-image: url('File_00000000fdb082089a8183b3a1cc72c3.png');
   background-size: cover;
   background-position: center;
   box-shadow: inset 0 0 15px rgba(0,0,0,0.8), 0 0 15px rgba(212,169,74,0.5);
