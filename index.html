@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>MZ Fashion - Premium Store</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600;700&family=Inter:wght@300;400;600&family=Cinzel:wght@400;600;700&display=swap" rel="stylesheet" />
+<!-- CSS File Link -->
+<link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+<!-- INTRO ANIMATION SCREEN -->
+<div id="intro-container">
+  <div class="bg-radial"></div>
+  <div class="vignette"></div>
+  <div class="particles" id="particles"></div>
+
+  <div class="intro-nav">
+    <div class="brand-mark"></div>
+  </div>
+
+  <section class="hero">
+    <div class="logo-wrap">
+      <div class="ring"></div>
+      <div class="ring"></div>
+      <div class="ring"></div>
+      <div class="brush"></div>
+      <div class="logo-inner">
+        <div class="tiles" id="tiles"></div>
+        <div class="shine-wrap"><div class="shine"></div></div>
+      </div>
+    </div>
+
+    <div class="tag">Welcome to your trusted shop</div>
+
+    <h1>
+      <span class="w w1">Your</span>
+      <span class="w w2 gold">Style,</span>
+      <span class="w w3">My</span>
+      <span class="w w4 gold">Shop.</span>
+    </h1>
+  </section>
+</div>
+
+<!-- MAIN WEBSITE CONTENT -->
+<div id="main-website">
+  <header>
+    <div class="brand-title">MZ FASHION</div>
+    <!-- Upper right logo sphere. Tapping this 7 times opens admin -->
+    <div class="logo-sphere" onclick="handleLogoTap()"></div>
+  </header>
+
+  <main>
+    <!-- Banners Section -->
+    <div class="banners-container" id="banner-container">
+      <div class="banner">
+        <h2>Premium Collection 2026</h2>
+        <p style="color:var(--muted)">Discover the essence of elegance.</p>
+      </div>
+      <div class="banner">
+        <h2>Exclusive Dark Edition</h2>
+        <p style="color:var(--muted)">Tailored for the modern aesthetic.</p>
+      </div>
+    </div>
+
+    <!-- Products Section -->
+    <h2 class="section-title">New Arrivals</h2>
+    <div class="products-grid" id="product-grid">
+      <div class="product-card">
+        <div class="product-img">Product Image</div>
+        <h3>Velvet Evening Gown</h3>
+        <p>₹4,999</p>
+      </div>
+      <div class="product-card">
+        <div class="product-img">Product Image</div>
+        <h3>Gold Accent Blazer</h3>
+        <p>₹6,499</p>
+      </div>
+      <div class="product-card">
+        <div class="product-img">Product Image</div>
+        <h3>Midnight Silk Shirt</h3>
+        <p>₹2,999</p>
+      </div>
+      <div class="product-card">
+        <div class="product-img">Product Image</div>
+        <h3>Classic Tuxedo</h3>
+        <p>₹12,999</p>
+      </div>
+    </div>
+  </main>
+</div>
+
+<!-- ADMIN PLANNER MODAL -->
+<div id="admin-modal">
+  <div class="admin-panel">
+    <h2>Admin Planner</h2>
+    <div class="admin-actions">
+      <button class="admin-btn" onclick="addBanner()">+ Add Banner</button>
+      <button class="admin-btn" onclick="removeBanner()">- Remove Banner</button>
+      <button class="admin-btn" onclick="addProduct()">+ Add Product</button>
+      <button class="admin-btn" onclick="removeProduct()">- Remove Product</button>
+    </div>
+    <button class="admin-btn close-admin" onclick="closeAdmin()">Close Admin Planner</button>
+  </div>
+</div>
+
+<!-- JS File Link -->
+<script src="script.js"></script>
+</body>
+</html>
