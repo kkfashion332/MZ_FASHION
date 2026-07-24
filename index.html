@@ -7,8 +7,252 @@
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600;700&family=Inter:wght@300;400;600&family=Cinzel:wght@400;600;700&display=swap" rel="stylesheet" />
-<!-- CSS File Link -->
-<link rel="stylesheet" href="./style.css" />
+
+<style>
+  /* =========================================
+     ALL CSS INCLUDED HERE
+     ========================================= */
+  :root{
+    --gold:#d4a94a; --gold-soft:#f0d488; --gold-deep:#8a6a1f;
+    --bg:#0a0a0a; --bg2:#141210; --fg:#f5efe0; --muted:#8a8578;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  html,body{background:var(--bg);color:var(--fg);font-family:'Inter',system-ui,sans-serif;overflow-x:hidden; scroll-behavior: smooth;}
+
+  #intro-container {
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    background: var(--bg);
+    transition: opacity 1s ease;
+  }
+  .bg-radial{position:absolute;inset:0;pointer-events:none;background:radial-gradient(ellipse at center,#1c1610 0%,#050505 70%);}
+  .vignette{position:absolute;inset:0;pointer-events:none;background:radial-gradient(circle at 50% 40%,transparent 30%,rgba(0,0,0,.9) 80%);}
+  .intro-nav{position:relative;z-index:20;display:flex;align-items:center;justify-content:space-between;padding:24px 48px;opacity:0;animation:fadeDown .8s ease forwards .2s;}
+  .brand-mark{width:34px;height:34px;border-radius:6px;background:linear-gradient(135deg,var(--gold),var(--gold-deep));box-shadow:0 0 20px rgba(212,169,74,.4);}
+  @media(max-width:768px){.intro-nav{padding:20px 24px;}}
+  .hero{position:relative;z-index:10;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:calc(100vh - 96px);padding:24px 24px 80px;text-align:center;}
+  .logo-wrap{position:relative;}
+  .ring{position:absolute;inset:0;border:1px solid rgba(212,169,74,.45);border-radius:18px;animation:pulseRing 3.5s cubic-bezier(.2,.8,.3,1) infinite;}
+  .ring:nth-child(2){animation-delay:1.1s;}
+  .ring:nth-child(3){animation-delay:2.2s;}
+  .brush{position:absolute;inset:-40px;z-index:-1;border-radius:24px;filter:blur(34px);
+    background:conic-gradient(from 220deg,transparent 0%,rgba(212,169,74,.55) 20%,transparent 45%,rgba(240,212,136,.5) 65%,transparent 90%);
+    opacity:0;transform:rotate(-40deg);animation:arcIn 1.6s cubic-bezier(.2,.8,.2,1) forwards,spinSlow 22s linear infinite 1.6s;}
+  .logo-inner{position:relative;width:240px;height:240px;border-radius:18px;
+    box-shadow:0 0 60px rgba(212,169,74,.35),0 0 140px rgba(212,169,74,.18),0 30px 80px rgba(0,0,0,.7);
+    animation:floatSlow 7s ease-in-out infinite 2.4s;}
+  @media(min-width:768px){.logo-inner{width:310px;height:310px;}}
+  .tiles{position:absolute;inset:0;border-radius:18px;overflow:hidden;border:1px solid rgba(212,169,74,.25);}
+  .tile{position:absolute;width:25%;height:25%;background-size:400% 400%;background-repeat:no-repeat;
+    opacity:0;transform:translate3d(var(--tx),var(--ty),0) rotate(var(--tr)) scale(.4);
+    filter:blur(6px);
+    animation:shardIn .9s cubic-bezier(.2,.8,.25,1) forwards;}
+  .shine-wrap{position:absolute;inset:0;overflow:hidden;border-radius:18px;pointer-events:none;}
+  .shine{position:absolute;top:-20px;bottom:-20px;width:36%;
+    background:linear-gradient(90deg,transparent,rgba(240,212,136,.55),transparent);
+    transform:translateX(-100%) skewX(-20deg);opacity:0;
+    animation:shineIn .01s linear forwards 2.2s,goldSweep 4.5s ease-in-out infinite 2.4s;}
+  .tag{margin-top:56px;margin-bottom:18px;font-family:'Cinzel',serif;font-size:12px;letter-spacing:.6em;color:rgba(240,212,136,.85);text-transform:uppercase;opacity:0;transform:translateY(20px);animation:fadeUp .9s ease forwards 2.6s;}
+  h1{font-family:'Cormorant Garamond',serif;font-weight:600;font-size:clamp(44px,9vw,104px);line-height:.95;letter-spacing:-.02em;max-width:960px;}
+  h1 .w{display:inline-block;margin-right:14px;opacity:0;transform:translateY(40px);filter:blur(10px);}
+  h1 .w1{animation:blurUp 1s cubic-bezier(.2,.8,.2,1) forwards 2.7s;}
+  h1 .w2{animation:blurUp 1s cubic-bezier(.2,.8,.2,1) forwards 2.85s;}
+  h1 .w3{animation:blurUp 1s cubic-bezier(.2,.8,.2,1) forwards 3s;}
+  h1 .w4{animation:blurUp 1s cubic-bezier(.2,.8,.2,1) forwards 3.15s;}
+  .gold{background:linear-gradient(90deg,#8a6a1f 0%,#f5e3a8 25%,#c99a3d 50%,#f5e3a8 75%,#8a6a1f 100%);background-size:200% 100%;-webkit-background-clip:text;background-clip:text;color:transparent;animation:shimmer 6s linear infinite;}
+  .particles{position:absolute;inset:0;overflow:hidden;pointer-events:none;}
+  .particles span{position:absolute;font-family:'Cinzel',serif;color:rgba(240,212,136,.35);user-select:none;animation:drift linear infinite;}
+
+  @keyframes fadeDown{from{opacity:0;transform:translateY(-10px);}to{opacity:1;transform:translateY(0);}}
+  @keyframes fadeUp{to{opacity:1;transform:translateY(0);}}
+  @keyframes blurUp{to{opacity:1;transform:translateY(0);filter:blur(0);}}
+  @keyframes arcIn{to{opacity:1;transform:rotate(0);}}
+  @keyframes spinSlow{to{transform:rotate(360deg);}}
+  @keyframes floatSlow{0%,100%{transform:translateY(0) rotate(0);}50%{transform:translateY(-18px) rotate(2deg);}}
+  @keyframes pulseRing{0%{transform:scale(.92);opacity:.6;}100%{transform:scale(1.35);opacity:0;}}
+  @keyframes goldSweep{0%{transform:translateX(-120%) skewX(-20deg);}60%,100%{transform:translateX(340%) skewX(-20deg);}}
+  @keyframes shimmer{0%{background-position:-200% 0;}100%{background-position:200% 0;}}
+  @keyframes drift{0%{transform:translate(0,0);opacity:0;}10%{opacity:1;}100%{transform:translate(var(--dx),var(--dy));opacity:0;}}
+  @keyframes shardIn{60%{filter:blur(0);}100%{opacity:1;transform:translate3d(0,0,0) rotate(0) scale(1);filter:blur(0);}}
+  @keyframes shineIn{to{opacity:1;}}
+
+  /* MAIN WEBSITE STYLES */
+  #main-website {
+    display: none; 
+    opacity: 0;
+    transition: opacity 1.5s ease-in-out;
+  }
+  header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 50px;
+    background: rgba(10, 10, 10, 0.9);
+    border-bottom: 1px solid rgba(212,169,74,.2);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    backdrop-filter: blur(10px);
+  }
+  .brand-title {
+    font-family: 'Cinzel', serif;
+    font-size: 28px;
+    color: var(--gold);
+    letter-spacing: 2px;
+  }
+  .logo-sphere {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background-image: url('logo.png'); /* Naya aasan naam */
+    background-size: cover;
+    background-position: center;
+    box-shadow: inset 0 0 15px rgba(0,0,0,0.8), 0 0 15px rgba(212,169,74,0.5);
+    border: 2px solid var(--gold-deep);
+    cursor: pointer;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+  }
+  .logo-sphere:hover {
+    transform: scale(1.05);
+    box-shadow: inset 0 0 10px rgba(0,0,0,0.6), 0 0 25px rgba(212,169,74,0.8);
+  }
+  .banners-container {
+    padding: 40px 50px;
+    display: flex;
+    gap: 20px;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+  .banners-container::-webkit-scrollbar { display: none; }
+  .banner {
+    min-width: 80%;
+    height: 400px;
+    background: linear-gradient(135deg, #1a1a1a, #0a0a0a);
+    border: 1px solid rgba(212,169,74,.3);
+    border-radius: 12px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    position: relative;
+    overflow: hidden;
+  }
+  .banner h2 {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 48px;
+    color: var(--gold-soft);
+    margin-bottom: 10px;
+  }
+  .section-title {
+    font-family: 'Cinzel', serif;
+    text-align: center;
+    font-size: 36px;
+    margin: 60px 0 30px;
+    color: var(--gold);
+  }
+  .products-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 30px;
+    padding: 0 50px 80px;
+  }
+  .product-card {
+    background: var(--bg2);
+    border: 1px solid rgba(212,169,74,.15);
+    border-radius: 10px;
+    padding: 20px;
+    text-align: center;
+    transition: transform 0.3s, border-color 0.3s;
+  }
+  .product-card:hover {
+    transform: translateY(-5px);
+    border-color: var(--gold);
+  }
+  .product-img {
+    width: 100%;
+    height: 300px;
+    background: #111;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--muted);
+    font-family: 'Inter', sans-serif;
+  }
+  .product-card h3 {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 24px;
+    color: var(--fg);
+    margin-bottom: 10px;
+  }
+  .product-card p {
+    color: var(--gold-soft);
+    font-size: 18px;
+    font-weight: 600;
+  }
+
+  /* Admin Modal */
+  #admin-modal {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.9);
+    z-index: 1000;
+    justify-content: center;
+    align-items: center;
+    backdrop-filter: blur(10px);
+  }
+  .admin-panel {
+    background: #111;
+    border: 2px solid var(--gold);
+    border-radius: 12px;
+    padding: 40px;
+    width: 90%;
+    max-width: 600px;
+    box-shadow: 0 0 50px rgba(212,169,74,0.2);
+  }
+  .admin-panel h2 {
+    font-family: 'Cinzel', serif;
+    color: var(--gold);
+    text-align: center;
+    margin-bottom: 30px;
+    font-size: 28px;
+  }
+  .admin-actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+  }
+  .admin-btn {
+    background: transparent;
+    border: 1px solid var(--gold);
+    color: var(--gold-soft);
+    padding: 15px;
+    font-family: 'Inter', sans-serif;
+    font-size: 16px;
+    cursor: pointer;
+    border-radius: 8px;
+    transition: all 0.3s;
+  }
+  .admin-btn:hover {
+    background: var(--gold);
+    color: #000;
+  }
+  .close-admin {
+    margin-top: 30px;
+    width: 100%;
+    border-color: #ff4444;
+    color: #ff4444;
+  }
+  .close-admin:hover {
+    background: #ff4444;
+    color: #fff;
+  }
+</style>
 </head>
 <body>
 
@@ -107,7 +351,133 @@
   </div>
 </div>
 
-<!-- JS File Link (End of body me hi hona chahiye) -->
-<script src="./script.js"></script>
+<script>
+  /* =========================================
+     ALL JAVASCRIPT INCLUDED HERE
+     ========================================= */
+  const LOGO_URL = "logo.png"; // Yahan simple naam use kiya hai
+
+  // Shards/Tiles generation
+  const tiles = document.getElementById('tiles');
+  if(tiles) {
+    for (let i = 0; i < 16; i++) {
+      const row = Math.floor(i / 4), col = i % 4;
+      const seed = (i * 9301 + 49297) % 233280;
+      const rnd = seed / 233280;
+      const angle = rnd * Math.PI * 2;
+      const dist = 260 + ((i * 37) % 180);
+      const tx = Math.cos(angle) * dist;
+      const ty = Math.sin(angle) * dist;
+      const tr = ((i * 47) % 720) - 360;
+      const delay = 0.15 + (row + col) * 0.08 + (i % 3) * 0.03;
+      const el = document.createElement('div');
+      el.className = 'tile';
+      el.style.cssText = `
+        left:${col*25}%; top:${row*25}%;
+        background-image:url('${LOGO_URL}');
+        background-position:${(col/3)*100}% ${(row/3)*100}%;
+        --tx:${tx}px; --ty:${ty}px; --tr:${tr}deg;
+        animation-delay:${delay}s;
+      `;
+      tiles.appendChild(el);
+    }
+  }
+
+  // Floating Particles
+  const p = document.getElementById('particles');
+  if(p) {
+    const chars = ['M','Z','✦','♛','MZ','F'];
+    for (let i = 0; i < 14; i++) {
+      const s = document.createElement('span');
+      s.textContent = chars[i % chars.length];
+      s.style.cssText = `
+        left:${(i*37)%100}%; top:${(i*53)%100}%;
+        font-size:${14 + ((i*7)%24)}px;
+        animation-duration:${12 + ((i*3)%14)}s;
+        animation-delay:${(i%7)*0.8}s;
+        --dx:${((i*91)%200)-100}px;
+        --dy:${-150 - ((i*43)%200)}px;
+      `;
+      p.appendChild(s);
+    }
+  }
+
+  // FORCE PAGE TRANSITION AFTER 6 SECONDS
+  window.onload = function() {
+    setTimeout(function() {
+      const intro = document.getElementById('intro-container');
+      const main = document.getElementById('main-website');
+      
+      if(intro && main) {
+        intro.style.display = 'none'; // Intro hide
+        main.style.display = 'block'; // Main show
+        
+        setTimeout(function() {
+          main.style.opacity = '1';
+        }, 100);
+      }
+    }, 6000); 
+  };
+
+  /* Admin Planner Logic */
+  let tapCount = 0;
+  let tapTimeout;
+
+  function handleLogoTap() {
+    tapCount++;
+    clearTimeout(tapTimeout);
+    tapTimeout = setTimeout(() => { tapCount = 0; }, 2000);
+
+    if (tapCount === 7) {
+      setTimeout(() => {
+        let pin = prompt("Enter Admin PIN:");
+        if (pin === "4321") {
+          document.getElementById('admin-modal').style.display = 'flex';
+        } else {
+          alert("Access Denied: Incorrect PIN.");
+        }
+      }, 100);
+      tapCount = 0; 
+    }
+  }
+
+  function closeAdmin() {
+    document.getElementById('admin-modal').style.display = 'none';
+  }
+
+  let bannerCount = 2;
+  function addBanner() {
+    bannerCount++;
+    const container = document.getElementById('banner-container');
+    const newBanner = document.createElement('div');
+    newBanner.className = 'banner';
+    newBanner.innerHTML = `<h2>Promo Banner ${bannerCount}</h2><p style="color:var(--muted)">Special Offer Limited Time</p>`;
+    container.appendChild(newBanner);
+  }
+
+  function removeBanner() {
+    const container = document.getElementById('banner-container');
+    if (container.lastElementChild) {
+      container.removeChild(container.lastElementChild);
+    }
+  }
+
+  let productCount = 4;
+  function addProduct() {
+    productCount++;
+    const container = document.getElementById('product-grid');
+    const newProduct = document.createElement('div');
+    newProduct.className = 'product-card';
+    newProduct.innerHTML = `<div class="product-img">New Item Image</div><h3>MZ Exclusive ${productCount}</h3><p>₹3,499</p>`;
+    container.appendChild(newProduct);
+  }
+
+  function removeProduct() {
+    const container = document.getElementById('product-grid');
+    if (container.lastElementChild) {
+      container.removeChild(container.lastElementChild);
+    }
+  }
+</script>
 </body>
 </html>
