@@ -1,65 +1,72 @@
-/* =========================================
-   INTRO ANIMATION LOGIC
-   ========================================= */
-// Yahan logo ka naya naam updated hai
-const LOGO_URL = "File_00000000fdb082089a8183b3a1cc72c3.png"; 
+// Is wrapper se ensure hota hai ki page ke saare elements load hone ke BAAD hi JS chalegi
+document.addEventListener('DOMContentLoaded', () => {
 
-const tiles = document.getElementById('tiles');
-for (let i = 0; i < 16; i++) {
-  const row = Math.floor(i / 4), col = i % 4;
-  const seed = (i * 9301 + 49297) % 233280;
-  const rnd = seed / 233280;
-  const angle = rnd * Math.PI * 2;
-  const dist = 260 + ((i * 37) % 180);
-  const tx = Math.cos(angle) * dist;
-  const ty = Math.sin(angle) * dist;
-  const tr = ((i * 47) % 720) - 360;
-  const delay = 0.15 + (row + col) * 0.08 + (i % 3) * 0.03;
-  const el = document.createElement('div');
-  el.className = 'tile';
-  el.style.cssText = `
-    left:${col*25}%; top:${row*25}%;
-    background-image:url(${LOGO_URL});
-    background-position:${(col/3)*100}% ${(row/3)*100}%;
-    --tx:${tx}px; --ty:${ty}px; --tr:${tr}deg;
-    animation-delay:${delay}s;
-  `;
-  tiles.appendChild(el);
-}
+  /* =========================================
+     INTRO ANIMATION LOGIC
+     ========================================= */
+  // Relative path added
+  const LOGO_URL = "./File_00000000fdb082089a8183b3a1cc72c3.png"; 
 
-const p = document.getElementById('particles');
-const chars = ['M','Z','✦','♛','MZ','F'];
-for (let i = 0; i < 14; i++) {
-  const s = document.createElement('span');
-  s.textContent = chars[i % chars.length];
-  s.style.cssText = `
-    left:${(i*37)%100}%; top:${(i*53)%100}%;
-    font-size:${14 + ((i*7)%24)}px;
-    animation-duration:${12 + ((i*3)%14)}s;
-    animation-delay:${(i%7)*0.8}s;
-    --dx:${((i*91)%200)-100}px;
-    --dy:${-150 - ((i*43)%200)}px;
-  `;
-  p.appendChild(s);
-}
+  const tiles = document.getElementById('tiles');
+  if (tiles) {
+    for (let i = 0; i < 16; i++) {
+      const row = Math.floor(i / 4), col = i % 4;
+      const seed = (i * 9301 + 49297) % 233280;
+      const rnd = seed / 233280;
+      const angle = rnd * Math.PI * 2;
+      const dist = 260 + ((i * 37) % 180);
+      const tx = Math.cos(angle) * dist;
+      const ty = Math.sin(angle) * dist;
+      const tr = ((i * 47) % 720) - 360;
+      const delay = 0.15 + (row + col) * 0.08 + (i % 3) * 0.03;
+      const el = document.createElement('div');
+      el.className = 'tile';
+      el.style.cssText = `
+        left:${col*25}%; top:${row*25}%;
+        background-image:url('${LOGO_URL}');
+        background-position:${(col/3)*100}% ${(row/3)*100}%;
+        --tx:${tx}px; --ty:${ty}px; --tr:${tr}deg;
+        animation-delay:${delay}s;
+      `;
+      tiles.appendChild(el);
+    }
+  }
 
-// Fixed Timing & Page Transition Logic
-setTimeout(() => {
-  const intro = document.getElementById('intro-container');
-  const main = document.getElementById('main-website');
-  
-  // Hide Intro instantly after 6 seconds
-  intro.style.display = 'none';
-  
-  // Show Main Website instantly
-  main.style.display = 'block';
-  
-  // Apply opacity to trigger CSS fade in
+  const p = document.getElementById('particles');
+  if (p) {
+    const chars = ['M','Z','✦','♛','MZ','F'];
+    for (let i = 0; i < 14; i++) {
+      const s = document.createElement('span');
+      s.textContent = chars[i % chars.length];
+      s.style.cssText = `
+        left:${(i*37)%100}%; top:${(i*53)%100}%;
+        font-size:${14 + ((i*7)%24)}px;
+        animation-duration:${12 + ((i*3)%14)}s;
+        animation-delay:${(i%7)*0.8}s;
+        --dx:${((i*91)%200)-100}px;
+        --dy:${-150 - ((i*43)%200)}px;
+      `;
+      p.appendChild(s);
+    }
+  }
+
+  // Fixed Timing Logic 
   setTimeout(() => {
-    main.style.opacity = '1';
-  }, 50); 
-  
-}, 6000); // 6000 milliseconds = 6 seconds wait time for animation
+    const intro = document.getElementById('intro-container');
+    const main = document.getElementById('main-website');
+    
+    if (intro && main) {
+      intro.style.display = 'none';
+      main.style.display = 'block';
+      
+      // Force trigger opacity transition
+      setTimeout(() => {
+        main.style.opacity = '1';
+      }, 50);
+    }
+  }, 6000); // 6 seconds
+
+}); // DOMContentLoaded khatam
 
 /* =========================================
    ADMIN PLANNER LOGIC (7 Taps + PIN)
@@ -70,7 +77,6 @@ let tapTimeout;
 function handleLogoTap() {
   tapCount++;
   
-  // Reset tap count if gap is more than 2 seconds
   clearTimeout(tapTimeout);
   tapTimeout = setTimeout(() => { tapCount = 0; }, 2000);
 
@@ -83,7 +89,7 @@ function handleLogoTap() {
         alert("Access Denied: Incorrect PIN.");
       }
     }, 100);
-    tapCount = 0; // Reset after successful or failed attempt
+    tapCount = 0; 
   }
 }
 
