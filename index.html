@@ -19,6 +19,7 @@
   *{box-sizing:border-box;margin:0;padding:0;}
   html,body{background:var(--bg);color:var(--fg);font-family:'Inter',system-ui,sans-serif;overflow-x:hidden; scroll-behavior: smooth;}
 
+  /* INTRO ANIMATION */
   #intro-container {
     position: fixed;
     inset: 0;
@@ -83,11 +84,13 @@
     opacity: 0;
     transition: opacity 1.5s ease-in-out;
   }
+  
+  /* HEADER UPDATE - Removed title, Logo on Right */
   header {
     display: flex;
-    justify-content: space-between;
+    justify-content: flex-end; /* Align right */
     align-items: center;
-    padding: 20px 50px;
+    padding: 15px 20px;
     background: rgba(10, 10, 10, 0.9);
     border-bottom: 1px solid rgba(212,169,74,.2);
     position: sticky;
@@ -95,40 +98,41 @@
     z-index: 100;
     backdrop-filter: blur(10px);
   }
-  .brand-title {
-    font-family: 'Cinzel', serif;
-    font-size: 28px;
-    color: var(--gold);
-    letter-spacing: 2px;
-  }
-  .logo-sphere {
-    width: 60px;
-    height: 60px;
-    border-radius: 50%;
-    background-image: url('logo.png'); /* Naya aasan naam */
+  
+  /* SQUARE LOGO UPDATE */
+  .logo-square {
+    width: 55px;
+    height: 55px;
+    border-radius: 8px; /* Square with slight roundness */
+    background-image: url('logo.png'); /* Ensure this image is uploaded */
+    background-color: #222;
     background-size: cover;
     background-position: center;
-    box-shadow: inset 0 0 15px rgba(0,0,0,0.8), 0 0 15px rgba(212,169,74,0.5);
+    box-shadow: 0 0 15px rgba(212,169,74,0.5);
     border: 2px solid var(--gold-deep);
     cursor: pointer;
     transition: transform 0.3s ease, box-shadow 0.3s ease;
   }
-  .logo-sphere:hover {
+  .logo-square:hover {
     transform: scale(1.05);
-    box-shadow: inset 0 0 10px rgba(0,0,0,0.6), 0 0 25px rgba(212,169,74,0.8);
+    box-shadow: 0 0 25px rgba(212,169,74,0.8);
   }
+
+  /* RECTANGULAR BANNERS UPDATE */
   .banners-container {
-    padding: 40px 50px;
+    padding: 20px;
     display: flex;
-    gap: 20px;
+    gap: 15px;
     overflow-x: auto;
     scrollbar-width: none;
   }
   .banners-container::-webkit-scrollbar { display: none; }
   .banner {
-    min-width: 80%;
-    height: 400px;
+    min-width: 100%; /* Full width for rectangular look */
+    height: 200px;   /* Rectangular height */
     background: linear-gradient(135deg, #1a1a1a, #0a0a0a);
+    background-size: cover;
+    background-position: center;
     border: 1px solid rgba(212,169,74,.3);
     border-radius: 12px;
     display: flex;
@@ -136,62 +140,66 @@
     justify-content: center;
     align-items: center;
     text-align: center;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    box-shadow: 0 5px 20px rgba(0,0,0,0.5);
     position: relative;
     overflow: hidden;
   }
   .banner h2 {
     font-family: 'Cormorant Garamond', serif;
-    font-size: 48px;
+    font-size: 32px;
     color: var(--gold-soft);
-    margin-bottom: 10px;
+    text-shadow: 0px 2px 4px rgba(0,0,0,0.8);
   }
+
   .section-title {
     font-family: 'Cinzel', serif;
     text-align: center;
-    font-size: 36px;
-    margin: 60px 0 30px;
+    font-size: 28px;
+    margin: 30px 0 20px;
     color: var(--gold);
   }
+
+  /* 2-COLUMN PRODUCTS GRID UPDATE */
   .products-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-    gap: 30px;
-    padding: 0 50px 80px;
+    grid-template-columns: repeat(2, 1fr); /* strictly 2 columns */
+    gap: 15px;
+    padding: 0 15px 60px;
   }
   .product-card {
     background: var(--bg2);
     border: 1px solid rgba(212,169,74,.15);
     border-radius: 10px;
-    padding: 20px;
+    padding: 10px;
     text-align: center;
     transition: transform 0.3s, border-color 0.3s;
   }
   .product-card:hover {
-    transform: translateY(-5px);
+    transform: translateY(-3px);
     border-color: var(--gold);
   }
   .product-img {
     width: 100%;
-    height: 300px;
-    background: #111;
+    height: 180px;
+    background-color: #111;
+    background-size: cover;
+    background-position: center;
     border-radius: 8px;
-    margin-bottom: 20px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: var(--muted);
-    font-family: 'Inter', sans-serif;
+    margin-bottom: 12px;
   }
   .product-card h3 {
-    font-family: 'Cormorant Garamond', serif;
-    font-size: 24px;
+    font-family: 'Inter', sans-serif;
+    font-size: 15px;
+    font-weight: 400;
     color: var(--fg);
-    margin-bottom: 10px;
+    margin-bottom: 5px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
   .product-card p {
     color: var(--gold-soft);
-    font-size: 18px;
+    font-size: 16px;
     font-weight: 600;
   }
 
@@ -210,30 +218,32 @@
     background: #111;
     border: 2px solid var(--gold);
     border-radius: 12px;
-    padding: 40px;
+    padding: 30px;
     width: 90%;
-    max-width: 600px;
+    max-width: 400px;
     box-shadow: 0 0 50px rgba(212,169,74,0.2);
+    max-height: 90vh;
+    overflow-y: auto;
   }
   .admin-panel h2 {
     font-family: 'Cinzel', serif;
     color: var(--gold);
     text-align: center;
-    margin-bottom: 30px;
-    font-size: 28px;
+    margin-bottom: 25px;
+    font-size: 24px;
   }
   .admin-actions {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
   }
   .admin-btn {
     background: transparent;
     border: 1px solid var(--gold);
     color: var(--gold-soft);
-    padding: 15px;
+    padding: 12px;
     font-family: 'Inter', sans-serif;
-    font-size: 16px;
+    font-size: 15px;
     cursor: pointer;
     border-radius: 8px;
     transition: all 0.3s;
@@ -243,8 +253,7 @@
     color: #000;
   }
   .close-admin {
-    margin-top: 30px;
-    width: 100%;
+    margin-top: 25px;
     border-color: #ff4444;
     color: #ff4444;
   }
@@ -262,10 +271,6 @@
   <div class="vignette"></div>
   <div class="particles" id="particles"></div>
 
-  <div class="intro-nav">
-    <div class="brand-mark"></div>
-  </div>
-
   <section class="hero">
     <div class="logo-wrap">
       <div class="ring"></div>
@@ -277,9 +282,7 @@
         <div class="shine-wrap"><div class="shine"></div></div>
       </div>
     </div>
-
     <div class="tag">Welcome to your trusted shop</div>
-
     <h1>
       <span class="w w1">Your</span>
       <span class="w w2 gold">Style,</span>
@@ -292,46 +295,31 @@
 <!-- MAIN WEBSITE CONTENT -->
 <div id="main-website">
   <header>
-    <div class="brand-title">MZ FASHION</div>
-    <!-- Upper right logo sphere. Tapping this 7 times opens admin -->
-    <div class="logo-sphere" onclick="handleLogoTap()"></div>
+    <!-- Upper right square logo -->
+    <div class="logo-square" onclick="handleLogoTap()"></div>
   </header>
 
   <main>
     <!-- Banners Section -->
     <div class="banners-container" id="banner-container">
       <div class="banner">
-        <h2>Premium Collection 2026</h2>
-        <p style="color:var(--muted)">Discover the essence of elegance.</p>
-      </div>
-      <div class="banner">
-        <h2>Exclusive Dark Edition</h2>
-        <p style="color:var(--muted)">Tailored for the modern aesthetic.</p>
+        <h2>Premium Collection</h2>
       </div>
     </div>
 
     <!-- Products Section -->
     <h2 class="section-title">New Arrivals</h2>
     <div class="products-grid" id="product-grid">
+      <!-- Default Demo Product -->
       <div class="product-card">
-        <div class="product-img">Product Image</div>
-        <h3>Velvet Evening Gown</h3>
-        <p>₹4,999</p>
+        <div class="product-img" style="background-image: url('https://via.placeholder.com/300x400/222/d4a94a?text=MZ+Item');"></div>
+        <h3 class="p-name">Velvet Evening Gown</h3>
+        <p class="p-price">₹4,999</p>
       </div>
       <div class="product-card">
-        <div class="product-img">Product Image</div>
-        <h3>Gold Accent Blazer</h3>
-        <p>₹6,499</p>
-      </div>
-      <div class="product-card">
-        <div class="product-img">Product Image</div>
-        <h3>Midnight Silk Shirt</h3>
-        <p>₹2,999</p>
-      </div>
-      <div class="product-card">
-        <div class="product-img">Product Image</div>
-        <h3>Classic Tuxedo</h3>
-        <p>₹12,999</p>
+        <div class="product-img" style="background-image: url('https://via.placeholder.com/300x400/222/d4a94a?text=MZ+Item');"></div>
+        <h3 class="p-name">Gold Accent Blazer</h3>
+        <p class="p-price">₹6,499</p>
       </div>
     </div>
   </main>
@@ -342,10 +330,11 @@
   <div class="admin-panel">
     <h2>Admin Planner</h2>
     <div class="admin-actions">
-      <button class="admin-btn" onclick="addBanner()">+ Add Banner</button>
-      <button class="admin-btn" onclick="removeBanner()">- Remove Banner</button>
-      <button class="admin-btn" onclick="addProduct()">+ Add Product</button>
-      <button class="admin-btn" onclick="removeProduct()">- Remove Product</button>
+      <button class="admin-btn" onclick="addBannerURL()">+ Add Banner (Image URL)</button>
+      <button class="admin-btn" onclick="removeBanner()">- Remove Last Banner</button>
+      <button class="admin-btn" onclick="addProductData()">+ Add Product (URL, Name, Price)</button>
+      <button class="admin-btn" onclick="editProductData()">✎ Edit Product</button>
+      <button class="admin-btn" onclick="removeProduct()">- Remove Last Product</button>
     </div>
     <button class="admin-btn close-admin" onclick="closeAdmin()">Close Admin Planner</button>
   </div>
@@ -353,11 +342,11 @@
 
 <script>
   /* =========================================
-     ALL JAVASCRIPT INCLUDED HERE
+     JAVASCRIPT LOGIC
      ========================================= */
-  const LOGO_URL = "file_00000000fdb082089a8183b3a1cc72c3.png"; // Yahan simple naam use kiya hai
+  const LOGO_URL = "logo.png"; // Ensure you uploaded logo.png
 
-  // Shards/Tiles generation
+  // Animation Shards
   const tiles = document.getElementById('tiles');
   if(tiles) {
     for (let i = 0; i < 16; i++) {
@@ -383,7 +372,7 @@
     }
   }
 
-  // Floating Particles
+  // Animation Particles
   const p = document.getElementById('particles');
   if(p) {
     const chars = ['M','Z','✦','♛','MZ','F'];
@@ -402,24 +391,22 @@
     }
   }
 
-  // FORCE PAGE TRANSITION AFTER 6 SECONDS
+  // FORCE TRANSITION FIX
   window.onload = function() {
     setTimeout(function() {
       const intro = document.getElementById('intro-container');
       const main = document.getElementById('main-website');
-      
       if(intro && main) {
-        intro.style.display = 'none'; // Intro hide
-        main.style.display = 'block'; // Main show
-        
-        setTimeout(function() {
-          main.style.opacity = '1';
-        }, 100);
+        intro.style.display = 'none';
+        main.style.display = 'block';
+        setTimeout(() => { main.style.opacity = '1'; }, 50);
       }
     }, 6000); 
   };
 
-  /* Admin Planner Logic */
+  /* =========================================
+     ADMIN PLANNER LOGIC
+     ========================================= */
   let tapCount = 0;
   let tapTimeout;
 
@@ -430,7 +417,7 @@
 
     if (tapCount === 7) {
       setTimeout(() => {
-        let pin = prompt("Enter Admin PIN:");
+        let pin = prompt("Enter Admin PIN (Hint: 4321):");
         if (pin === "4321") {
           document.getElementById('admin-modal').style.display = 'flex';
         } else {
@@ -445,37 +432,84 @@
     document.getElementById('admin-modal').style.display = 'none';
   }
 
-  let bannerCount = 2;
-  function addBanner() {
-    bannerCount++;
+  // BANNERS (By URL)
+  function addBannerURL() {
+    let imgUrl = prompt("Enter Banner Image URL:");
+    if (!imgUrl) return;
+
     const container = document.getElementById('banner-container');
     const newBanner = document.createElement('div');
     newBanner.className = 'banner';
-    newBanner.innerHTML = `<h2>Promo Banner ${bannerCount}</h2><p style="color:var(--muted)">Special Offer Limited Time</p>`;
+    newBanner.style.backgroundImage = `url('${imgUrl}')`; // Direct Image Setup
     container.appendChild(newBanner);
+    alert('Banner Added successfully!');
   }
 
   function removeBanner() {
     const container = document.getElementById('banner-container');
     if (container.lastElementChild) {
       container.removeChild(container.lastElementChild);
+      alert('Last banner removed!');
+    } else {
+      alert('No banners to remove.');
     }
   }
 
-  let productCount = 4;
-  function addProduct() {
-    productCount++;
+  // PRODUCTS (By URL, Name, Price)
+  function addProductData() {
+    let imgUrl = prompt("1. Enter Product Image URL:");
+    if (!imgUrl) return;
+    let name = prompt("2. Enter Product Name:");
+    if (!name) name = "MZ Item";
+    let price = prompt("3. Enter Product Price (e.g., ₹2,999):");
+    if (!price) price = "₹0";
+
     const container = document.getElementById('product-grid');
     const newProduct = document.createElement('div');
     newProduct.className = 'product-card';
-    newProduct.innerHTML = `<div class="product-img">New Item Image</div><h3>MZ Exclusive ${productCount}</h3><p>₹3,499</p>`;
+    newProduct.innerHTML = `
+      <div class="product-img" style="background-image: url('${imgUrl}')"></div>
+      <h3 class="p-name">${name}</h3>
+      <p class="p-price">${price}</p>
+    `;
     container.appendChild(newProduct);
+    alert('Product Added successfully!');
+  }
+
+  function editProductData() {
+    const container = document.getElementById('product-grid');
+    if (container.children.length === 0) {
+      alert("No products exist to edit.");
+      return;
+    }
+    
+    // Ask which product to edit
+    let index = prompt(`Enter product number to edit (1 to ${container.children.length}):`);
+    let idx = parseInt(index) - 1;
+
+    if (idx >= 0 && idx < container.children.length) {
+      let card = container.children[idx];
+      let newUrl = prompt("Enter New Image URL (leave blank to skip):");
+      let newName = prompt("Enter New Name (leave blank to skip):");
+      let newPrice = prompt("Enter New Price (leave blank to skip):");
+
+      if (newUrl) card.querySelector('.product-img').style.backgroundImage = `url('${newUrl}')`;
+      if (newName) card.querySelector('.p-name').innerText = newName;
+      if (newPrice) card.querySelector('.p-price').innerText = newPrice;
+      
+      alert('Product updated!');
+    } else {
+      alert("Invalid product number.");
+    }
   }
 
   function removeProduct() {
     const container = document.getElementById('product-grid');
     if (container.lastElementChild) {
       container.removeChild(container.lastElementChild);
+      alert('Last product removed!');
+    } else {
+      alert('No products to remove.');
     }
   }
 </script>
