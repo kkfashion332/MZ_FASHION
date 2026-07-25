@@ -18,56 +18,9 @@ const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 
 /* =========================================
-   ANIMATION LOGIC
+   PAGE TRANSITION LOGIC (AFTER VIDEO)
    ========================================= */
-const LOGO_URL = "./logo.png"; // Ensuring relative path for animation logo
-
-// Shards Setup
-const tiles = document.getElementById('tiles');
-if(tiles) {
-  for (let i = 0; i < 16; i++) {
-    const row = Math.floor(i / 4), col = i % 4;
-    const seed = (i * 9301 + 49297) % 233280;
-    const rnd = seed / 233280;
-    const angle = rnd * Math.PI * 2;
-    const dist = 260 + ((i * 37) % 180);
-    const tx = Math.cos(angle) * dist;
-    const ty = Math.sin(angle) * dist;
-    const tr = ((i * 47) % 720) - 360;
-    const delay = 0.15 + (row + col) * 0.08 + (i % 3) * 0.03;
-    const el = document.createElement('div');
-    el.className = 'tile';
-    el.style.cssText = `
-      left:${col*25}%; top:${row*25}%;
-      background-image:url('${LOGO_URL}');
-      background-position:${(col/3)*100}% ${(row/3)*100}%;
-      --tx:${tx}px; --ty:${ty}px; --tr:${tr}deg;
-      animation-delay:${delay}s;
-    `;
-    tiles.appendChild(el);
-  }
-}
-
-// Particles Setup
-const p = document.getElementById('particles');
-if(p) {
-  const chars = ['M','Z','✦','♛','MZ','F'];
-  for (let i = 0; i < 14; i++) {
-    const s = document.createElement('span');
-    s.textContent = chars[i % chars.length];
-    s.style.cssText = `
-      left:${(i*37)%100}%; top:${(i*53)%100}%;
-      font-size:${14 + ((i*7)%24)}px;
-      animation-duration:${12 + ((i*3)%14)}s;
-      animation-delay:${(i%7)*0.8}s;
-      --dx:${((i*91)%200)-100}px;
-      --dy:${-150 - ((i*43)%200)}px;
-    `;
-    p.appendChild(s);
-  }
-}
-
-// 6 Seconds Page Transition
+// 7 Seconds Timeout setup (Tagline fades at 3s and animation takes 2s, 7s gives it proper time)
 setTimeout(() => {
   const intro = document.getElementById('intro-container');
   const main = document.getElementById('main-website');
@@ -76,7 +29,7 @@ setTimeout(() => {
     main.style.display = 'block';
     setTimeout(() => { main.style.opacity = '1'; }, 50);
   }
-}, 6000); 
+}, 7000); 
 
 /* =========================================
    AUTO SWIPE BANNERS EVERY 2 SECONDS
@@ -85,7 +38,6 @@ setInterval(() => {
   const container = document.getElementById('banner-container');
   if(container && container.children.length > 1) {
     let maxScroll = container.scrollWidth - container.clientWidth;
-    // If reached end, scroll back to 0, else scroll right by 1 width
     if (container.scrollLeft >= maxScroll - 10) {
       container.scrollLeft = 0;
     } else {
@@ -111,12 +63,10 @@ onValue(bannersRef, (snapshot) => {
       const data = child.val();
       const key = child.key;
 
-      // Render for Main Website (With Optional Link)
       const bannerContent = `<div class="banner" style="background-image: url('${data.url}')"></div>`;
       const finalBanner = data.link ? `<a href="${data.link}" target="_blank" class="banner-wrapper">${bannerContent}</a>` : `<div class="banner-wrapper">${bannerContent}</div>`;
       siteContainer.innerHTML += finalBanner;
 
-      // Render for Admin List
       adminContainer.innerHTML += `
         <div class="admin-item">
           <div class="admin-item-info">
@@ -149,7 +99,6 @@ onValue(productsRef, (snapshot) => {
       const data = child.val();
       const key = child.key;
 
-      // Render for Main Website
       siteContainer.innerHTML += `
         <div class="product-card">
           <div class="product-img" style="background-image: url('${data.url}')"></div>
@@ -158,7 +107,6 @@ onValue(productsRef, (snapshot) => {
         </div>
       `;
 
-      // Render for Admin List
       adminContainer.innerHTML += `
         <div class="admin-item">
           <div class="admin-item-info">
