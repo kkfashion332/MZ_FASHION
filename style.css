@@ -89,7 +89,7 @@ header {
   height: 55px;
   border-radius: 50%;
   /* ZIP format replaced with PNG to ensure browser rendering */
-  background-image: url('./logo.png'); 
+  background-image: url('./logo1.png'); 
   background-color: #222;
   background-size: cover;
   background-position: center;
