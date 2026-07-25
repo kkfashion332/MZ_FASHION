@@ -3,40 +3,23 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>MZ Fashion - Premium Store</title>
+<title>MZ Fashion - Style Beyond Limits</title>
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600;700&family=Inter:wght@300;400;600&family=Cinzel:wght@400;600;700&display=swap" rel="stylesheet" />
-<!-- CSS Link -->
 <link rel="stylesheet" href="style.css" />
 </head>
 <body>
 
-<!-- INTRO ANIMATION SCREEN -->
+<!-- NEW VIDEO INTRO ANIMATION -->
 <div id="intro-container">
-  <div class="bg-radial"></div>
-  <div class="vignette"></div>
-  <div class="particles" id="particles"></div>
-
-  <section class="hero">
-    <div class="logo-wrap">
-      <div class="ring"></div>
-      <div class="ring"></div>
-      <div class="ring"></div>
-      <div class="brush"></div>
-      <div class="logo-inner">
-        <div class="tiles" id="tiles"></div>
-        <div class="shine-wrap"><div class="shine"></div></div>
-      </div>
-    </div>
-    <div class="tag">Welcome to your trusted shop</div>
-    <h1>
-      <span class="w w1">Your</span>
-      <span class="w w2 gold">Style,</span>
-      <span class="w w3">My</span>
-      <span class="w w4 gold">Shop.</span>
-    </h1>
-  </section>
+  <div class="stage">
+    <video autoplay muted playsinline>
+      <source src="https://storage.lovable.dev/__l5e/assets-v1/be8c69f7-2d9f-4f15-b76d-54d762debd78/mz-intro.mp4" type="video/mp4" />
+      Your browser does not support the video tag.
+    </video>
+    <div class="tagline">MZ Fashion — Style Beyond Limits</div>
+  </div>
 </div>
 
 <!-- MAIN WEBSITE CONTENT -->
@@ -71,7 +54,6 @@
       <h3>Manage Banners</h3>
       <button class="admin-btn full-width" onclick="window.addBanner()">+ Add New Banner (with Link)</button>
       <div class="admin-list" id="admin-banner-list">
-        <!-- Banners will be listed here -->
       </div>
     </div>
 
@@ -80,7 +62,6 @@
       <h3>Manage Products</h3>
       <button class="admin-btn full-width" onclick="window.addProduct()">+ Add New Product</button>
       <div class="admin-list" id="admin-product-list">
-        <!-- Products will be listed here -->
       </div>
     </div>
 
@@ -88,7 +69,7 @@
   </div>
 </div>
 
-<!-- JS Link (Type module is necessary for Firebase) -->
+<!-- JS Link -->
 <script type="module" src="app.js"></script>
 </body>
 </html>
