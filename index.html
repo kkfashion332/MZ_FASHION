@@ -3,158 +3,73 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>MZ Fashion</title>
+<title>MZ Fashion - Style Beyond Limits</title>
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600;700&family=Inter:wght@300;400;600&family=Cinzel:wght@400;600;700&display=swap" rel="stylesheet" />
-<style>
-  :root{
-    --gold:#d4a94a; --gold-soft:#f0d488; --gold-deep:#8a6a1f;
-    --bg:#0a0a0a; --bg2:#141210; --fg:#f5efe0; --muted:#8a8578;
-  }
-  *{box-sizing:border-box;margin:0;padding:0;}
-  html,body{background:var(--bg);color:var(--fg);font-family:'Inter',system-ui,sans-serif;overflow-x:hidden;}
-
-  main{position:relative;min-height:100vh;}
-  .bg-radial{position:absolute;inset:0;pointer-events:none;background:radial-gradient(ellipse at center,#1c1610 0%,#050505 70%);}
-  .vignette{position:absolute;inset:0;pointer-events:none;background:radial-gradient(circle at 50% 40%,transparent 30%,rgba(0,0,0,.9) 80%);}
-
-  nav{position:relative;z-index:20;display:flex;align-items:center;justify-content:space-between;padding:24px 48px;opacity:0;animation:fadeDown .8s ease forwards .2s;}
-  .brand-mark{width:34px;height:34px;border-radius:6px;background:linear-gradient(135deg,var(--gold),var(--gold-deep));box-shadow:0 0 20px rgba(212,169,74,.4);}
-  @media(max-width:768px){nav{padding:20px 24px;}}
-
-  .hero{position:relative;z-index:10;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:calc(100vh - 96px);padding:24px 24px 80px;text-align:center;}
-
-  .logo-wrap{position:relative;}
-  .ring{position:absolute;inset:0;border:1px solid rgba(212,169,74,.45);border-radius:18px;animation:pulseRing 3.5s cubic-bezier(.2,.8,.3,1) infinite;}
-  .ring:nth-child(2){animation-delay:1.1s;}
-  .ring:nth-child(3){animation-delay:2.2s;}
-
-  .brush{position:absolute;inset:-40px;z-index:-1;border-radius:24px;filter:blur(34px);
-    background:conic-gradient(from 220deg,transparent 0%,rgba(212,169,74,.55) 20%,transparent 45%,rgba(240,212,136,.5) 65%,transparent 90%);
-    opacity:0;transform:rotate(-40deg);animation:arcIn 1.6s cubic-bezier(.2,.8,.2,1) forwards,spinSlow 22s linear infinite 1.6s;}
-
-  .logo-inner{position:relative;width:240px;height:240px;border-radius:18px;
-    box-shadow:0 0 60px rgba(212,169,74,.35),0 0 140px rgba(212,169,74,.18),0 30px 80px rgba(0,0,0,.7);
-    animation:floatSlow 7s ease-in-out infinite 2.4s;}
-  @media(min-width:768px){.logo-inner{width:310px;height:310px;}}
-
-  .tiles{position:absolute;inset:0;border-radius:18px;overflow:hidden;border:1px solid rgba(212,169,74,.25);}
-  .tile{position:absolute;width:25%;height:25%;background-size:400% 400%;background-repeat:no-repeat;
-    opacity:0;transform:translate3d(var(--tx),var(--ty),0) rotate(var(--tr)) scale(.4);
-    filter:blur(6px);
-    animation:shardIn .9s cubic-bezier(.2,.8,.25,1) forwards;}
-
-  .shine-wrap{position:absolute;inset:0;overflow:hidden;border-radius:18px;pointer-events:none;}
-  .shine{position:absolute;top:-20px;bottom:-20px;width:36%;
-    background:linear-gradient(90deg,transparent,rgba(240,212,136,.55),transparent);
-    transform:translateX(-100%) skewX(-20deg);opacity:0;
-    animation:shineIn .01s linear forwards 2.2s,goldSweep 4.5s ease-in-out infinite 2.4s;}
-
-  .tag{margin-top:56px;margin-bottom:18px;font-family:'Cinzel',serif;font-size:12px;letter-spacing:.6em;color:rgba(240,212,136,.85);text-transform:uppercase;opacity:0;transform:translateY(20px);animation:fadeUp .9s ease forwards 2.6s;}
-
-  h1{font-family:'Cormorant Garamond',serif;font-weight:600;font-size:clamp(44px,9vw,104px);line-height:.95;letter-spacing:-.02em;max-width:960px;}
-  h1 .w{display:inline-block;margin-right:14px;opacity:0;transform:translateY(40px);filter:blur(10px);}
-  h1 .w1{animation:blurUp 1s cubic-bezier(.2,.8,.2,1) forwards 2.7s;}
-  h1 .w2{animation:blurUp 1s cubic-bezier(.2,.8,.2,1) forwards 2.85s;}
-  h1 .w3{animation:blurUp 1s cubic-bezier(.2,.8,.2,1) forwards 3s;}
-  h1 .w4{animation:blurUp 1s cubic-bezier(.2,.8,.2,1) forwards 3.15s;}
-  .gold{background:linear-gradient(90deg,#8a6a1f 0%,#f5e3a8 25%,#c99a3d 50%,#f5e3a8 75%,#8a6a1f 100%);background-size:200% 100%;-webkit-background-clip:text;background-clip:text;color:transparent;animation:shimmer 6s linear infinite;}
-
-  .particles{position:absolute;inset:0;overflow:hidden;pointer-events:none;}
-  .particles span{position:absolute;font-family:'Cinzel',serif;color:rgba(240,212,136,.35);user-select:none;animation:drift linear infinite;}
-
-  @keyframes fadeDown{from{opacity:0;transform:translateY(-10px);}to{opacity:1;transform:translateY(0);}}
-  @keyframes fadeUp{to{opacity:1;transform:translateY(0);}}
-  @keyframes blurUp{to{opacity:1;transform:translateY(0);filter:blur(0);}}
-  @keyframes arcIn{to{opacity:1;transform:rotate(0);}}
-  @keyframes spinSlow{to{transform:rotate(360deg);}}
-  @keyframes floatSlow{0%,100%{transform:translateY(0) rotate(0);}50%{transform:translateY(-18px) rotate(2deg);}}
-  @keyframes pulseRing{0%{transform:scale(.92);opacity:.6;}100%{transform:scale(1.35);opacity:0;}}
-  @keyframes goldSweep{0%{transform:translateX(-120%) skewX(-20deg);}60%,100%{transform:translateX(340%) skewX(-20deg);}}
-  @keyframes shimmer{0%{background-position:-200% 0;}100%{background-position:200% 0;}}
-  @keyframes drift{0%{transform:translate(0,0);opacity:0;}10%{opacity:1;}100%{transform:translate(var(--dx),var(--dy));opacity:0;}}
-  @keyframes shardIn{60%{filter:blur(0);}100%{opacity:1;transform:translate3d(0,0,0) rotate(0) scale(1);filter:blur(0);}}
-  @keyframes shineIn{to{opacity:1;}}
-</style>
+<link rel="stylesheet" href="style.css" />
 </head>
 <body>
-<main>
-  <div class="bg-radial"></div>
-  <div class="vignette"></div>
-  <div class="particles" id="particles"></div>
 
-  <nav>
-    <div class="brand-mark"></div>
-  </nav>
+<!-- NEW VIDEO INTRO ANIMATION -->
+<div id="intro-container">
+  <div class="stage">
+    <video autoplay muted playsinline>
+      <source src="https://storage.lovable.dev/__l5e/assets-v1/be8c69f7-2d9f-4f15-b76d-54d762debd78/mz-intro.mp4" type="video/mp4" />
+      Your browser does not support the video tag.
+    </video>
+    <div class="tagline">MZ Fashion — Style Beyond Limits</div>
+  </div>
+</div>
 
-  <section class="hero">
-    <div class="logo-wrap">
-      <div class="ring"></div>
-      <div class="ring"></div>
-      <div class="ring"></div>
-      <div class="brush"></div>
-      <div class="logo-inner">
-        <div class="tiles" id="tiles"></div>
-        <div class="shine-wrap"><div class="shine"></div></div>
+<!-- MAIN WEBSITE CONTENT -->
+<div id="main-website">
+  <header>
+    <!-- Upper Left Sphere Logo (7 Taps for Admin) -->
+    <div class="logo-sphere" onclick="window.handleLogoTap()"></div>
+    <div class="brand-title">MZ FASHION</div>
+  </header>
+
+  <main>
+    <!-- Banners Section (Realtime Data + Auto Swipe) -->
+    <div class="banners-container" id="banner-container">
+      <div class="no-data">Loading Banners...</div>
+    </div>
+
+    <!-- Products Section (Realtime Data) -->
+    <h2 class="section-title">All products available</h2>
+    <div class="products-grid" id="product-grid">
+      <div class="no-data" style="grid-column: span 2;">Loading Products...</div>
+    </div>
+  </main>
+</div>
+
+<!-- ADVANCED ADMIN PLANNER MODAL -->
+<div id="admin-modal">
+  <div class="admin-panel">
+    <h2>Admin Planner</h2>
+    
+    <!-- Manage Banners Section -->
+    <div class="admin-section">
+      <h3>Manage Banners</h3>
+      <button class="admin-btn full-width" onclick="window.addBanner()">+ Add New Banner (with Link)</button>
+      <div class="admin-list" id="admin-banner-list">
       </div>
     </div>
 
-    <div class="tag">Welcome to your trusted shop</div>
+    <!-- Manage Products Section -->
+    <div class="admin-section" style="margin-top: 20px;">
+      <h3>Manage Products</h3>
+      <button class="admin-btn full-width" onclick="window.addProduct()">+ Add New Product</button>
+      <div class="admin-list" id="admin-product-list">
+      </div>
+    </div>
 
-    <h1>
-      <span class="w w1">Your</span>
-      <span class="w w2 gold">Style,</span>
-      <span class="w w3">My</span>
-      <span class="w w4 gold">Shop.</span>
-    </h1>
-  </section>
-</main>
+    <button class="admin-btn close-admin full-width" onclick="window.closeAdmin()">Close Admin Planner</button>
+  </div>
+</div>
 
-<script>
-  // CHANGE THIS to your logo image URL
-  const LOGO_URL = "logo1.png";
-
-  // Build 4x4 shard grid
-  const tiles = document.getElementById('tiles');
-  for (let i = 0; i < 16; i++) {
-    const row = Math.floor(i / 4), col = i % 4;
-    const seed = (i * 9301 + 49297) % 233280;
-    const rnd = seed / 233280;
-    const angle = rnd * Math.PI * 2;
-    const dist = 260 + ((i * 37) % 180);
-    const tx = Math.cos(angle) * dist;
-    const ty = Math.sin(angle) * dist;
-    const tr = ((i * 47) % 720) - 360;
-    const delay = 0.15 + (row + col) * 0.08 + (i % 3) * 0.03;
-    const el = document.createElement('div');
-    el.className = 'tile';
-    el.style.cssText = `
-      left:${col*25}%; top:${row*25}%;
-      background-image:url(${LOGO_URL});
-      background-position:${(col/3)*100}% ${(row/3)*100}%;
-      --tx:${tx}px; --ty:${ty}px; --tr:${tr}deg;
-      animation-delay:${delay}s;
-    `;
-    tiles.appendChild(el);
-  }
-
-  // Floating particles
-  const p = document.getElementById('particles');
-  const chars = ['M','Z','✦','♛','MZ','F'];
-  for (let i = 0; i < 14; i++) {
-    const s = document.createElement('span');
-    s.textContent = chars[i % chars.length];
-    s.style.cssText = `
-      left:${(i*37)%100}%; top:${(i*53)%100}%;
-      font-size:${14 + ((i*7)%24)}px;
-      animation-duration:${12 + ((i*3)%14)}s;
-      animation-delay:${(i%7)*0.8}s;
-      --dx:${((i*91)%200)-100}px;
-      --dy:${-150 - ((i*43)%200)}px;
-    `;
-    p.appendChild(s);
-  }
-</script>
+<!-- JS Link -->
+<script type="module" src="app.js"></script>
 </body>
 </html>
