@@ -29,10 +29,7 @@
   }
   .bg-radial{position:absolute;inset:0;pointer-events:none;background:radial-gradient(ellipse at center,#1c1610 0%,#050505 70%);}
   .vignette{position:absolute;inset:0;pointer-events:none;background:radial-gradient(circle at 50% 40%,transparent 30%,rgba(0,0,0,.9) 80%);}
-  .intro-nav{position:relative;z-index:20;display:flex;align-items:center;justify-content:space-between;padding:24px 48px;opacity:0;animation:fadeDown .8s ease forwards .2s;}
-  .brand-mark{width:34px;height:34px;border-radius:6px;background:linear-gradient(135deg,var(--gold),var(--gold-deep));box-shadow:0 0 20px rgba(212,169,74,.4);}
-  @media(max-width:768px){.intro-nav{padding:20px 24px;}}
-  .hero{position:relative;z-index:10;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:calc(100vh - 96px);padding:24px 24px 80px;text-align:center;}
+  .hero{position:relative;z-index:10;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;padding:24px;text-align:center;}
   .logo-wrap{position:relative;}
   .ring{position:absolute;inset:0;border:1px solid rgba(212,169,74,.45);border-radius:18px;animation:pulseRing 3.5s cubic-bezier(.2,.8,.3,1) infinite;}
   .ring:nth-child(2){animation-delay:1.1s;}
@@ -65,7 +62,6 @@
   .particles{position:absolute;inset:0;overflow:hidden;pointer-events:none;}
   .particles span{position:absolute;font-family:'Cinzel',serif;color:rgba(240,212,136,.35);user-select:none;animation:drift linear infinite;}
 
-  @keyframes fadeDown{from{opacity:0;transform:translateY(-10px);}to{opacity:1;transform:translateY(0);}}
   @keyframes fadeUp{to{opacity:1;transform:translateY(0);}}
   @keyframes blurUp{to{opacity:1;transform:translateY(0);filter:blur(0);}}
   @keyframes arcIn{to{opacity:1;transform:rotate(0);}}
@@ -85,10 +81,9 @@
     transition: opacity 1.5s ease-in-out;
   }
   
-  /* HEADER UPDATE - Removed title, Logo on Right */
   header {
     display: flex;
-    justify-content: flex-end; /* Align right */
+    justify-content: flex-end; 
     align-items: center;
     padding: 15px 20px;
     background: rgba(10, 10, 10, 0.9);
@@ -99,12 +94,11 @@
     backdrop-filter: blur(10px);
   }
   
-  /* SQUARE LOGO UPDATE */
   .logo-square {
     width: 55px;
     height: 55px;
-    border-radius: 8px; /* Square with slight roundness */
-    background-image: url('logo.png'); /* Ensure this image is uploaded */
+    border-radius: 8px; 
+    background-image: url('logo.png'); 
     background-color: #222;
     background-size: cover;
     background-position: center;
@@ -118,7 +112,6 @@
     box-shadow: 0 0 25px rgba(212,169,74,0.8);
   }
 
-  /* RECTANGULAR BANNERS UPDATE */
   .banners-container {
     padding: 20px;
     display: flex;
@@ -128,8 +121,8 @@
   }
   .banners-container::-webkit-scrollbar { display: none; }
   .banner {
-    min-width: 100%; /* Full width for rectangular look */
-    height: 200px;   /* Rectangular height */
+    min-width: 100%; 
+    height: 200px;   
     background: linear-gradient(135deg, #1a1a1a, #0a0a0a);
     background-size: cover;
     background-position: center;
@@ -144,11 +137,14 @@
     position: relative;
     overflow: hidden;
   }
-  .banner h2 {
-    font-family: 'Cormorant Garamond', serif;
-    font-size: 32px;
-    color: var(--gold-soft);
-    text-shadow: 0px 2px 4px rgba(0,0,0,0.8);
+  
+  /* Missing Data Styles */
+  .no-data {
+    width: 100%;
+    text-align: center;
+    color: var(--muted);
+    font-family: 'Inter', sans-serif;
+    padding: 20px 0;
   }
 
   .section-title {
@@ -159,10 +155,9 @@
     color: var(--gold);
   }
 
-  /* 2-COLUMN PRODUCTS GRID UPDATE */
   .products-grid {
     display: grid;
-    grid-template-columns: repeat(2, 1fr); /* strictly 2 columns */
+    grid-template-columns: repeat(2, 1fr); 
     gap: 15px;
     padding: 0 15px 60px;
   }
@@ -295,32 +290,21 @@
 <!-- MAIN WEBSITE CONTENT -->
 <div id="main-website">
   <header>
-    <!-- Upper right square logo -->
-    <div class="logo-square" onclick="handleLogoTap()"></div>
+    <!-- Upper right square logo (7 Taps for Admin) -->
+    <div class="logo-square" onclick="window.handleLogoTap()"></div>
   </header>
 
   <main>
-    <!-- Banners Section -->
+    <!-- Banners Section (Realtime Data) -->
     <div class="banners-container" id="banner-container">
-      <div class="banner">
-        <h2>Premium Collection</h2>
-      </div>
+      <div class="no-data">Loading Banners...</div>
     </div>
 
-    <!-- Products Section -->
+    <!-- Products Section (Realtime Data) -->
     <h2 class="section-title">New Arrivals</h2>
     <div class="products-grid" id="product-grid">
-      <!-- Default Demo Product -->
-      <div class="product-card">
-        <div class="product-img" style="background-image: url('https://via.placeholder.com/300x400/222/d4a94a?text=MZ+Item');"></div>
-        <h3 class="p-name">Velvet Evening Gown</h3>
-        <p class="p-price">₹4,999</p>
-      </div>
-      <div class="product-card">
-        <div class="product-img" style="background-image: url('https://via.placeholder.com/300x400/222/d4a94a?text=MZ+Item');"></div>
-        <h3 class="p-name">Gold Accent Blazer</h3>
-        <p class="p-price">₹6,499</p>
-      </div>
+      <!-- Loading message -->
+      <div class="no-data" style="grid-column: span 2;">Loading Products...</div>
     </div>
   </main>
 </div>
@@ -330,23 +314,43 @@
   <div class="admin-panel">
     <h2>Admin Planner</h2>
     <div class="admin-actions">
-      <button class="admin-btn" onclick="addBannerURL()">+ Add Banner (Image URL)</button>
-      <button class="admin-btn" onclick="removeBanner()">- Remove Last Banner</button>
-      <button class="admin-btn" onclick="addProductData()">+ Add Product (URL, Name, Price)</button>
-      <button class="admin-btn" onclick="editProductData()">✎ Edit Product</button>
-      <button class="admin-btn" onclick="removeProduct()">- Remove Last Product</button>
+      <button class="admin-btn" onclick="window.addBannerURL()">+ Add Banner (Image URL)</button>
+      <button class="admin-btn" onclick="window.removeBanner()">- Remove Last Banner</button>
+      <button class="admin-btn" onclick="window.addProductData()">+ Add Product (URL, Name, Price)</button>
+      <button class="admin-btn" onclick="window.editProductData()">✎ Edit Product</button>
+      <button class="admin-btn" onclick="window.removeProduct()">- Remove Last Product</button>
     </div>
-    <button class="admin-btn close-admin" onclick="closeAdmin()">Close Admin Planner</button>
+    <button class="admin-btn close-admin" onclick="window.closeAdmin()">Close Admin Planner</button>
   </div>
 </div>
 
-<script>
-  /* =========================================
-     JAVASCRIPT LOGIC
-     ========================================= */
-  const LOGO_URL = "logo.png"; // Ensure you uploaded logo.png
+<!-- TYPE="MODULE" IS IMPORTANT FOR FIREBASE -->
+<script type="module">
+  // 1. Firebase SDKs Import 
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+  import { getDatabase, ref, onValue, push, remove, update } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
 
-  // Animation Shards
+  // 2. User's Firebase Configuration
+  const firebaseConfig = {
+    apiKey: "AIzaSyD5qRE8B6uwDUVWdUjnKYfGHOCOOhnK1Rk",
+    authDomain: "mz-fashion-f4c8d.firebaseapp.com",
+    projectId: "mz-fashion-f4c8d",
+    storageBucket: "mz-fashion-f4c8d.firebasestorage.app",
+    messagingSenderId: "756363172587",
+    appId: "1:756363172587:web:b61d87481984267f9f7cae",
+    databaseURL: "https://mz-fashion-f4c8d-default-rtdb.firebaseio.com" // Important for Realtime DB
+  };
+
+  // Initialize Firebase
+  const app = initializeApp(firebaseConfig);
+  const db = getDatabase(app);
+
+  /* =========================================
+     ANIMATION LOGIC
+     ========================================= */
+  const LOGO_URL = "logo.png"; // Yahan se tiles me photo jayegi
+
+  // Shards
   const tiles = document.getElementById('tiles');
   if(tiles) {
     for (let i = 0; i < 16; i++) {
@@ -372,7 +376,7 @@
     }
   }
 
-  // Animation Particles
+  // Particles
   const p = document.getElementById('particles');
   if(p) {
     const chars = ['M','Z','✦','♛','MZ','F'];
@@ -391,26 +395,76 @@
     }
   }
 
-  // FORCE TRANSITION FIX
-  window.onload = function() {
-    setTimeout(function() {
-      const intro = document.getElementById('intro-container');
-      const main = document.getElementById('main-website');
-      if(intro && main) {
-        intro.style.display = 'none';
-        main.style.display = 'block';
-        setTimeout(() => { main.style.opacity = '1'; }, 50);
-      }
-    }, 6000); 
-  };
+  // 6 Seconds Page Transition
+  setTimeout(() => {
+    const intro = document.getElementById('intro-container');
+    const main = document.getElementById('main-website');
+    if(intro && main) {
+      intro.style.display = 'none';
+      main.style.display = 'block';
+      setTimeout(() => { main.style.opacity = '1'; }, 50);
+    }
+  }, 6000); 
 
   /* =========================================
-     ADMIN PLANNER LOGIC
+     REAL-TIME DATABASE LOGIC (FETCH DATA)
+     ========================================= */
+  
+  let currentBanners = [];
+  let currentProducts = [];
+
+  // 1. Fetch Banners
+  const bannersRef = ref(db, 'banners');
+  onValue(bannersRef, (snapshot) => {
+    const container = document.getElementById('banner-container');
+    container.innerHTML = '';
+    currentBanners = [];
+
+    if(snapshot.exists()) {
+      snapshot.forEach((child) => {
+        currentBanners.push({ key: child.key, data: child.val() });
+        const newBanner = document.createElement('div');
+        newBanner.className = 'banner';
+        newBanner.style.backgroundImage = `url('${child.val().url}')`;
+        container.appendChild(newBanner);
+      });
+    } else {
+      container.innerHTML = '<div class="no-data">No Banners Added Yet.</div>';
+    }
+  });
+
+  // 2. Fetch Products
+  const productsRef = ref(db, 'products');
+  onValue(productsRef, (snapshot) => {
+    const container = document.getElementById('product-grid');
+    container.innerHTML = '';
+    currentProducts = [];
+
+    if(snapshot.exists()) {
+      snapshot.forEach((child) => {
+        currentProducts.push({ key: child.key, data: child.val() });
+        const newProduct = document.createElement('div');
+        newProduct.className = 'product-card';
+        newProduct.innerHTML = `
+          <div class="product-img" style="background-image: url('${child.val().url}')"></div>
+          <h3 class="p-name">${child.val().name}</h3>
+          <p class="p-price">${child.val().price}</p>
+        `;
+        container.appendChild(newProduct);
+      });
+    } else {
+      container.innerHTML = '<div class="no-data" style="grid-column: span 2;">No Products Added Yet.</div>';
+    }
+  });
+
+
+  /* =========================================
+     ADMIN PANEL & CRUD LOGIC
      ========================================= */
   let tapCount = 0;
   let tapTimeout;
 
-  function handleLogoTap() {
+  window.handleLogoTap = function() {
     tapCount++;
     clearTimeout(tapTimeout);
     tapTimeout = setTimeout(() => { tapCount = 0; }, 2000);
@@ -426,37 +480,36 @@
       }, 100);
       tapCount = 0; 
     }
-  }
+  };
 
-  function closeAdmin() {
+  window.closeAdmin = function() {
     document.getElementById('admin-modal').style.display = 'none';
-  }
+  };
 
-  // BANNERS (By URL)
-  function addBannerURL() {
+  // BANNER ADMIN ACTIONS
+  window.addBannerURL = function() {
     let imgUrl = prompt("Enter Banner Image URL:");
     if (!imgUrl) return;
 
-    const container = document.getElementById('banner-container');
-    const newBanner = document.createElement('div');
-    newBanner.className = 'banner';
-    newBanner.style.backgroundImage = `url('${imgUrl}')`; // Direct Image Setup
-    container.appendChild(newBanner);
-    alert('Banner Added successfully!');
-  }
+    push(ref(db, 'banners'), { url: imgUrl })
+      .then(() => alert('Banner saved to Firebase!'))
+      .catch((error) => alert('Error saving banner: ' + error.message));
+  };
 
-  function removeBanner() {
-    const container = document.getElementById('banner-container');
-    if (container.lastElementChild) {
-      container.removeChild(container.lastElementChild);
-      alert('Last banner removed!');
-    } else {
+  window.removeBanner = function() {
+    if (currentBanners.length === 0) {
       alert('No banners to remove.');
+      return;
     }
-  }
+    // Remove the last banner in the array
+    const lastBannerKey = currentBanners[currentBanners.length - 1].key;
+    remove(ref(db, 'banners/' + lastBannerKey))
+      .then(() => alert('Banner deleted from Firebase!'))
+      .catch((error) => alert('Error: ' + error.message));
+  };
 
-  // PRODUCTS (By URL, Name, Price)
-  function addProductData() {
+  // PRODUCT ADMIN ACTIONS
+  window.addProductData = function() {
     let imgUrl = prompt("1. Enter Product Image URL:");
     if (!imgUrl) return;
     let name = prompt("2. Enter Product Name:");
@@ -464,54 +517,50 @@
     let price = prompt("3. Enter Product Price (e.g., ₹2,999):");
     if (!price) price = "₹0";
 
-    const container = document.getElementById('product-grid');
-    const newProduct = document.createElement('div');
-    newProduct.className = 'product-card';
-    newProduct.innerHTML = `
-      <div class="product-img" style="background-image: url('${imgUrl}')"></div>
-      <h3 class="p-name">${name}</h3>
-      <p class="p-price">${price}</p>
-    `;
-    container.appendChild(newProduct);
-    alert('Product Added successfully!');
-  }
+    push(ref(db, 'products'), { url: imgUrl, name: name, price: price })
+      .then(() => alert('Product saved to Firebase!'))
+      .catch((error) => alert('Error saving product: ' + error.message));
+  };
 
-  function editProductData() {
-    const container = document.getElementById('product-grid');
-    if (container.children.length === 0) {
+  window.editProductData = function() {
+    if (currentProducts.length === 0) {
       alert("No products exist to edit.");
       return;
     }
-    
-    // Ask which product to edit
-    let index = prompt(`Enter product number to edit (1 to ${container.children.length}):`);
+    let index = prompt(`Enter product number to edit (1 to ${currentProducts.length}):`);
     let idx = parseInt(index) - 1;
 
-    if (idx >= 0 && idx < container.children.length) {
-      let card = container.children[idx];
-      let newUrl = prompt("Enter New Image URL (leave blank to skip):");
-      let newName = prompt("Enter New Name (leave blank to skip):");
-      let newPrice = prompt("Enter New Price (leave blank to skip):");
+    if (idx >= 0 && idx < currentProducts.length) {
+      let product = currentProducts[idx];
+      let newUrl = prompt("Enter New Image URL (leave blank to skip):", product.data.url);
+      let newName = prompt("Enter New Name (leave blank to skip):", product.data.name);
+      let newPrice = prompt("Enter New Price (leave blank to skip):", product.data.price);
 
-      if (newUrl) card.querySelector('.product-img').style.backgroundImage = `url('${newUrl}')`;
-      if (newName) card.querySelector('.p-name').innerText = newName;
-      if (newPrice) card.querySelector('.p-price').innerText = newPrice;
-      
-      alert('Product updated!');
+      update(ref(db, 'products/' + product.key), {
+        url: newUrl || product.data.url,
+        name: newName || product.data.name,
+        price: newPrice || product.data.price
+      })
+      .then(() => alert('Product updated in Firebase!'))
+      .catch((error) => alert('Error updating: ' + error.message));
+
     } else {
       alert("Invalid product number.");
     }
-  }
+  };
 
-  function removeProduct() {
-    const container = document.getElementById('product-grid');
-    if (container.lastElementChild) {
-      container.removeChild(container.lastElementChild);
-      alert('Last product removed!');
-    } else {
+  window.removeProduct = function() {
+    if (currentProducts.length === 0) {
       alert('No products to remove.');
+      return;
     }
-  }
+    // Remove the last product in the array
+    const lastProductKey = currentProducts[currentProducts.length - 1].key;
+    remove(ref(db, 'products/' + lastProductKey))
+      .then(() => alert('Product deleted from Firebase!'))
+      .catch((error) => alert('Error: ' + error.message));
+  };
+
 </script>
 </body>
 </html>
