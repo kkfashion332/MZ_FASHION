@@ -1,75 +1,339 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>MZ Fashion - Style Beyond Limits</title>
-<link rel="preconnect" href="https://fonts.googleapis.com" />
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600;700&family=Inter:wght@300;400;600&family=Cinzel:wght@400;600;700&display=swap" rel="stylesheet" />
-<link rel="stylesheet" href="style.css" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Unique Fashion Store</title>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&display=swap" rel="stylesheet">
+
+  <style>
+    /* -------------------------------------- */
+    /* CSS VARIABLES & RESET (Added for support) */
+    /* -------------------------------------- */
+    :root {
+      --ink: #211e2f;
+      --muted: #6f6b80;
+      --line: #e5e2de;
+      --orange: #f26022;
+      --orange-dark: #d9531a;
+      --white: #ffffff;
+      --paper: #ffffff;
+      --night: #1a1825;
+      --butter: #f5d47a;
+      --green: #2fa866;
+      --violet: #7159cd;
+      --shadow-small: 0 4px 12px rgba(0,0,0,0.1);
+      --radius: 12px;
+    }
+    
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: system-ui, -apple-system, sans-serif;
+      color: var(--ink);
+      background: #fdfcfb;
+    }
+
+    button {
+      cursor: pointer;
+      font-family: inherit;
+    }
+
+    /* -------------------------------------- */
+    /* YOUR CUSTOM CSS */
+    /* -------------------------------------- */
+    .product-body { padding: 15px; }
+    .product-category { color: var(--muted); font-size: 10px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; }
+    .product-name { min-height: 42px; margin: 6px 0 8px; font-family: "Bricolage Grotesque", sans-serif; font-size: 19px; font-weight: 500; letter-spacing: -.04em; line-height: 1.05; }
+    .product-price { display: flex; align-items: baseline; gap: 7px; margin-bottom: 13px; }
+    .product-price strong { font-size: 17px; }
+    .product-price del { color: #aaa2a5; font-size: 12px; }
+    .product-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+    .small-button { min-height: 36px; padding: 0 7px; border: 1px solid var(--line); border-radius: 9px; color: var(--ink); background: transparent; font-size: 11px; font-weight: 700; transition: .2s ease; }
+    .small-button:hover { border-color: var(--orange); color: var(--orange); }
+    .small-button.buy { border-color: var(--orange); color: var(--white); background: var(--orange); }
+    .small-button.buy:hover { background: var(--orange-dark); }
+    .empty-state { grid-column: 1 / -1; padding: 60px 20px; border: 1px dashed var(--line); border-radius: var(--radius); color: var(--muted); text-align: center; }
+    .empty-state strong { display: block; margin-bottom: 7px; color: var(--ink); font-family: "Bricolage Grotesque", sans-serif; font-size: 25px; }
+
+    .orders-section { padding-top: 78px; padding-bottom: 90px; }
+    .orders-section .section-heading { margin-bottom: 18px; }
+    .order-strip { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+    .order-stat { padding: 18px; border-radius: 14px; background: #f6f1eb; }
+    .order-stat strong { display: block; font-family: "Bricolage Grotesque", sans-serif; font-size: 27px; }
+    .order-stat span { color: var(--muted); font-size: 12px; }
+
+    footer { color: rgba(255,255,255,.82); background: var(--night); }
+    .footer-inner { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; padding-top: 55px; padding-bottom: 35px; max-width: 1320px; margin: 0 auto; padding-inline: max(5vw, 22px); }
+    .footer-brand { display: flex; align-items: center; gap: 12px; }
+    .footer-brand .brand-copy strong { color: var(--white); }
+    .footer-brand .brand-copy small { color: rgba(255,255,255,.5); }
+    .footer-copy { max-width: 355px; margin-top: 18px; color: rgba(255,255,255,.58); font-size: 13px; line-height: 1.7; }
+    .footer-contact { justify-self: end; align-self: center; text-align: right; }
+    .footer-contact small { display: block; margin-bottom: 10px; color: var(--butter); font-size: 10px; font-weight: 700; letter-spacing: .16em; text-transform: uppercase; }
+    .footer-contact strong { display: block; color: var(--white); font-size: 18px; }
+    .footer-contact a { display: inline-block; margin-top: 8px; color: var(--orange); font-weight: 700; text-decoration: none; }
+    .footer-bottom { max-width: 1320px; margin: 0 auto; padding: 17px max(5vw, 22px); border-top: 1px solid rgba(255,255,255,.12); color: rgba(255,255,255,.4); font-size: 10px; }
+
+    .overlay { position: fixed; z-index: 40; inset: 0; display: grid; place-items: center; padding: 20px; background: rgba(33,30,47,.42); backdrop-filter: blur(5px); animation: fade-in .2s ease; }
+    .modal, .drawer { position: relative; width: min(100%, 560px); max-height: min(720px, calc(100vh - 40px)); overflow: auto; padding: 28px; border-radius: 22px; background: var(--paper); box-shadow: 0 25px 90px rgba(33,30,47,.26); animation: rise-in .25s ease; }
+    .drawer { align-self: stretch; justify-self: end; width: min(100%, 480px); max-height: none; border-radius: 20px 0 0 20px; }
+    .close-button { position: absolute; top: 16px; right: 16px; display: grid; place-items: center; width: 34px; height: 34px; border: 1px solid var(--line); border-radius: 50%; color: var(--muted); background: var(--white); }
+    .modal h3, .drawer h3 { margin: 0 35px 6px 0; font-family: "Bricolage Grotesque", sans-serif; font-size: 30px; font-weight: 500; letter-spacing: -.06em; }
+    .modal-intro, .drawer-intro { margin: 0 0 22px; color: var(--muted); font-size: 13px; line-height: 1.55; }
+    .checkout-product { display: flex; align-items: center; gap: 12px; margin-bottom: 20px; padding: 10px; border-radius: 12px; background: #f5efe8; }
+    .checkout-product img { width: 62px; height: 62px; border-radius: 9px; object-fit: cover; }
+    .checkout-product strong { display: block; }
+    .checkout-product span { color: var(--muted); font-size: 12px; }
+    .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 13px; }
+    .field { display: flex; flex-direction: column; gap: 6px; }
+    .field.full { grid-column: 1 / -1; }
+    .field label { color: var(--muted); font-size: 11px; font-weight: 700; }
+    .field input, .field select, .field textarea { width: 100%; padding: 11px 12px; border: 1px solid var(--line); border-radius: 9px; outline: none; color: var(--ink); background: var(--white); }
+    .field textarea { min-height: 80px; resize: vertical; }
+    .field input:focus, .field select:focus, .field textarea:focus { border-color: var(--violet); box-shadow: 0 0 0 3px rgba(113,89,205,.1); }
+    .form-submit { width: 100%; margin-top: 18px; border: 0; }
+    .success-icon { display: grid; place-items: center; width: 58px; height: 58px; margin: 4px 0 18px; border-radius: 50%; color: var(--white); background: var(--green); }
+    .modal-center { text-align: center; }
+    .modal-center h3 { margin-right: 0; }
+    .modal-center .primary-button { margin-top: 8px; }
+    .list-item { display: flex; gap: 12px; padding: 15px 0; border-bottom: 1px solid var(--line); }
+    .list-item img { width: 65px; height: 65px; border-radius: 10px; object-fit: cover; }
+    .list-item-main { flex: 1; min-width: 0; }
+    .list-item-main strong { display: block; }
+    .list-item-main span { display: block; margin-top: 4px; color: var(--muted); font-size: 12px; }
+    .order-status { display: inline-block; margin-top: 7px; padding: 4px 7px; border-radius: 999px; color: var(--green); background: #e9f6ef; font-size: 10px; font-weight: 700; }
+
+    .admin-page { min-height: 100vh; background: #f5f1ec; }
+    .admin-header { display: flex; align-items: center; justify-content: space-between; gap: 20px; padding: 22px max(5vw, 22px); color: var(--white); background: var(--night); }
+    .admin-header h1 { margin: 3px 0 0; font-family: "Bricolage Grotesque", sans-serif; font-size: 31px; font-weight: 500; letter-spacing: -.06em; }
+    .admin-kicker { color: var(--butter); font-size: 10px; font-weight: 700; letter-spacing: .16em; text-transform: uppercase; }
+    .admin-main { display: grid; grid-template-columns: 360px 1fr; gap: 22px; max-width: 1320px; margin: 0 auto; padding: 30px max(5vw, 22px) 70px; }
+    .admin-panel { padding: 22px; border: 1px solid var(--line); border-radius: 18px; background: var(--paper); }
+    .admin-panel h2 { margin: 0 0 5px; font-family: "Bricolage Grotesque", sans-serif; font-size: 25px; font-weight: 500; letter-spacing: -.06em; }
+    .admin-panel > p { margin: 0 0 20px; color: var(--muted); font-size: 12px; line-height: 1.5; }
+    .admin-products { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 13px; }
+    .admin-product { display: flex; flex-direction: column; gap: 8px; padding: 10px; border: 1px solid var(--line); border-radius: 13px; background: var(--white); }
+    .admin-product img { width: 100%; aspect-ratio: 1; border-radius: 9px; object-fit: cover; }
+    .admin-product strong { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .admin-product small { color: var(--muted); }
+    .admin-product-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 5px; }
+    .admin-list { max-height: 240px; overflow: auto; margin-top: 25px; }
+    .admin-list h3 { margin: 0 0 8px; font-size: 13px; }
+    .mini-row { display: flex; justify-content: space-between; gap: 12px; padding: 9px 0; border-bottom: 1px solid var(--line); font-size: 12px; }
+    .mini-row span { color: var(--muted); }
+    .admin-form-actions { display: flex; gap: 8px; margin-top: 14px; }
+    .admin-form-actions button { flex: 1; padding: 10px; border-radius: 8px; border: 1px solid var(--line); background: white; }
+    .admin-form-actions button.primary-button { background: var(--orange); color: white; border: none; }
+
+    #toast-region { position: fixed; z-index: 80; right: 22px; bottom: 22px; display: grid; gap: 9px; }
+    .toast { padding: 13px 16px; border: 1px solid rgba(255,255,255,.18); border-radius: 12px; color: var(--white); background: var(--night); box-shadow: var(--shadow-small); font-size: 12px; animation: rise-in .25s ease; }
+    
+    @keyframes fade-in { from { opacity: 0; } to { opacity: 1; } }
+    @keyframes rise-in { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+
+    @media (max-width: 980px) {
+      .site-header { grid-template-columns: 1fr auto; gap: 10px 16px; }
+      .search-box { grid-column: 1 / -1; grid-row: 2; }
+      .product-grid { grid-template-columns: repeat(3, 1fr); }
+      .hero { gap: 20px; }
+      .admin-main { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 700px) {
+      .site-header { min-height: 126px; padding-top: 9px; padding-bottom: 12px; }
+      .brand-copy strong { font-size: 16px; }
+      .brand-logo { width: 38px; height: 38px; }
+      .header-actions .text-action { display: none; }
+      .hero { display: flex; flex-direction: column; align-items: stretch; padding-top: 48px; }
+      .hero h1 { font-size: clamp(47px, 14vw, 66px); }
+      .hero-art { min-height: 310px; margin-top: 12px; }
+      .hero-card { width: 90%; }
+      .category-row { padding-bottom: 45px; overflow-x: auto; flex-wrap: nowrap; }
+      .category-button { flex: none; }
+      .section-heading { align-items: flex-start; flex-direction: column; gap: 12px; }
+      .product-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; }
+      .product-body { padding: 11px; }
+      .product-name { min-height: 37px; font-size: 16px; }
+      .product-price { margin-bottom: 9px; }
+      .small-button { font-size: 10px; }
+      .order-strip { grid-template-columns: 1fr; }
+      .footer-inner { grid-template-columns: 1fr; gap: 28px; }
+      .footer-contact { justify-self: start; text-align: left; }
+      .modal, .drawer { padding: 22px; }
+      .form-grid { grid-template-columns: 1fr; }
+      .field.full { grid-column: auto; }
+      .admin-header { align-items: flex-start; flex-direction: column; }
+      .admin-products { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    }
+    @media (max-width: 390px) {
+      .product-grid { grid-template-columns: 1fr; }
+      .product-image-wrap { aspect-ratio: 1.2; }
+      .hero-card { width: 86%; }
+    }
+  </style>
 </head>
 <body>
 
-<!-- NEW VIDEO INTRO ANIMATION -->
-<div id="intro-container">
-  <div class="stage">
-    <video autoplay muted playsinline>
-      <source src="https://storage.lovable.dev/__l5e/assets-v1/be8c69f7-2d9f-4f15-b76d-54d762debd78/mz-intro.mp4" type="video/mp4" />
-      Your browser does not support the video tag.
-    </video>
-    <div class="tagline">MZ Fashion — Style Beyond Limits</div>
-  </div>
-</div>
+  <div id="app"></div>
 
-<!-- MAIN WEBSITE CONTENT -->
-<div id="main-website">
-  <header>
-    <!-- Upper Left Sphere Logo (7 Taps for Admin) -->
-    <div class="logo-sphere" onclick="window.handleLogoTap()"></div>
-    <div class="brand-title">MZ FASHION</div>
-  </header>
+  <div id="toast-region"></div>
 
-  <main>
-    <!-- Banners Section (Realtime Data + Auto Swipe) -->
-    <div class="banners-container" id="banner-container">
-      <div class="no-data">Loading Banners...</div>
-    </div>
-
-    <!-- Products Section (Realtime Data) -->
-    <h2 class="section-title">All products available</h2>
-    <div class="products-grid" id="product-grid">
-      <div class="no-data" style="grid-column: span 2;">Loading Products...</div>
-    </div>
-  </main>
-</div>
-
-<!-- ADVANCED ADMIN PLANNER MODAL -->
-<div id="admin-modal">
-  <div class="admin-panel">
-    <h2>Admin Planner</h2>
+  <script>
+    // --------------------------------------
+    // YOUR JAVASCRIPT CODE
+    // --------------------------------------
     
-    <!-- Manage Banners Section -->
-    <div class="admin-section">
-      <h3>Manage Banners</h3>
-      <button class="admin-btn full-width" onclick="window.addBanner()">+ Add New Banner (with Link)</button>
-      <div class="admin-list" id="admin-banner-list">
-      </div>
-    </div>
+    // Some basic dummy state/functions to prevent JS errors based on your snippet
+    let state = { adminEditing: null, products: [], liked: [], orders: [], cart: [], modal: null, category: "all", search: "" };
+    let logoTaps = [];
+    const categoryLabels = { all: "All Products" };
+    
+    function esc(str) { return str ? str.replace(/</g, "&lt;").replace(/>/g, "&gt;") : ""; }
+    function money(amount) { return "₹" + amount.toLocaleString("en-IN"); }
+    function icon(name, size) { return `<span style="font-size:${size}px">Icon</span>`; } // Dummy icon function
+    function productById(id) { return state.products.find(p => p.id === id); }
+    function isLiked(id) { return state.liked.includes(id); }
+    function save() { console.log("State saved"); }
+    function updateCounts() { console.log("Counts updated"); }
+    function showToast(msg) { 
+      const toastRegion = document.getElementById("toast-region");
+      toastRegion.innerHTML = `<div class="toast">${msg}</div>`;
+      setTimeout(() => { toastRegion.innerHTML = ""; }, 3000);
+    }
+    function categoryName(key) { return categoryLabels[key] || "Category"; }
+    
+    // Main render function (assuming your script injects into #app)
+    function render() {
+      const app = document.getElementById("app");
+      if (window.location.hash === "#admin") {
+        app.innerHTML = renderAdmin();
+      } else {
+        // Dummy Front-end rendering to complement your snippet logic
+        app.innerHTML = `
+          <div style="padding: 20px;">
+            <h1 data-logo-tap="true" style="cursor:pointer; display:inline-block;">Unique Fashion Store</h1>
+            <p>(Tap logo 5 times to enter Admin Panel)</p>
+          </div>
+        `;
+      }
+    }
 
-    <!-- Manage Products Section -->
-    <div class="admin-section" style="margin-top: 20px;">
-      <h3>Manage Products</h3>
-      <button class="admin-btn full-width" onclick="window.addProduct()">+ Add New Product</button>
-      <div class="admin-list" id="admin-product-list">
-      </div>
-    </div>
+    // Your provided admin rendering function
+    function renderAdmin() {
+      const editing = state.adminEditing ? productById(state.adminEditing) : null;
+      return `<div class="admin-page">
+        <header class="admin-header"><div><div class="admin-kicker">Unique Fashion / Store desk</div><h1>Manage the good stuff.</h1></div><button class="secondary-button" data-action="go-home" data-testid="button-admin-back">${icon("arrow", 16)} Back to store</button></header>
+        <main class="admin-main">
+          <section class="admin-panel"><h2>${editing ? "Edit product" : "Add a product"}</h2><p>Add a product with its image URL, category, price and live status.</p><form data-form="product"><div class="form-grid"><div class="field full"><label for="admin-name">Product name</label><input id="admin-name" name="name" required value="${esc(editing?.name || "")}" placeholder="e.g. Kota Street Shirt" data-testid="input-admin-name"></div><div class="field full"><label for="admin-image">Image URL</label><input id="admin-image" name="image" type="url" required value="${esc(editing?.image || "")}" placeholder="https://..." data-testid="input-admin-image"></div><div class="field"><label for="admin-category">Category</label><select id="admin-category" name="category" data-testid="select-admin-category">${Object.entries(categoryLabels).filter(([key]) => key !== "all").map(([key, label]) => `<option value="${key}" ${editing?.category === key ? "selected" : ""}>${label}</option>`).join("")}</select></div><div class="field"><label for="admin-price">Price (₹)</label><input id="admin-price" name="price" type="number" min="1" required value="${editing?.price || ""}" data-testid="input-admin-price"></div><div class="field"><label for="admin-mrp">MRP (₹)</label><input id="admin-mrp" name="mrp" type="number" min="1" required value="${editing?.mrp || ""}" data-testid="input-admin-mrp"></div><div class="field"><label for="admin-discount">Discount (%)</label><input id="admin-discount" name="discount" type="number" min="0" max="90" required value="${editing?.discount || 0}" data-testid="input-admin-discount"></div><div class="field"><label for="admin-stock">Stock</label><input id="admin-stock" name="stock" type="number" min="0" required value="${editing?.stock ?? 1}" data-testid="input-admin-stock"></div><div class="field"><label for="admin-live">Live option</label><select id="admin-live" name="live" data-testid="select-admin-live"><option value="true" ${editing?.live ? "selected" : ""}>Live / ready</option><option value="false" ${editing && !editing.live ? "selected" : ""}>Offline</option></select></div><div class="field full"><label for="admin-description">Description</label><textarea id="admin-description" name="description" placeholder="Short product description" data-testid="input-admin-description">${esc(editing?.description || "")}</textarea></div></div><div class="admin-form-actions"><button class="primary-button" type="submit" data-testid="button-save-product">${editing ? "Save changes" : "Add product"} ${icon("check", 15)}</button>${editing ? `<button class="secondary-button" type="button" data-action="cancel-edit" data-testid="button-cancel-edit">Cancel</button>` : ""}</div></form><div class="admin-list"><h3>At a glance</h3><div class="mini-row"><span>Total products</span><strong>${state.products.length}</strong></div><div class="mini-row"><span>Liked products</span><strong>${state.liked.length}</strong></div><div class="mini-row"><span>Orders</span><strong>${state.orders.length}</strong></div></div></section>
+          <section class="admin-panel"><h2>Your catalog</h2><p>Edit the details your customers see on the storefront.</p><div class="admin-products">${state.products.map((product) => `<article class="admin-product" data-testid="admin-product-${esc(product.id)}"><img src="${esc(product.image)}" alt="${esc(product.name)}"><strong>${esc(product.name)}</strong><small>${categoryName(product.category)} · ${money(product.price)}</small><div class="admin-product-actions"><button class="small-button" data-action="edit-product" data-id="${esc(product.id)}" data-testid="button-edit-product-${esc(product.id)}">${icon("edit", 13)} Edit</button><button class="small-button" data-action="delete-product" data-id="${esc(product.id)}" data-testid="button-delete-product-${esc(product.id)}">${icon("trash", 13)} Delete</button></div></article>`).join("")}</div><div class="admin-list"><h3>Recent orders</h3>${state.orders.length ? [...state.orders].reverse().slice(0, 8).map((order) => `<div class="mini-row"><span>${esc(order.productName)} · ${esc(order.customerName)}</span><strong>${money(order.total)}</strong></div>`).join("") : `<div class="mini-row"><span>No orders yet</span><strong>—</strong></div>`}</div></section>
+        </main>
+      </div>`;
+    }
 
-    <button class="admin-btn close-admin full-width" onclick="window.closeAdmin()">Close Admin Planner</button>
-  </div>
-</div>
+    function closeModal() { state.modal = null; render(); }
+    function scrollToCollection() { document.querySelector("#collection")?.scrollIntoView({ behavior: "smooth" }); }
 
-<!-- JS Link -->
-<script type="module" src="app.js"></script>
+    // Your Event Listeners
+    document.addEventListener("click", (event) => {
+      const target = event.target.closest("[data-action], [data-logo-tap]");
+      if (!target) return;
+      if (target.hasAttribute("data-logo-tap")) {
+        event.preventDefault();
+        const now = Date.now();
+        logoTaps = [...logoTaps.filter((tap) => now - tap < 2200), now];
+        if (logoTaps.length >= 5) {
+          logoTaps = [];
+          window.location.hash = "admin";
+          showToast("Admin panel unlocked");
+        }
+        return;
+      }
+      const action = target.dataset.action;
+      if (action === "set-category") { state.category = target.dataset.category || "all"; state.modal = null; render(); if (target.dataset.category !== "all") setTimeout(scrollToCollection, 30); }
+      if (action === "shop-collection") scrollToCollection();
+      if (action === "toggle-like") {
+        const id = target.dataset.id;
+        state.liked = isLiked(id) ? state.liked.filter((likedId) => likedId !== id) : [...state.liked, id];
+        save(); render(); showToast(isLiked(id) ? "Saved to your liked pieces" : "Removed from liked pieces");
+      }
+      if (action === "open-liked") { state.modal = { type: "liked" }; render(); }
+      if (action === "open-orders") { state.modal = { type: "orders" }; render(); }
+      if (action === "open-cart") { state.modal = { type: "cart" }; render(); }
+      if (action === "buy-now") { state.modal = { type: "checkout", id: target.dataset.id }; render(); }
+      if (action === "add-cart") {
+        const existing = state.cart.find((item) => item.id === target.dataset.id);
+        if (existing) existing.quantity += 1; else state.cart.push({ id: target.dataset.id, quantity: 1 });
+        save(); updateCounts(); showToast("Added to your bag");
+      }
+      if (action === "close-modal") {
+        if (event.target.closest("[data-modal-content]") && !target.classList.contains("close-button") && !target.dataset.testid?.includes("close")) return;
+        closeModal();
+      }
+      if (action === "go-home") { window.location.hash = ""; state.adminEditing = null; render(); }
+      if (action === "edit-product") { state.adminEditing = target.dataset.id; render(); window.scrollTo({ top: 0, behavior: "smooth" }); }
+      if (action === "cancel-edit") { state.adminEditing = null; render(); }
+      if (action === "delete-product") {
+        const product = productById(target.dataset.id);
+        if (product && window.confirm(`Delete ${product.name}?`)) {
+          state.products = state.products.filter((item) => item.id !== target.dataset.id);
+          state.liked = state.liked.filter((id) => id !== target.dataset.id);
+          state.cart = state.cart.filter((item) => item.id !== target.dataset.id);
+          save(); render(); showToast("Product removed");
+        }
+      }
+    });
+
+    document.addEventListener("input", (event) => {
+      if (!event.target.matches("[data-search]")) return;
+      state.search = event.target.value;
+      const value = state.search;
+      render();
+      const search = document.querySelector("[data-search]");
+      if (search) { search.focus(); search.setSelectionRange(value.length, value.length); }
+    });
+
+    document.addEventListener("submit", (event) => {
+      const form = event.target;
+      if (form.dataset.form === "checkout") {
+        event.preventDefault();
+        const data = new FormData(form);
+        const product = productById(form.dataset.productId);
+        const quantity = Math.max(1, Number(data.get("quantity")) || 1);
+        const order = { id: `UF-${Date.now().toString().slice(-6)}`, productName: product.name, image: product.image, quantity, total: product.price * quantity, customerName: data.get("name"), phone: data.get("phone"), address: data.get("address"), status: "Order placed" };
+        state.orders.push(order);
+        state.cart = state.cart.filter((item) => item.id !== product.id);
+        save();
+        state.modal = { type: "success", orderId: order.id, phone: order.phone };
+        render();
+        showToast("Order placed successfully");
+      }
+      if (form.dataset.form === "product") {
+        event.preventDefault();
+        const data = new FormData(form);
+        const item = { name: data.get("name"), image: data.get("image"), category: data.get("category"), price: Number(data.get("price")), mrp: Number(data.get("mrp")), discount: Number(data.get("discount")), stock: Number(data.get("stock")), live: data.get("live") === "true", description: data.get("description") };
+        if (state.adminEditing) {
+          state.products = state.products.map((product) => product.id === state.adminEditing ? { ...product, ...item } : product);
+          showToast("Product updated");
+        } else {
+          state.products.push({ ...item, id: `product-${Date.now()}` });
+          showToast("Product added");
+        }
+        state.adminEditing = null;
+        save(); render();
+      }
+    });
+
+    window.addEventListener("hashchange", render);
+    
+    // Initial Render
+    render();
+  </script>
 </body>
 </html>
