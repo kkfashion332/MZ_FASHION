@@ -1,103 +1,140 @@
- <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Unique Fashion</title>
+    <!-- Zoom disable karne ke liye user-scalable=no add kiya hai -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>MZ Fashion</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
         .no-scrollbar::-webkit-scrollbar { display: none; }
-        .text-gold { color: #D4AF37; }
-        .bg-gold { background-color: #D4AF37; }
-        .border-gold { border-color: #D4AF37; }
-        
-        /* Smooth fade-in animation for page transitions */
-        .fade-in {
-            animation: fadeIn 0.3s ease-in-out;
-        }
+        .fade-in { animation: fadeIn 0.3s ease-in-out; }
         @keyframes fadeIn {
             from { opacity: 0; }
             to { opacity: 1; }
+        }
+        /* Hide scrollbar for category section but keep it scrollable */
+        .category-scroll {
+            overflow-x: auto;
+            scroll-behavior: smooth;
+        }
+        .category-scroll::-webkit-scrollbar {
+            display: none;
         }
     </style>
 </head>
 <body class="bg-black text-gray-200">
 
+    <!-- Navbar -->
     <nav class="bg-zinc-950 p-4 flex justify-between items-center sticky top-0 z-50 border-b border-yellow-600/40 shadow-[0_4px_15px_rgba(212,175,55,0.1)]">
         <div class="flex items-center gap-3">
-            <img id="secretLogo" src="240370.jpg" onerror="this.src='https://ui-avatars.com/api/?name=UF&background=000&color=D4AF37'" alt="Unique Fashion" class="w-12 h-12 rounded-full cursor-pointer border-2 border-yellow-500 object-cover shadow-[0_0_10px_rgba(212,175,55,0.4)]">
-            <span onclick="goHome()" class="cursor-pointer font-extrabold text-xl tracking-wider text-transparent bg-clip-text bg-gradient-to-r from-yellow-200 to-yellow-600">
-                UNIQUE FASHION
+            <!-- Logo image changed to logo.png -->
+            <img id="secretLogo" src="logo.png" onerror="this.src='https://ui-avatars.com/api/?name=MZ&background=000&color=D4AF37'" alt="MZ Fashion" class="w-10 h-10 rounded-full cursor-pointer border border-yellow-500 object-cover shadow-[0_0_10px_rgba(212,175,55,0.4)]">
+            <!-- Text made smaller (text-base instead of text-xl) and changed to MZ FASHION -->
+            <span onclick="goHome()" class="cursor-pointer font-bold text-base tracking-widest text-transparent bg-clip-text bg-gradient-to-r from-yellow-200 to-yellow-600">
+                MZ FASHION
             </span>
         </div>
         <div class="relative cursor-pointer" onclick="showCart()">
             <i class="fa-solid fa-cart-shopping text-xl text-yellow-500"></i>
-            <span id="cartCount" class="absolute -top-2 -right-2 bg-red-600 text-white text-xs font-bold px-1.5 py-0.5 rounded-full hidden">0</span>
+            <span id="cartCount" class="absolute -top-2 -right-2 bg-red-600 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full hidden">0</span>
         </div>
     </nav>
 
+    <!-- Main App Container -->
     <div id="app" class="max-w-md mx-auto bg-zinc-900 min-h-screen shadow-2xl pb-20">
-        </div>
+        <!-- Views will be injected here -->
+    </div>
+
+    <!-- Full Screen Image Modal Container -->
+    <div id="imageModalContainer"></div>
 
     <script>
         // --- DATA ---
+        // Categories with Images
+        const categories = [
+            { name: "All", img: "https://images.unsplash.com/photo-1490481651871-ab68de25d43d?w=150&q=80" },
+            { name: "T-Shirts", img: "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=150&q=80" },
+            { name: "Shirts", img: "https://images.unsplash.com/photo-1596755094514-f87e32f85ec8?w=150&q=80" },
+            { name: "Jeans", img: "https://images.unsplash.com/photo-1541099649105-f69ad21f3246?w=150&q=80" },
+            { name: "Shoes", img: "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=150&q=80" }
+        ];
+
+        // Products Data with Category mapping
         const products = [
-            { id: 1, name: "Premium Black T-Shirt", price: 499, mrp: 999, discount: "50% OFF", img: "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=400&q=80" },
-            { id: 2, name: "Funky Denim Jacket", price: 1299, mrp: 2599, discount: "50% OFF", img: "https://images.unsplash.com/photo-1576995853123-5a10305d93c0?w=400&q=80" },
-            { id: 3, name: "Aesthetic Sneakers", price: 899, mrp: 1499, discount: "40% OFF", img: "https://images.unsplash.com/photo-1525966222134-fcfa99b8ae77?w=400&q=80" },
-            { id: 4, name: "Casual Chinos", price: 799, mrp: 1299, discount: "38% OFF", img: "https://images.unsplash.com/photo-1473966968600-fa801b869a1a?w=400&q=80" }
+            { id: 1, name: "Premium Black T-Shirt", price: 499, mrp: 999, discount: "50% OFF", category: "T-Shirts", img: "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=400&q=80" },
+            { id: 2, name: "Funky Denim Jacket", price: 1299, mrp: 2599, discount: "50% OFF", category: "Shirts", img: "https://images.unsplash.com/photo-1576995853123-5a10305d93c0?w=400&q=80" },
+            { id: 3, name: "Aesthetic Sneakers", price: 899, mrp: 1499, discount: "40% OFF", category: "Shoes", img: "https://images.unsplash.com/photo-1525966222134-fcfa99b8ae77?w=400&q=80" },
+            { id: 4, name: "Casual Chinos", price: 799, mrp: 1299, discount: "38% OFF", category: "Jeans", img: "https://images.unsplash.com/photo-1473966968600-fa801b869a1a?w=400&q=80" }
         ];
         
-        const categories = ["T-Shirts", "Shirts", "Jeans", "Shoes", "Accessories"];
         let cart = [];
-        // LocalStorage se purane orders nikal lo taaki refresh hone par delete na ho
-        let orders = JSON.parse(localStorage.getItem('uf_orders')) || [];
-
+        let orders = JSON.parse(localStorage.getItem('mz_orders')) || [];
         const appDiv = document.getElementById('app');
         let currentCheckoutItem = null;
+        let activeCategory = "All"; // Default
 
-        // --- VIEWS RENDERING ---
+        // --- VIEWS ---
 
         function goHome() {
-            let catHTML = categories.map(cat => `<div class="flex-shrink-0 bg-black text-yellow-500 px-5 py-2 rounded-full text-sm font-semibold border border-yellow-600/50 shadow-[0_0_5px_rgba(212,175,55,0.2)]">${cat}</div>`).join('');
-            
-            let prodHTML = products.map(item => `
-                <div class="bg-zinc-950 border border-yellow-600/30 rounded-lg shadow-lg relative flex flex-col justify-between overflow-hidden">
-                    <button onclick="toggleLike(this)" class="absolute top-2 right-2 text-gray-500 z-10 text-xl bg-black/50 rounded-full w-8 h-8 flex items-center justify-center backdrop-blur-sm">
-                        <i class="fa-solid fa-heart"></i>
-                    </button>
-                    <div onclick="viewProduct(${item.id})" class="cursor-pointer">
-                        <img src="${item.img}" class="w-full h-48 object-cover opacity-90 hover:opacity-100 transition duration-300">
+            // Filter products based on selected picture category
+            let displayProducts = products;
+            if(activeCategory !== "All") {
+                displayProducts = products.filter(p => p.category === activeCategory);
+            }
+
+            // Image based Category HTML
+            let catHTML = categories.map(cat => `
+                <div onclick="filterCategory('${cat.name}')" class="flex-shrink-0 flex flex-col items-center gap-2 cursor-pointer w-16">
+                    <div class="w-16 h-16 rounded-full overflow-hidden border-2 ${activeCategory === cat.name ? 'border-yellow-400 shadow-[0_0_10px_rgba(212,175,55,0.8)]' : 'border-gray-600'} transition-all">
+                        <img src="${cat.img}" class="w-full h-full object-cover">
                     </div>
+                    <span class="text-[10px] ${activeCategory === cat.name ? 'text-yellow-400 font-bold' : 'text-gray-400 font-medium'} text-center w-full uppercase">${cat.name}</span>
+                </div>
+            `).join('');
+            
+            // Products HTML (No Product detail page link, clicking image zooms it)
+            let prodHTML = displayProducts.map(item => `
+                <div class="bg-zinc-950 border border-yellow-600/30 rounded-lg shadow-lg relative flex flex-col justify-between overflow-hidden">
+                    
+                    <!-- Clicking Image opens full screen view -->
+                    <div onclick="openImage('${item.img}')" class="cursor-zoom-in relative">
+                        <img src="${item.img}" class="w-full h-44 object-cover opacity-90 hover:opacity-100 transition duration-300">
+                        <div class="absolute bottom-1 right-1 bg-black/60 rounded p-1 text-white text-xs"><i class="fa-solid fa-expand"></i></div>
+                    </div>
+                    
                     <div class="p-3 flex flex-col flex-grow border-t border-yellow-600/20">
-                        <h3 onclick="viewProduct(${item.id})" class="text-sm font-semibold truncate text-gray-200 cursor-pointer">${item.name}</h3>
+                        <h3 class="text-sm font-semibold truncate text-gray-200">${item.name}</h3>
                         <div class="mt-1 flex items-center gap-2">
                             <span class="font-bold text-yellow-500">₹${item.price}</span>
                             <span class="text-xs line-through text-gray-500">₹${item.mrp}</span>
                         </div>
-                        <span class="text-xs text-yellow-600 font-bold mt-1">${item.discount}</span>
-                        <button onclick="goToCheckout(${item.id})" class="mt-4 block w-full bg-gradient-to-r from-yellow-600 to-yellow-400 hover:from-yellow-500 hover:to-yellow-300 text-black font-extrabold text-center py-2 rounded shadow-[0_0_10px_rgba(212,175,55,0.3)] text-sm transition-all duration-300">
-                            BUY NOW
-                        </button>
+                        <span class="text-[10px] text-yellow-600 font-bold mt-1 bg-yellow-900/20 px-1 w-max rounded">${item.discount}</span>
+                        
+                        <!-- Buttons: Add to Cart & Buy Now side by side -->
+                        <div class="flex gap-2 mt-3">
+                            <button id="addBtn-${item.id}" onclick="addToCart(${item.id})" class="w-1/2 bg-zinc-800 border border-yellow-500 text-yellow-500 font-bold py-1.5 rounded text-xs hover:bg-yellow-900/30 transition shadow-sm">CART</button>
+                            <button onclick="goToCheckout(${item.id})" class="w-1/2 bg-gradient-to-r from-yellow-600 to-yellow-400 text-black font-extrabold py-1.5 rounded shadow-[0_0_10px_rgba(212,175,55,0.4)] text-xs transition-all duration-300">BUY NOW</button>
+                        </div>
                     </div>
                 </div>
             `).join('');
 
+            if(displayProducts.length === 0) {
+                prodHTML = `<div class="col-span-2 text-center text-gray-500 py-10">No products found in this category.</div>`;
+            }
+
             appDiv.innerHTML = `
                 <div class="fade-in">
-                    <div class="w-full h-44 bg-zinc-950 flex flex-col items-center justify-center overflow-hidden relative border-b border-yellow-600/30">
-                        <div class="absolute inset-0 bg-gradient-to-r from-black via-zinc-900 to-black opacity-80 z-0"></div>
-                        <h1 class="relative z-10 text-transparent bg-clip-text bg-gradient-to-r from-yellow-300 to-yellow-600 font-extrabold text-3xl tracking-widest drop-shadow-lg text-center px-2">
-                            PREMIUM COLLECTION
-                        </h1>
-                        <p class="relative z-10 text-yellow-200/70 text-sm mt-2 tracking-widest">UPTO 50% OFF</p>
-                    </div>
-                    <div class="flex overflow-x-auto gap-3 p-4 no-scrollbar bg-zinc-950 border-b border-yellow-600/20">
+                    <!-- Picture Categories -->
+                    <div class="flex category-scroll gap-4 p-4 bg-zinc-950 border-b border-yellow-600/20">
                         ${catHTML}
                     </div>
+                    
+                    <!-- Products -->
                     <div class="p-4">
-                        <h2 class="font-bold text-lg mb-4 text-yellow-500 tracking-wide border-l-4 border-yellow-500 pl-2">TRENDING NOW</h2>
+                        <h2 class="font-bold text-lg mb-4 text-yellow-500 tracking-wide border-l-4 border-yellow-500 pl-2 uppercase">${activeCategory} Collection</h2>
                         <div class="grid grid-cols-2 gap-4">
                             ${prodHTML}
                         </div>
@@ -107,37 +144,26 @@
             window.scrollTo(0,0);
         }
 
-        function viewProduct(id) {
-            const product = products.find(p => p.id === id);
-            appDiv.innerHTML = `
-                <div class="fade-in relative bg-black pb-10">
-                    <button onclick="goHome()" class="absolute top-4 left-4 bg-black/70 border border-yellow-500 text-yellow-500 rounded-full p-2 w-10 h-10 z-10 flex items-center justify-center backdrop-blur-sm">
-                        <i class="fa-solid fa-arrow-left"></i>
-                    </button>
-                    <img src="${product.img}" class="w-full h-[450px] object-cover opacity-90">
-                    
-                    <div class="p-5 bg-zinc-900 min-h-[40vh]">
-                        <h1 class="text-2xl font-bold text-gray-100">${product.name}</h1>
-                        <div class="mt-3 flex items-center gap-3">
-                            <span class="text-3xl font-extrabold text-yellow-500">₹${product.price}</span>
-                            <span class="text-lg line-through text-gray-500">₹${product.mrp}</span>
-                            <span class="text-sm text-black font-bold bg-yellow-500 px-2 py-1 rounded">${product.discount}</span>
-                        </div>
-                        <div class="mt-6 border-t border-yellow-600/30 pt-4">
-                            <h3 class="text-yellow-500 font-semibold mb-2">Product Details</h3>
-                            <p class="text-gray-400 text-sm leading-relaxed">Experience the ultimate comfort and style with this premium quality apparel. Perfect for everyday wear, designed exclusively for your unique fashion sense.</p>
-                        </div>
-                    </div>
-                    
-                    <div class="fixed bottom-0 left-0 w-full bg-zinc-950 border-t border-yellow-600/40 p-3 max-w-md mx-auto flex gap-3 z-50">
-                        <button id="addBtn-${product.id}" onclick="addToCart(${product.id})" class="w-1/2 bg-black border border-yellow-500 text-yellow-500 font-bold py-3 rounded hover:bg-yellow-900/20 transition">ADD TO CART</button>
-                        <button onclick="goToCheckout(${product.id})" class="w-1/2 bg-gradient-to-r from-yellow-600 to-yellow-400 text-black font-extrabold py-3 rounded text-center block shadow-[0_0_15px_rgba(212,175,55,0.4)]">BUY NOW</button>
-                    </div>
-                </div>
-            `;
-            window.scrollTo(0,0);
+        function filterCategory(catName) {
+            activeCategory = catName;
+            goHome();
         }
 
+        // --- FULL SCREEN IMAGE VIEWER ---
+        function openImage(url) {
+            const container = document.getElementById('imageModalContainer');
+            container.innerHTML = `
+                <div class="fixed inset-0 z-[100] bg-black/95 flex items-center justify-center fade-in backdrop-blur-sm">
+                    <button onclick="closeImage()" class="absolute top-6 right-6 text-yellow-500 text-3xl z-[101] bg-black/50 w-10 h-10 rounded-full flex items-center justify-center border border-yellow-500"><i class="fa-solid fa-xmark"></i></button>
+                    <img src="${url}" class="max-w-full max-h-full object-contain p-2">
+                </div>
+            `;
+        }
+        function closeImage() {
+            document.getElementById('imageModalContainer').innerHTML = '';
+        }
+
+        // --- CART & CHECKOUT ---
         function showCart() {
             if (cart.length === 0) {
                 appDiv.innerHTML = `
@@ -158,7 +184,7 @@
                     <div class="flex gap-4 items-center bg-zinc-950 p-3 rounded-lg border border-yellow-600/30 mb-3 shadow-md">
                         <img src="${item.img}" class="w-20 h-20 object-cover rounded border border-gray-700">
                         <div class="flex-grow">
-                            <p class="font-bold text-gray-200">${item.name}</p>
+                            <p class="font-bold text-gray-200 text-sm">${item.name}</p>
                             <p class="text-yellow-500 font-semibold mt-1">₹${item.price}</p>
                         </div>
                         <button onclick="removeFromCart(${index})" class="text-red-500 p-2"><i class="fa-solid fa-trash"></i></button>
@@ -170,13 +196,12 @@
                 <div class="fade-in p-5 pb-24">
                     <div class="flex items-center gap-3 mb-6 border-b border-yellow-600/30 pb-2">
                         <button onclick="goHome()" class="text-yellow-500"><i class="fa-solid fa-arrow-left"></i></button>
-                        <h1 class="text-2xl font-bold text-yellow-500">Your Cart</h1>
+                        <h1 class="text-xl font-bold text-yellow-500">Your Cart</h1>
                     </div>
                     ${cartHTML}
                     
                     <div class="mt-6 p-4 bg-black border border-yellow-600/50 rounded-lg">
                         <div class="flex justify-between text-gray-300 text-sm mb-2"><span>Subtotal</span><span>₹${total}</span></div>
-                        <div class="flex justify-between text-gray-300 text-sm mb-2"><span>Shipping</span><span class="text-green-500">Free</span></div>
                         <div class="flex justify-between font-bold text-yellow-500 text-lg border-t border-gray-800 pt-2 mt-2">
                             <span>Total</span><span>₹${total}</span>
                         </div>
@@ -206,11 +231,10 @@
                 productNames = product.name;
             }
 
-            // Save data for confirmation page
             currentCheckoutItem = { names: productNames, price: total };
 
             let itemsHTML = checkoutItems.map(item => `
-                <div class="flex gap-4 items-center mb-3">
+                <div class="flex gap-4 items-center mb-3 border-b border-gray-800 pb-2 last:border-0 last:pb-0">
                     <img src="${item.img}" class="w-12 h-12 object-cover rounded border border-gray-700">
                     <div>
                         <p class="font-bold text-gray-200 text-sm">${item.name}</p>
@@ -222,8 +246,8 @@
             appDiv.innerHTML = `
                 <div class="fade-in p-5">
                     <div class="flex items-center gap-3 mb-6 border-b border-yellow-600/30 pb-2">
-                        <button onclick="goHome()" class="text-yellow-500"><i class="fa-solid fa-arrow-left"></i></button>
-                        <h1 class="text-2xl font-bold text-yellow-500">Checkout</h1>
+                        <button onclick="goHome()" class="text-yellow-500 text-xl"><i class="fa-solid fa-arrow-left"></i></button>
+                        <h1 class="text-xl font-bold text-yellow-500">Checkout</h1>
                     </div>
                     
                     <div class="bg-zinc-950 p-4 rounded-lg border border-yellow-600/30 mb-6 shadow-md">
@@ -234,29 +258,80 @@
                         </div>
                     </div>
 
-                    <form id="checkoutForm" onsubmit="confirmOrder(event)" class="flex flex-col gap-5">
+                    <form id="checkoutForm" onsubmit="confirmOrder(event)" class="flex flex-col gap-4">
                         <div>
-                            <h2 class="font-bold text-gray-300 mb-3"><i class="fa-solid fa-location-dot text-yellow-500 mr-2"></i>Shipping Details</h2>
-                            <input type="text" id="custName" placeholder="Full Name" required class="bg-zinc-950 border border-gray-700 focus:border-yellow-500 outline-none text-white p-3 rounded w-full mb-3">
-                            <input type="tel" id="custPhone" placeholder="Phone Number" required class="bg-zinc-950 border border-gray-700 focus:border-yellow-500 outline-none text-white p-3 rounded w-full mb-3">
-                            <textarea id="custAddress" placeholder="Complete Address (House No, Street, City)" required class="bg-zinc-950 border border-gray-700 focus:border-yellow-500 outline-none text-white p-3 rounded w-full" rows="3"></textarea>
+                            <h2 class="font-bold text-gray-300 mb-3 text-sm"><i class="fa-solid fa-location-dot text-yellow-500 mr-2"></i>Shipping Details</h2>
+                            <input type="text" id="custName" placeholder="Full Name" required class="bg-zinc-950 border border-gray-700 focus:border-yellow-500 outline-none text-white p-3 rounded w-full mb-3 text-sm">
+                            <input type="tel" id="custPhone" placeholder="Phone Number" required class="bg-zinc-950 border border-gray-700 focus:border-yellow-500 outline-none text-white p-3 rounded w-full mb-3 text-sm">
+                            <textarea id="custAddress" placeholder="Complete Address (House No, Street, City)" required class="bg-zinc-950 border border-gray-700 focus:border-yellow-500 outline-none text-white p-3 rounded w-full text-sm" rows="3"></textarea>
                         </div>
                         
                         <div>
-                            <h2 class="font-bold text-gray-300 mt-2 mb-3"><i class="fa-solid fa-wallet text-yellow-500 mr-2"></i>Payment Method</h2>
-                            <div class="flex items-center gap-3 bg-zinc-950 p-3 rounded border border-yellow-600/50 mb-2">
-                                <input type="radio" id="cod" name="payment" value="COD" checked class="accent-yellow-500 w-4 h-4">
-                                <label for="cod" class="text-gray-200 font-medium">Cash on Delivery (COD)</label>
+                            <h2 class="font-bold text-gray-300 mt-2 mb-3 text-sm"><i class="fa-solid fa-wallet text-yellow-500 mr-2"></i>Payment Method</h2>
+                            
+                            <!-- Prepaid Option -->
+                            <div class="flex items-center gap-3 bg-zinc-950 p-3 rounded border border-gray-700 mb-2">
+                                <input type="radio" id="prepaid" name="payment" value="Prepaid" onchange="renderPaymentUI()" class="accent-yellow-500 w-4 h-4">
+                                <label for="prepaid" class="text-gray-200 font-medium text-sm">Prepaid (Full Payment)</label>
                             </div>
+                            
+                            <!-- COD Option -->
+                            <div class="flex items-center gap-3 bg-zinc-950 p-3 rounded border border-gray-700 mb-2">
+                                <input type="radio" id="cod" name="payment" value="COD" onchange="renderPaymentUI()" class="accent-yellow-500 w-4 h-4" checked>
+                                <label for="cod" class="text-gray-200 font-medium text-sm">Cash on Delivery (C.O.D)</label>
+                            </div>
+
+                            <!-- Dynamic Payment UI Area -->
+                            <div id="paymentUI" class="mt-4 p-4 bg-black border border-yellow-500 rounded-lg shadow-[0_0_10px_rgba(212,175,55,0.2)]"></div>
                         </div>
                         
-                        <button type="submit" class="mt-2 bg-gradient-to-r from-yellow-600 to-yellow-400 text-black font-extrabold py-4 rounded shadow-[0_0_15px_rgba(212,175,55,0.4)] w-full text-lg tracking-wide">
+                        <button type="submit" class="mt-4 bg-gradient-to-r from-yellow-600 to-yellow-400 text-black font-extrabold py-4 rounded shadow-[0_0_15px_rgba(212,175,55,0.4)] w-full text-lg tracking-wide">
                             PLACE ORDER
                         </button>
                     </form>
                 </div>
             `;
             window.scrollTo(0,0);
+            renderPaymentUI(); // Trigger UI generation for default selected option
+        }
+
+        function renderPaymentUI() {
+            const isCOD = document.getElementById('cod').checked;
+            const uiDiv = document.getElementById('paymentUI');
+            const totalAmount = currentCheckoutItem.price;
+            
+            // Generate a dummy QR for demonstration
+            const qrUrl = "https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=upi://pay?pa=dummy@upi&pn=MZFASHION";
+
+            if (!isCOD) {
+                // PREPAID UI
+                uiDiv.innerHTML = `
+                    <p class="text-center text-sm text-gray-300 mb-2">Scan QR to pay Full Amount</p>
+                    <p class="text-center font-bold text-xl text-yellow-500 mb-4">₹${totalAmount}</p>
+                    <div class="flex justify-center mb-4">
+                        <img src="${qrUrl}" class="w-32 h-32 border-4 border-yellow-500 rounded p-1 bg-white shadow-lg">
+                    </div>
+                    <p class="text-xs text-center text-gray-500">After payment, click Place Order.</p>
+                `;
+            } else {
+                // C.O.D UI (30% Token)
+                const tokenAmount = Math.round(totalAmount * 0.30);
+                uiDiv.innerHTML = `
+                    <div class="bg-yellow-900/30 border border-yellow-600/50 p-2 rounded mb-3 text-center">
+                        <p class="text-xs text-yellow-200">For C.O.D, 30% advance token is required.</p>
+                        <p class="font-bold text-lg text-yellow-500 mt-1">Token Amount: ₹${tokenAmount}</p>
+                    </div>
+                    <div class="flex justify-center mb-4">
+                        <img src="${qrUrl}" class="w-32 h-32 border-4 border-yellow-500 rounded p-1 bg-white shadow-lg">
+                    </div>
+                    <p class="text-xs text-center text-gray-400 mb-3">Scan & Pay Token, then send screenshot below.</p>
+                    
+                    <!-- WhatsApp Glowing Button -->
+                    <a href="https://wa.me/919982437489" target="_blank" class="flex items-center justify-center gap-2 bg-green-500 hover:bg-green-600 text-white font-bold py-3 px-4 rounded-lg shadow-[0_0_15px_rgba(34,197,94,0.6)] animate-pulse transition">
+                        <i class="fa-brands fa-whatsapp text-2xl"></i> SEND SCREENSHOT
+                    </a>
+                `;
+            }
         }
 
         function confirmOrder(event) {
@@ -265,126 +340,64 @@
             const name = document.getElementById('custName').value;
             const phone = document.getElementById('custPhone').value;
             const address = document.getElementById('custAddress').value;
+            const paymentType = document.getElementById('cod').checked ? "COD (30% Token)" : "Prepaid";
             
-            // Save order for admin panel
             const newOrder = {
                 id: Date.now(),
                 date: new Date().toLocaleString(),
                 name: name,
                 phone: phone,
                 address: address,
-                payment: "COD",
+                payment: paymentType,
                 product_name: currentCheckoutItem.names,
                 price: currentCheckoutItem.price
             };
             
             orders.push(newOrder);
-            localStorage.setItem('uf_orders', JSON.stringify(orders)); // Save to local storage
+            localStorage.setItem('mz_orders', JSON.stringify(orders));
             
-            // Clear cart
             cart = [];
             updateCartBadge();
 
             appDiv.innerHTML = `
                 <div class="fade-in flex flex-col items-center justify-center min-h-[70vh] p-4 text-center">
-                    <div class="w-24 h-24 bg-zinc-950 border-2 border-yellow-500 text-yellow-500 rounded-full flex items-center justify-center text-5xl mb-6 shadow-[0_0_20px_rgba(212,175,55,0.3)]">
+                    <div class="w-20 h-20 bg-zinc-950 border-2 border-yellow-500 text-yellow-500 rounded-full flex items-center justify-center text-4xl mb-6 shadow-[0_0_20px_rgba(212,175,55,0.3)]">
                         <i class="fa-solid fa-check"></i>
                     </div>
-                    <h1 class="text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-yellow-300 to-yellow-600">Order Confirmed!</h1>
-                    <p class="text-gray-400 mt-4 text-lg">Thank you, <span class="text-white font-semibold">${name}</span>.</p>
-                    <p class="text-gray-400 mt-1">Your order for <b class="text-yellow-500">${currentCheckoutItem.names}</b> is being processed.</p>
+                    <h1 class="text-2xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-yellow-300 to-yellow-600">Order Placed!</h1>
+                    <p class="text-gray-400 mt-4 text-sm">Thank you, <span class="text-white font-semibold">${name}</span>.</p>
+                    <p class="text-gray-400 mt-1 text-sm">Order for <b class="text-yellow-500">${currentCheckoutItem.names}</b> is processing.</p>
                     
-                    <div class="mt-6 bg-zinc-950 border border-yellow-600/30 p-4 rounded-lg w-full max-w-xs inline-block">
-                        <p class="text-sm text-gray-400">Amount to pay on delivery</p>
-                        <p class="text-2xl font-bold text-yellow-500">₹${currentCheckoutItem.price}</p>
-                    </div>
-                    
-                    <button onclick="goHome()" class="mt-8 border border-yellow-500 text-yellow-500 hover:bg-yellow-500 hover:text-black px-8 py-3 rounded font-bold shadow-md transition-all duration-300">Continue Shopping</button>
+                    <button onclick="goHome()" class="mt-10 border border-yellow-500 text-yellow-500 hover:bg-yellow-500 hover:text-black px-8 py-3 rounded font-bold shadow-md transition-all duration-300">Continue Shopping</button>
                 </div>
             `;
             window.scrollTo(0,0);
         }
-
-        function renderAdmin() {
-            let ordersHTML = "";
-            
-            if (orders.length > 0) {
-                // Reverse to show newest first
-                [...orders].reverse().forEach(order => {
-                    ordersHTML += `
-                        <div class="border border-yellow-600/30 rounded-lg p-4 bg-zinc-950 shadow-[0_0_10px_rgba(0,0,0,0.5)]">
-                            <div class="flex justify-between items-start mb-2">
-                                <p class="font-bold text-yellow-500 text-lg">${order.product_name}</p>
-                                <span class="bg-green-900/50 text-green-400 text-xs px-2 py-1 rounded border border-green-700">New</span>
-                            </div>
-                            <div class="space-y-1 mt-3">
-                                <p class="text-xs text-gray-500 border-b border-gray-800 pb-1 mb-2">${order.date}</p>
-                                <p class="text-sm text-gray-300"><i class="fa-solid fa-user w-5 text-gray-500"></i> ${order.name} (${order.phone})</p>
-                                <p class="text-sm text-gray-300"><i class="fa-solid fa-location-dot w-5 text-gray-500"></i> ${order.address}</p>
-                                <p class="text-sm text-gray-300"><i class="fa-solid fa-money-bill w-5 text-gray-500"></i> ${order.payment} - <span class="font-bold text-white">₹${order.price}</span></p>
-                            </div>
-                        </div>
-                    `;
-                });
-            } else {
-                ordersHTML = `
-                    <div class="bg-zinc-950 border border-dashed border-gray-700 p-8 text-center rounded-lg mt-10">
-                        <i class="fa-solid fa-box-open text-4xl text-gray-600 mb-3"></i>
-                        <p class="text-gray-500 italic">No orders yet.</p>
-                    </div>
-                `;
-            }
-
-            appDiv.innerHTML = `
-                <div class="fade-in p-5">
-                    <h1 class="text-3xl font-bold mb-6 text-yellow-500 border-b border-yellow-600/30 pb-3">
-                        <i class="fa-solid fa-crown mr-2"></i> Admin Dashboard
-                    </h1>
-                    
-                    <div class="flex justify-between items-center mt-4 mb-4">
-                        <h2 class="text-xl font-semibold text-gray-200">Total Orders: ${orders.length}</h2>
-                        <button onclick="clearOrders()" class="text-sm text-red-500 border border-red-900 px-2 py-1 rounded">Clear All</button>
-                    </div>
-                    
-                    <div class="flex flex-col gap-4">
-                        ${ordersHTML}
-                    </div>
-                    
-                    <div class="mt-10 text-center">
-                        <button onclick="goHome()" class="text-yellow-500 border-b border-yellow-500 pb-1 hover:text-yellow-400"><i class="fa-solid fa-arrow-left mr-2"></i> Back to Store</button>
-                    </div>
-                </div>
-            `;
-            window.scrollTo(0,0);
-        }
-
-        // --- HELPER FUNCTIONS ---
 
         function addToCart(id) {
             const product = products.find(p => p.id === id);
             cart.push(product);
             updateCartBadge();
             
-            // Change button text temporarily to show success
             const btn = document.getElementById(`addBtn-${id}`);
             if(btn) {
                 const originalText = btn.innerHTML;
-                btn.innerHTML = '<i class="fa-solid fa-check"></i> ADDED';
-                btn.classList.add('bg-green-900', 'text-white', 'border-green-500');
-                btn.classList.remove('bg-black', 'text-yellow-500', 'border-yellow-500');
+                btn.innerHTML = '<i class="fa-solid fa-check"></i>';
+                btn.classList.add('bg-green-600', 'text-white', 'border-green-500');
+                btn.classList.remove('bg-zinc-800', 'text-yellow-500', 'border-yellow-500');
                 
                 setTimeout(() => {
                     btn.innerHTML = originalText;
-                    btn.classList.remove('bg-green-900', 'text-white', 'border-green-500');
-                    btn.classList.add('bg-black', 'text-yellow-500', 'border-yellow-500');
-                }, 1500);
+                    btn.classList.remove('bg-green-600', 'text-white', 'border-green-500');
+                    btn.classList.add('bg-zinc-800', 'text-yellow-500', 'border-yellow-500');
+                }, 1000);
             }
         }
 
         function removeFromCart(index) {
             cart.splice(index, 1);
             updateCartBadge();
-            showCart(); // Refresh cart view
+            showCart();
         }
 
         function updateCartBadge() {
@@ -397,35 +410,65 @@
             }
         }
 
-        function toggleLike(element) {
-            element.classList.toggle('text-red-500');
-            element.classList.toggle('text-gray-500');
+        function renderAdmin() {
+            let ordersHTML = "";
+            if (orders.length > 0) {
+                [...orders].reverse().forEach(order => {
+                    ordersHTML += `
+                        <div class="border border-yellow-600/30 rounded-lg p-4 bg-zinc-950 shadow-[0_0_10px_rgba(0,0,0,0.5)]">
+                            <div class="flex justify-between items-start mb-2">
+                                <p class="font-bold text-yellow-500 text-sm">${order.product_name}</p>
+                            </div>
+                            <div class="space-y-1 mt-3">
+                                <p class="text-[10px] text-gray-500 border-b border-gray-800 pb-1 mb-2">${order.date}</p>
+                                <p class="text-xs text-gray-300"><i class="fa-solid fa-user w-4 text-gray-500"></i> ${order.name} (${order.phone})</p>
+                                <p class="text-xs text-gray-300"><i class="fa-solid fa-location-dot w-4 text-gray-500"></i> ${order.address}</p>
+                                <p class="text-xs text-gray-300"><i class="fa-solid fa-money-bill w-4 text-gray-500"></i> ${order.payment} - <span class="font-bold text-white">₹${order.price}</span></p>
+                            </div>
+                        </div>
+                    `;
+                });
+            } else {
+                ordersHTML = `<div class="bg-zinc-950 border border-dashed border-gray-700 p-8 text-center rounded-lg mt-5"><p class="text-gray-500 italic">No orders yet.</p></div>`;
+            }
+
+            appDiv.innerHTML = `
+                <div class="fade-in p-5">
+                    <h1 class="text-2xl font-bold mb-4 text-yellow-500 border-b border-yellow-600/30 pb-3">Admin Panel</h1>
+                    <div class="flex justify-between items-center mb-4">
+                        <h2 class="text-sm font-semibold text-gray-200">Total Orders: ${orders.length}</h2>
+                        <button onclick="clearOrders()" class="text-[10px] text-red-500 border border-red-900 px-2 py-1 rounded">Clear All</button>
+                    </div>
+                    <div class="flex flex-col gap-3">${ordersHTML}</div>
+                    <div class="mt-8 text-center">
+                        <button onclick="goHome()" class="text-yellow-500 text-sm"><i class="fa-solid fa-arrow-left mr-1"></i> Back to Store</button>
+                    </div>
+                </div>
+            `;
+            window.scrollTo(0,0);
         }
 
         function clearOrders() {
-            if(confirm("Are you sure you want to delete all orders?")) {
+            if(confirm("Delete all orders?")) {
                 orders = [];
-                localStorage.removeItem('uf_orders');
+                localStorage.removeItem('mz_orders');
                 renderAdmin();
             }
         }
 
-        // --- SECRET ADMIN LOGIC ---
+        // --- SECRET ADMIN PANEL LOGIC ---
         let clicks = 0;
         document.getElementById('secretLogo').addEventListener('click', () => {
             clicks++;
             if(clicks >= 5) {
-                clicks = 0; // reset
+                clicks = 0;
                 renderAdmin();
             }
-            // Reset click count if they click slowly
             setTimeout(() => { clicks = 0; }, 2000);
         });
 
-        // --- INITIALIZATION ---
-        // Start the app by showing the home page
+        // Initialize App
         goHome();
-
     </script>
 </body>
 </html>
