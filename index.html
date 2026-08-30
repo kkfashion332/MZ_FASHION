@@ -1,339 +1,431 @@
-<!DOCTYPE html>
+ <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Unique Fashion Store</title>
-  
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&display=swap" rel="stylesheet">
-
-  <style>
-    /* -------------------------------------- */
-    /* CSS VARIABLES & RESET (Added for support) */
-    /* -------------------------------------- */
-    :root {
-      --ink: #211e2f;
-      --muted: #6f6b80;
-      --line: #e5e2de;
-      --orange: #f26022;
-      --orange-dark: #d9531a;
-      --white: #ffffff;
-      --paper: #ffffff;
-      --night: #1a1825;
-      --butter: #f5d47a;
-      --green: #2fa866;
-      --violet: #7159cd;
-      --shadow-small: 0 4px 12px rgba(0,0,0,0.1);
-      --radius: 12px;
-    }
-    
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
-
-    body {
-      font-family: system-ui, -apple-system, sans-serif;
-      color: var(--ink);
-      background: #fdfcfb;
-    }
-
-    button {
-      cursor: pointer;
-      font-family: inherit;
-    }
-
-    /* -------------------------------------- */
-    /* YOUR CUSTOM CSS */
-    /* -------------------------------------- */
-    .product-body { padding: 15px; }
-    .product-category { color: var(--muted); font-size: 10px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; }
-    .product-name { min-height: 42px; margin: 6px 0 8px; font-family: "Bricolage Grotesque", sans-serif; font-size: 19px; font-weight: 500; letter-spacing: -.04em; line-height: 1.05; }
-    .product-price { display: flex; align-items: baseline; gap: 7px; margin-bottom: 13px; }
-    .product-price strong { font-size: 17px; }
-    .product-price del { color: #aaa2a5; font-size: 12px; }
-    .product-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-    .small-button { min-height: 36px; padding: 0 7px; border: 1px solid var(--line); border-radius: 9px; color: var(--ink); background: transparent; font-size: 11px; font-weight: 700; transition: .2s ease; }
-    .small-button:hover { border-color: var(--orange); color: var(--orange); }
-    .small-button.buy { border-color: var(--orange); color: var(--white); background: var(--orange); }
-    .small-button.buy:hover { background: var(--orange-dark); }
-    .empty-state { grid-column: 1 / -1; padding: 60px 20px; border: 1px dashed var(--line); border-radius: var(--radius); color: var(--muted); text-align: center; }
-    .empty-state strong { display: block; margin-bottom: 7px; color: var(--ink); font-family: "Bricolage Grotesque", sans-serif; font-size: 25px; }
-
-    .orders-section { padding-top: 78px; padding-bottom: 90px; }
-    .orders-section .section-heading { margin-bottom: 18px; }
-    .order-strip { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
-    .order-stat { padding: 18px; border-radius: 14px; background: #f6f1eb; }
-    .order-stat strong { display: block; font-family: "Bricolage Grotesque", sans-serif; font-size: 27px; }
-    .order-stat span { color: var(--muted); font-size: 12px; }
-
-    footer { color: rgba(255,255,255,.82); background: var(--night); }
-    .footer-inner { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; padding-top: 55px; padding-bottom: 35px; max-width: 1320px; margin: 0 auto; padding-inline: max(5vw, 22px); }
-    .footer-brand { display: flex; align-items: center; gap: 12px; }
-    .footer-brand .brand-copy strong { color: var(--white); }
-    .footer-brand .brand-copy small { color: rgba(255,255,255,.5); }
-    .footer-copy { max-width: 355px; margin-top: 18px; color: rgba(255,255,255,.58); font-size: 13px; line-height: 1.7; }
-    .footer-contact { justify-self: end; align-self: center; text-align: right; }
-    .footer-contact small { display: block; margin-bottom: 10px; color: var(--butter); font-size: 10px; font-weight: 700; letter-spacing: .16em; text-transform: uppercase; }
-    .footer-contact strong { display: block; color: var(--white); font-size: 18px; }
-    .footer-contact a { display: inline-block; margin-top: 8px; color: var(--orange); font-weight: 700; text-decoration: none; }
-    .footer-bottom { max-width: 1320px; margin: 0 auto; padding: 17px max(5vw, 22px); border-top: 1px solid rgba(255,255,255,.12); color: rgba(255,255,255,.4); font-size: 10px; }
-
-    .overlay { position: fixed; z-index: 40; inset: 0; display: grid; place-items: center; padding: 20px; background: rgba(33,30,47,.42); backdrop-filter: blur(5px); animation: fade-in .2s ease; }
-    .modal, .drawer { position: relative; width: min(100%, 560px); max-height: min(720px, calc(100vh - 40px)); overflow: auto; padding: 28px; border-radius: 22px; background: var(--paper); box-shadow: 0 25px 90px rgba(33,30,47,.26); animation: rise-in .25s ease; }
-    .drawer { align-self: stretch; justify-self: end; width: min(100%, 480px); max-height: none; border-radius: 20px 0 0 20px; }
-    .close-button { position: absolute; top: 16px; right: 16px; display: grid; place-items: center; width: 34px; height: 34px; border: 1px solid var(--line); border-radius: 50%; color: var(--muted); background: var(--white); }
-    .modal h3, .drawer h3 { margin: 0 35px 6px 0; font-family: "Bricolage Grotesque", sans-serif; font-size: 30px; font-weight: 500; letter-spacing: -.06em; }
-    .modal-intro, .drawer-intro { margin: 0 0 22px; color: var(--muted); font-size: 13px; line-height: 1.55; }
-    .checkout-product { display: flex; align-items: center; gap: 12px; margin-bottom: 20px; padding: 10px; border-radius: 12px; background: #f5efe8; }
-    .checkout-product img { width: 62px; height: 62px; border-radius: 9px; object-fit: cover; }
-    .checkout-product strong { display: block; }
-    .checkout-product span { color: var(--muted); font-size: 12px; }
-    .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 13px; }
-    .field { display: flex; flex-direction: column; gap: 6px; }
-    .field.full { grid-column: 1 / -1; }
-    .field label { color: var(--muted); font-size: 11px; font-weight: 700; }
-    .field input, .field select, .field textarea { width: 100%; padding: 11px 12px; border: 1px solid var(--line); border-radius: 9px; outline: none; color: var(--ink); background: var(--white); }
-    .field textarea { min-height: 80px; resize: vertical; }
-    .field input:focus, .field select:focus, .field textarea:focus { border-color: var(--violet); box-shadow: 0 0 0 3px rgba(113,89,205,.1); }
-    .form-submit { width: 100%; margin-top: 18px; border: 0; }
-    .success-icon { display: grid; place-items: center; width: 58px; height: 58px; margin: 4px 0 18px; border-radius: 50%; color: var(--white); background: var(--green); }
-    .modal-center { text-align: center; }
-    .modal-center h3 { margin-right: 0; }
-    .modal-center .primary-button { margin-top: 8px; }
-    .list-item { display: flex; gap: 12px; padding: 15px 0; border-bottom: 1px solid var(--line); }
-    .list-item img { width: 65px; height: 65px; border-radius: 10px; object-fit: cover; }
-    .list-item-main { flex: 1; min-width: 0; }
-    .list-item-main strong { display: block; }
-    .list-item-main span { display: block; margin-top: 4px; color: var(--muted); font-size: 12px; }
-    .order-status { display: inline-block; margin-top: 7px; padding: 4px 7px; border-radius: 999px; color: var(--green); background: #e9f6ef; font-size: 10px; font-weight: 700; }
-
-    .admin-page { min-height: 100vh; background: #f5f1ec; }
-    .admin-header { display: flex; align-items: center; justify-content: space-between; gap: 20px; padding: 22px max(5vw, 22px); color: var(--white); background: var(--night); }
-    .admin-header h1 { margin: 3px 0 0; font-family: "Bricolage Grotesque", sans-serif; font-size: 31px; font-weight: 500; letter-spacing: -.06em; }
-    .admin-kicker { color: var(--butter); font-size: 10px; font-weight: 700; letter-spacing: .16em; text-transform: uppercase; }
-    .admin-main { display: grid; grid-template-columns: 360px 1fr; gap: 22px; max-width: 1320px; margin: 0 auto; padding: 30px max(5vw, 22px) 70px; }
-    .admin-panel { padding: 22px; border: 1px solid var(--line); border-radius: 18px; background: var(--paper); }
-    .admin-panel h2 { margin: 0 0 5px; font-family: "Bricolage Grotesque", sans-serif; font-size: 25px; font-weight: 500; letter-spacing: -.06em; }
-    .admin-panel > p { margin: 0 0 20px; color: var(--muted); font-size: 12px; line-height: 1.5; }
-    .admin-products { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 13px; }
-    .admin-product { display: flex; flex-direction: column; gap: 8px; padding: 10px; border: 1px solid var(--line); border-radius: 13px; background: var(--white); }
-    .admin-product img { width: 100%; aspect-ratio: 1; border-radius: 9px; object-fit: cover; }
-    .admin-product strong { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-    .admin-product small { color: var(--muted); }
-    .admin-product-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 5px; }
-    .admin-list { max-height: 240px; overflow: auto; margin-top: 25px; }
-    .admin-list h3 { margin: 0 0 8px; font-size: 13px; }
-    .mini-row { display: flex; justify-content: space-between; gap: 12px; padding: 9px 0; border-bottom: 1px solid var(--line); font-size: 12px; }
-    .mini-row span { color: var(--muted); }
-    .admin-form-actions { display: flex; gap: 8px; margin-top: 14px; }
-    .admin-form-actions button { flex: 1; padding: 10px; border-radius: 8px; border: 1px solid var(--line); background: white; }
-    .admin-form-actions button.primary-button { background: var(--orange); color: white; border: none; }
-
-    #toast-region { position: fixed; z-index: 80; right: 22px; bottom: 22px; display: grid; gap: 9px; }
-    .toast { padding: 13px 16px; border: 1px solid rgba(255,255,255,.18); border-radius: 12px; color: var(--white); background: var(--night); box-shadow: var(--shadow-small); font-size: 12px; animation: rise-in .25s ease; }
-    
-    @keyframes fade-in { from { opacity: 0; } to { opacity: 1; } }
-    @keyframes rise-in { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
-
-    @media (max-width: 980px) {
-      .site-header { grid-template-columns: 1fr auto; gap: 10px 16px; }
-      .search-box { grid-column: 1 / -1; grid-row: 2; }
-      .product-grid { grid-template-columns: repeat(3, 1fr); }
-      .hero { gap: 20px; }
-      .admin-main { grid-template-columns: 1fr; }
-    }
-    @media (max-width: 700px) {
-      .site-header { min-height: 126px; padding-top: 9px; padding-bottom: 12px; }
-      .brand-copy strong { font-size: 16px; }
-      .brand-logo { width: 38px; height: 38px; }
-      .header-actions .text-action { display: none; }
-      .hero { display: flex; flex-direction: column; align-items: stretch; padding-top: 48px; }
-      .hero h1 { font-size: clamp(47px, 14vw, 66px); }
-      .hero-art { min-height: 310px; margin-top: 12px; }
-      .hero-card { width: 90%; }
-      .category-row { padding-bottom: 45px; overflow-x: auto; flex-wrap: nowrap; }
-      .category-button { flex: none; }
-      .section-heading { align-items: flex-start; flex-direction: column; gap: 12px; }
-      .product-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; }
-      .product-body { padding: 11px; }
-      .product-name { min-height: 37px; font-size: 16px; }
-      .product-price { margin-bottom: 9px; }
-      .small-button { font-size: 10px; }
-      .order-strip { grid-template-columns: 1fr; }
-      .footer-inner { grid-template-columns: 1fr; gap: 28px; }
-      .footer-contact { justify-self: start; text-align: left; }
-      .modal, .drawer { padding: 22px; }
-      .form-grid { grid-template-columns: 1fr; }
-      .field.full { grid-column: auto; }
-      .admin-header { align-items: flex-start; flex-direction: column; }
-      .admin-products { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-    }
-    @media (max-width: 390px) {
-      .product-grid { grid-template-columns: 1fr; }
-      .product-image-wrap { aspect-ratio: 1.2; }
-      .hero-card { width: 86%; }
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Unique Fashion</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .text-gold { color: #D4AF37; }
+        .bg-gold { background-color: #D4AF37; }
+        .border-gold { border-color: #D4AF37; }
+        
+        /* Smooth fade-in animation for page transitions */
+        .fade-in {
+            animation: fadeIn 0.3s ease-in-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+    </style>
 </head>
-<body>
+<body class="bg-black text-gray-200">
 
-  <div id="app"></div>
+    <nav class="bg-zinc-950 p-4 flex justify-between items-center sticky top-0 z-50 border-b border-yellow-600/40 shadow-[0_4px_15px_rgba(212,175,55,0.1)]">
+        <div class="flex items-center gap-3">
+            <img id="secretLogo" src="240370.jpg" onerror="this.src='https://ui-avatars.com/api/?name=UF&background=000&color=D4AF37'" alt="Unique Fashion" class="w-12 h-12 rounded-full cursor-pointer border-2 border-yellow-500 object-cover shadow-[0_0_10px_rgba(212,175,55,0.4)]">
+            <span onclick="goHome()" class="cursor-pointer font-extrabold text-xl tracking-wider text-transparent bg-clip-text bg-gradient-to-r from-yellow-200 to-yellow-600">
+                UNIQUE FASHION
+            </span>
+        </div>
+        <div class="relative cursor-pointer" onclick="showCart()">
+            <i class="fa-solid fa-cart-shopping text-xl text-yellow-500"></i>
+            <span id="cartCount" class="absolute -top-2 -right-2 bg-red-600 text-white text-xs font-bold px-1.5 py-0.5 rounded-full hidden">0</span>
+        </div>
+    </nav>
 
-  <div id="toast-region"></div>
+    <div id="app" class="max-w-md mx-auto bg-zinc-900 min-h-screen shadow-2xl pb-20">
+        </div>
 
-  <script>
-    // --------------------------------------
-    // YOUR JAVASCRIPT CODE
-    // --------------------------------------
-    
-    // Some basic dummy state/functions to prevent JS errors based on your snippet
-    let state = { adminEditing: null, products: [], liked: [], orders: [], cart: [], modal: null, category: "all", search: "" };
-    let logoTaps = [];
-    const categoryLabels = { all: "All Products" };
-    
-    function esc(str) { return str ? str.replace(/</g, "&lt;").replace(/>/g, "&gt;") : ""; }
-    function money(amount) { return "₹" + amount.toLocaleString("en-IN"); }
-    function icon(name, size) { return `<span style="font-size:${size}px">Icon</span>`; } // Dummy icon function
-    function productById(id) { return state.products.find(p => p.id === id); }
-    function isLiked(id) { return state.liked.includes(id); }
-    function save() { console.log("State saved"); }
-    function updateCounts() { console.log("Counts updated"); }
-    function showToast(msg) { 
-      const toastRegion = document.getElementById("toast-region");
-      toastRegion.innerHTML = `<div class="toast">${msg}</div>`;
-      setTimeout(() => { toastRegion.innerHTML = ""; }, 3000);
-    }
-    function categoryName(key) { return categoryLabels[key] || "Category"; }
-    
-    // Main render function (assuming your script injects into #app)
-    function render() {
-      const app = document.getElementById("app");
-      if (window.location.hash === "#admin") {
-        app.innerHTML = renderAdmin();
-      } else {
-        // Dummy Front-end rendering to complement your snippet logic
-        app.innerHTML = `
-          <div style="padding: 20px;">
-            <h1 data-logo-tap="true" style="cursor:pointer; display:inline-block;">Unique Fashion Store</h1>
-            <p>(Tap logo 5 times to enter Admin Panel)</p>
-          </div>
-        `;
-      }
-    }
+    <script>
+        // --- DATA ---
+        const products = [
+            { id: 1, name: "Premium Black T-Shirt", price: 499, mrp: 999, discount: "50% OFF", img: "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=400&q=80" },
+            { id: 2, name: "Funky Denim Jacket", price: 1299, mrp: 2599, discount: "50% OFF", img: "https://images.unsplash.com/photo-1576995853123-5a10305d93c0?w=400&q=80" },
+            { id: 3, name: "Aesthetic Sneakers", price: 899, mrp: 1499, discount: "40% OFF", img: "https://images.unsplash.com/photo-1525966222134-fcfa99b8ae77?w=400&q=80" },
+            { id: 4, name: "Casual Chinos", price: 799, mrp: 1299, discount: "38% OFF", img: "https://images.unsplash.com/photo-1473966968600-fa801b869a1a?w=400&q=80" }
+        ];
+        
+        const categories = ["T-Shirts", "Shirts", "Jeans", "Shoes", "Accessories"];
+        let cart = [];
+        // LocalStorage se purane orders nikal lo taaki refresh hone par delete na ho
+        let orders = JSON.parse(localStorage.getItem('uf_orders')) || [];
 
-    // Your provided admin rendering function
-    function renderAdmin() {
-      const editing = state.adminEditing ? productById(state.adminEditing) : null;
-      return `<div class="admin-page">
-        <header class="admin-header"><div><div class="admin-kicker">Unique Fashion / Store desk</div><h1>Manage the good stuff.</h1></div><button class="secondary-button" data-action="go-home" data-testid="button-admin-back">${icon("arrow", 16)} Back to store</button></header>
-        <main class="admin-main">
-          <section class="admin-panel"><h2>${editing ? "Edit product" : "Add a product"}</h2><p>Add a product with its image URL, category, price and live status.</p><form data-form="product"><div class="form-grid"><div class="field full"><label for="admin-name">Product name</label><input id="admin-name" name="name" required value="${esc(editing?.name || "")}" placeholder="e.g. Kota Street Shirt" data-testid="input-admin-name"></div><div class="field full"><label for="admin-image">Image URL</label><input id="admin-image" name="image" type="url" required value="${esc(editing?.image || "")}" placeholder="https://..." data-testid="input-admin-image"></div><div class="field"><label for="admin-category">Category</label><select id="admin-category" name="category" data-testid="select-admin-category">${Object.entries(categoryLabels).filter(([key]) => key !== "all").map(([key, label]) => `<option value="${key}" ${editing?.category === key ? "selected" : ""}>${label}</option>`).join("")}</select></div><div class="field"><label for="admin-price">Price (₹)</label><input id="admin-price" name="price" type="number" min="1" required value="${editing?.price || ""}" data-testid="input-admin-price"></div><div class="field"><label for="admin-mrp">MRP (₹)</label><input id="admin-mrp" name="mrp" type="number" min="1" required value="${editing?.mrp || ""}" data-testid="input-admin-mrp"></div><div class="field"><label for="admin-discount">Discount (%)</label><input id="admin-discount" name="discount" type="number" min="0" max="90" required value="${editing?.discount || 0}" data-testid="input-admin-discount"></div><div class="field"><label for="admin-stock">Stock</label><input id="admin-stock" name="stock" type="number" min="0" required value="${editing?.stock ?? 1}" data-testid="input-admin-stock"></div><div class="field"><label for="admin-live">Live option</label><select id="admin-live" name="live" data-testid="select-admin-live"><option value="true" ${editing?.live ? "selected" : ""}>Live / ready</option><option value="false" ${editing && !editing.live ? "selected" : ""}>Offline</option></select></div><div class="field full"><label for="admin-description">Description</label><textarea id="admin-description" name="description" placeholder="Short product description" data-testid="input-admin-description">${esc(editing?.description || "")}</textarea></div></div><div class="admin-form-actions"><button class="primary-button" type="submit" data-testid="button-save-product">${editing ? "Save changes" : "Add product"} ${icon("check", 15)}</button>${editing ? `<button class="secondary-button" type="button" data-action="cancel-edit" data-testid="button-cancel-edit">Cancel</button>` : ""}</div></form><div class="admin-list"><h3>At a glance</h3><div class="mini-row"><span>Total products</span><strong>${state.products.length}</strong></div><div class="mini-row"><span>Liked products</span><strong>${state.liked.length}</strong></div><div class="mini-row"><span>Orders</span><strong>${state.orders.length}</strong></div></div></section>
-          <section class="admin-panel"><h2>Your catalog</h2><p>Edit the details your customers see on the storefront.</p><div class="admin-products">${state.products.map((product) => `<article class="admin-product" data-testid="admin-product-${esc(product.id)}"><img src="${esc(product.image)}" alt="${esc(product.name)}"><strong>${esc(product.name)}</strong><small>${categoryName(product.category)} · ${money(product.price)}</small><div class="admin-product-actions"><button class="small-button" data-action="edit-product" data-id="${esc(product.id)}" data-testid="button-edit-product-${esc(product.id)}">${icon("edit", 13)} Edit</button><button class="small-button" data-action="delete-product" data-id="${esc(product.id)}" data-testid="button-delete-product-${esc(product.id)}">${icon("trash", 13)} Delete</button></div></article>`).join("")}</div><div class="admin-list"><h3>Recent orders</h3>${state.orders.length ? [...state.orders].reverse().slice(0, 8).map((order) => `<div class="mini-row"><span>${esc(order.productName)} · ${esc(order.customerName)}</span><strong>${money(order.total)}</strong></div>`).join("") : `<div class="mini-row"><span>No orders yet</span><strong>—</strong></div>`}</div></section>
-        </main>
-      </div>`;
-    }
+        const appDiv = document.getElementById('app');
+        let currentCheckoutItem = null;
 
-    function closeModal() { state.modal = null; render(); }
-    function scrollToCollection() { document.querySelector("#collection")?.scrollIntoView({ behavior: "smooth" }); }
+        // --- VIEWS RENDERING ---
 
-    // Your Event Listeners
-    document.addEventListener("click", (event) => {
-      const target = event.target.closest("[data-action], [data-logo-tap]");
-      if (!target) return;
-      if (target.hasAttribute("data-logo-tap")) {
-        event.preventDefault();
-        const now = Date.now();
-        logoTaps = [...logoTaps.filter((tap) => now - tap < 2200), now];
-        if (logoTaps.length >= 5) {
-          logoTaps = [];
-          window.location.hash = "admin";
-          showToast("Admin panel unlocked");
+        function goHome() {
+            let catHTML = categories.map(cat => `<div class="flex-shrink-0 bg-black text-yellow-500 px-5 py-2 rounded-full text-sm font-semibold border border-yellow-600/50 shadow-[0_0_5px_rgba(212,175,55,0.2)]">${cat}</div>`).join('');
+            
+            let prodHTML = products.map(item => `
+                <div class="bg-zinc-950 border border-yellow-600/30 rounded-lg shadow-lg relative flex flex-col justify-between overflow-hidden">
+                    <button onclick="toggleLike(this)" class="absolute top-2 right-2 text-gray-500 z-10 text-xl bg-black/50 rounded-full w-8 h-8 flex items-center justify-center backdrop-blur-sm">
+                        <i class="fa-solid fa-heart"></i>
+                    </button>
+                    <div onclick="viewProduct(${item.id})" class="cursor-pointer">
+                        <img src="${item.img}" class="w-full h-48 object-cover opacity-90 hover:opacity-100 transition duration-300">
+                    </div>
+                    <div class="p-3 flex flex-col flex-grow border-t border-yellow-600/20">
+                        <h3 onclick="viewProduct(${item.id})" class="text-sm font-semibold truncate text-gray-200 cursor-pointer">${item.name}</h3>
+                        <div class="mt-1 flex items-center gap-2">
+                            <span class="font-bold text-yellow-500">₹${item.price}</span>
+                            <span class="text-xs line-through text-gray-500">₹${item.mrp}</span>
+                        </div>
+                        <span class="text-xs text-yellow-600 font-bold mt-1">${item.discount}</span>
+                        <button onclick="goToCheckout(${item.id})" class="mt-4 block w-full bg-gradient-to-r from-yellow-600 to-yellow-400 hover:from-yellow-500 hover:to-yellow-300 text-black font-extrabold text-center py-2 rounded shadow-[0_0_10px_rgba(212,175,55,0.3)] text-sm transition-all duration-300">
+                            BUY NOW
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+
+            appDiv.innerHTML = `
+                <div class="fade-in">
+                    <div class="w-full h-44 bg-zinc-950 flex flex-col items-center justify-center overflow-hidden relative border-b border-yellow-600/30">
+                        <div class="absolute inset-0 bg-gradient-to-r from-black via-zinc-900 to-black opacity-80 z-0"></div>
+                        <h1 class="relative z-10 text-transparent bg-clip-text bg-gradient-to-r from-yellow-300 to-yellow-600 font-extrabold text-3xl tracking-widest drop-shadow-lg text-center px-2">
+                            PREMIUM COLLECTION
+                        </h1>
+                        <p class="relative z-10 text-yellow-200/70 text-sm mt-2 tracking-widest">UPTO 50% OFF</p>
+                    </div>
+                    <div class="flex overflow-x-auto gap-3 p-4 no-scrollbar bg-zinc-950 border-b border-yellow-600/20">
+                        ${catHTML}
+                    </div>
+                    <div class="p-4">
+                        <h2 class="font-bold text-lg mb-4 text-yellow-500 tracking-wide border-l-4 border-yellow-500 pl-2">TRENDING NOW</h2>
+                        <div class="grid grid-cols-2 gap-4">
+                            ${prodHTML}
+                        </div>
+                    </div>
+                </div>
+            `;
+            window.scrollTo(0,0);
         }
-        return;
-      }
-      const action = target.dataset.action;
-      if (action === "set-category") { state.category = target.dataset.category || "all"; state.modal = null; render(); if (target.dataset.category !== "all") setTimeout(scrollToCollection, 30); }
-      if (action === "shop-collection") scrollToCollection();
-      if (action === "toggle-like") {
-        const id = target.dataset.id;
-        state.liked = isLiked(id) ? state.liked.filter((likedId) => likedId !== id) : [...state.liked, id];
-        save(); render(); showToast(isLiked(id) ? "Saved to your liked pieces" : "Removed from liked pieces");
-      }
-      if (action === "open-liked") { state.modal = { type: "liked" }; render(); }
-      if (action === "open-orders") { state.modal = { type: "orders" }; render(); }
-      if (action === "open-cart") { state.modal = { type: "cart" }; render(); }
-      if (action === "buy-now") { state.modal = { type: "checkout", id: target.dataset.id }; render(); }
-      if (action === "add-cart") {
-        const existing = state.cart.find((item) => item.id === target.dataset.id);
-        if (existing) existing.quantity += 1; else state.cart.push({ id: target.dataset.id, quantity: 1 });
-        save(); updateCounts(); showToast("Added to your bag");
-      }
-      if (action === "close-modal") {
-        if (event.target.closest("[data-modal-content]") && !target.classList.contains("close-button") && !target.dataset.testid?.includes("close")) return;
-        closeModal();
-      }
-      if (action === "go-home") { window.location.hash = ""; state.adminEditing = null; render(); }
-      if (action === "edit-product") { state.adminEditing = target.dataset.id; render(); window.scrollTo({ top: 0, behavior: "smooth" }); }
-      if (action === "cancel-edit") { state.adminEditing = null; render(); }
-      if (action === "delete-product") {
-        const product = productById(target.dataset.id);
-        if (product && window.confirm(`Delete ${product.name}?`)) {
-          state.products = state.products.filter((item) => item.id !== target.dataset.id);
-          state.liked = state.liked.filter((id) => id !== target.dataset.id);
-          state.cart = state.cart.filter((item) => item.id !== target.dataset.id);
-          save(); render(); showToast("Product removed");
+
+        function viewProduct(id) {
+            const product = products.find(p => p.id === id);
+            appDiv.innerHTML = `
+                <div class="fade-in relative bg-black pb-10">
+                    <button onclick="goHome()" class="absolute top-4 left-4 bg-black/70 border border-yellow-500 text-yellow-500 rounded-full p-2 w-10 h-10 z-10 flex items-center justify-center backdrop-blur-sm">
+                        <i class="fa-solid fa-arrow-left"></i>
+                    </button>
+                    <img src="${product.img}" class="w-full h-[450px] object-cover opacity-90">
+                    
+                    <div class="p-5 bg-zinc-900 min-h-[40vh]">
+                        <h1 class="text-2xl font-bold text-gray-100">${product.name}</h1>
+                        <div class="mt-3 flex items-center gap-3">
+                            <span class="text-3xl font-extrabold text-yellow-500">₹${product.price}</span>
+                            <span class="text-lg line-through text-gray-500">₹${product.mrp}</span>
+                            <span class="text-sm text-black font-bold bg-yellow-500 px-2 py-1 rounded">${product.discount}</span>
+                        </div>
+                        <div class="mt-6 border-t border-yellow-600/30 pt-4">
+                            <h3 class="text-yellow-500 font-semibold mb-2">Product Details</h3>
+                            <p class="text-gray-400 text-sm leading-relaxed">Experience the ultimate comfort and style with this premium quality apparel. Perfect for everyday wear, designed exclusively for your unique fashion sense.</p>
+                        </div>
+                    </div>
+                    
+                    <div class="fixed bottom-0 left-0 w-full bg-zinc-950 border-t border-yellow-600/40 p-3 max-w-md mx-auto flex gap-3 z-50">
+                        <button id="addBtn-${product.id}" onclick="addToCart(${product.id})" class="w-1/2 bg-black border border-yellow-500 text-yellow-500 font-bold py-3 rounded hover:bg-yellow-900/20 transition">ADD TO CART</button>
+                        <button onclick="goToCheckout(${product.id})" class="w-1/2 bg-gradient-to-r from-yellow-600 to-yellow-400 text-black font-extrabold py-3 rounded text-center block shadow-[0_0_15px_rgba(212,175,55,0.4)]">BUY NOW</button>
+                    </div>
+                </div>
+            `;
+            window.scrollTo(0,0);
         }
-      }
-    });
 
-    document.addEventListener("input", (event) => {
-      if (!event.target.matches("[data-search]")) return;
-      state.search = event.target.value;
-      const value = state.search;
-      render();
-      const search = document.querySelector("[data-search]");
-      if (search) { search.focus(); search.setSelectionRange(value.length, value.length); }
-    });
+        function showCart() {
+            if (cart.length === 0) {
+                appDiv.innerHTML = `
+                    <div class="fade-in p-5 text-center flex flex-col items-center justify-center min-h-[70vh]">
+                        <i class="fa-solid fa-cart-shopping text-6xl text-gray-700 mb-4"></i>
+                        <h2 class="text-xl text-yellow-500 font-bold mb-4">Your Cart is Empty</h2>
+                        <button onclick="goHome()" class="border border-yellow-500 text-yellow-500 px-6 py-2 rounded font-bold">Go Shopping</button>
+                    </div>
+                `;
+                return;
+            }
 
-    document.addEventListener("submit", (event) => {
-      const form = event.target;
-      if (form.dataset.form === "checkout") {
-        event.preventDefault();
-        const data = new FormData(form);
-        const product = productById(form.dataset.productId);
-        const quantity = Math.max(1, Number(data.get("quantity")) || 1);
-        const order = { id: `UF-${Date.now().toString().slice(-6)}`, productName: product.name, image: product.image, quantity, total: product.price * quantity, customerName: data.get("name"), phone: data.get("phone"), address: data.get("address"), status: "Order placed" };
-        state.orders.push(order);
-        state.cart = state.cart.filter((item) => item.id !== product.id);
-        save();
-        state.modal = { type: "success", orderId: order.id, phone: order.phone };
-        render();
-        showToast("Order placed successfully");
-      }
-      if (form.dataset.form === "product") {
-        event.preventDefault();
-        const data = new FormData(form);
-        const item = { name: data.get("name"), image: data.get("image"), category: data.get("category"), price: Number(data.get("price")), mrp: Number(data.get("mrp")), discount: Number(data.get("discount")), stock: Number(data.get("stock")), live: data.get("live") === "true", description: data.get("description") };
-        if (state.adminEditing) {
-          state.products = state.products.map((product) => product.id === state.adminEditing ? { ...product, ...item } : product);
-          showToast("Product updated");
-        } else {
-          state.products.push({ ...item, id: `product-${Date.now()}` });
-          showToast("Product added");
+            let cartHTML = '';
+            let total = 0;
+            cart.forEach((item, index) => {
+                total += item.price;
+                cartHTML += `
+                    <div class="flex gap-4 items-center bg-zinc-950 p-3 rounded-lg border border-yellow-600/30 mb-3 shadow-md">
+                        <img src="${item.img}" class="w-20 h-20 object-cover rounded border border-gray-700">
+                        <div class="flex-grow">
+                            <p class="font-bold text-gray-200">${item.name}</p>
+                            <p class="text-yellow-500 font-semibold mt-1">₹${item.price}</p>
+                        </div>
+                        <button onclick="removeFromCart(${index})" class="text-red-500 p-2"><i class="fa-solid fa-trash"></i></button>
+                    </div>
+                `;
+            });
+
+            appDiv.innerHTML = `
+                <div class="fade-in p-5 pb-24">
+                    <div class="flex items-center gap-3 mb-6 border-b border-yellow-600/30 pb-2">
+                        <button onclick="goHome()" class="text-yellow-500"><i class="fa-solid fa-arrow-left"></i></button>
+                        <h1 class="text-2xl font-bold text-yellow-500">Your Cart</h1>
+                    </div>
+                    ${cartHTML}
+                    
+                    <div class="mt-6 p-4 bg-black border border-yellow-600/50 rounded-lg">
+                        <div class="flex justify-between text-gray-300 text-sm mb-2"><span>Subtotal</span><span>₹${total}</span></div>
+                        <div class="flex justify-between text-gray-300 text-sm mb-2"><span>Shipping</span><span class="text-green-500">Free</span></div>
+                        <div class="flex justify-between font-bold text-yellow-500 text-lg border-t border-gray-800 pt-2 mt-2">
+                            <span>Total</span><span>₹${total}</span>
+                        </div>
+                    </div>
+
+                    <div class="fixed bottom-0 left-0 w-full bg-zinc-950 border-t border-yellow-600/40 p-3 max-w-md mx-auto z-50">
+                        <button onclick="goToCheckout('cart')" class="w-full bg-gradient-to-r from-yellow-600 to-yellow-400 text-black font-extrabold py-3 rounded text-center block shadow-[0_0_15px_rgba(212,175,55,0.4)] tracking-wide">CHECKOUT (₹${total})</button>
+                    </div>
+                </div>
+            `;
+            window.scrollTo(0,0);
         }
-        state.adminEditing = null;
-        save(); render();
-      }
-    });
 
-    window.addEventListener("hashchange", render);
-    
-    // Initial Render
-    render();
-  </script>
+        function goToCheckout(source) {
+            let checkoutItems = [];
+            let total = 0;
+            let productNames = "";
+
+            if (source === 'cart') {
+                checkoutItems = cart;
+                total = cart.reduce((sum, item) => sum + item.price, 0);
+                productNames = cart.map(i => i.name).join(", ");
+            } else {
+                const product = products.find(p => p.id === source);
+                checkoutItems = [product];
+                total = product.price;
+                productNames = product.name;
+            }
+
+            // Save data for confirmation page
+            currentCheckoutItem = { names: productNames, price: total };
+
+            let itemsHTML = checkoutItems.map(item => `
+                <div class="flex gap-4 items-center mb-3">
+                    <img src="${item.img}" class="w-12 h-12 object-cover rounded border border-gray-700">
+                    <div>
+                        <p class="font-bold text-gray-200 text-sm">${item.name}</p>
+                        <p class="text-yellow-500 text-sm font-semibold">₹${item.price}</p>
+                    </div>
+                </div>
+            `).join('');
+
+            appDiv.innerHTML = `
+                <div class="fade-in p-5">
+                    <div class="flex items-center gap-3 mb-6 border-b border-yellow-600/30 pb-2">
+                        <button onclick="goHome()" class="text-yellow-500"><i class="fa-solid fa-arrow-left"></i></button>
+                        <h1 class="text-2xl font-bold text-yellow-500">Checkout</h1>
+                    </div>
+                    
+                    <div class="bg-zinc-950 p-4 rounded-lg border border-yellow-600/30 mb-6 shadow-md">
+                        ${itemsHTML}
+                        <div class="border-t border-yellow-600/30 mt-3 pt-3 flex justify-between font-bold text-lg text-yellow-500">
+                            <span>Total to Pay:</span>
+                            <span>₹${total}</span>
+                        </div>
+                    </div>
+
+                    <form id="checkoutForm" onsubmit="confirmOrder(event)" class="flex flex-col gap-5">
+                        <div>
+                            <h2 class="font-bold text-gray-300 mb-3"><i class="fa-solid fa-location-dot text-yellow-500 mr-2"></i>Shipping Details</h2>
+                            <input type="text" id="custName" placeholder="Full Name" required class="bg-zinc-950 border border-gray-700 focus:border-yellow-500 outline-none text-white p-3 rounded w-full mb-3">
+                            <input type="tel" id="custPhone" placeholder="Phone Number" required class="bg-zinc-950 border border-gray-700 focus:border-yellow-500 outline-none text-white p-3 rounded w-full mb-3">
+                            <textarea id="custAddress" placeholder="Complete Address (House No, Street, City)" required class="bg-zinc-950 border border-gray-700 focus:border-yellow-500 outline-none text-white p-3 rounded w-full" rows="3"></textarea>
+                        </div>
+                        
+                        <div>
+                            <h2 class="font-bold text-gray-300 mt-2 mb-3"><i class="fa-solid fa-wallet text-yellow-500 mr-2"></i>Payment Method</h2>
+                            <div class="flex items-center gap-3 bg-zinc-950 p-3 rounded border border-yellow-600/50 mb-2">
+                                <input type="radio" id="cod" name="payment" value="COD" checked class="accent-yellow-500 w-4 h-4">
+                                <label for="cod" class="text-gray-200 font-medium">Cash on Delivery (COD)</label>
+                            </div>
+                        </div>
+                        
+                        <button type="submit" class="mt-2 bg-gradient-to-r from-yellow-600 to-yellow-400 text-black font-extrabold py-4 rounded shadow-[0_0_15px_rgba(212,175,55,0.4)] w-full text-lg tracking-wide">
+                            PLACE ORDER
+                        </button>
+                    </form>
+                </div>
+            `;
+            window.scrollTo(0,0);
+        }
+
+        function confirmOrder(event) {
+            event.preventDefault();
+            
+            const name = document.getElementById('custName').value;
+            const phone = document.getElementById('custPhone').value;
+            const address = document.getElementById('custAddress').value;
+            
+            // Save order for admin panel
+            const newOrder = {
+                id: Date.now(),
+                date: new Date().toLocaleString(),
+                name: name,
+                phone: phone,
+                address: address,
+                payment: "COD",
+                product_name: currentCheckoutItem.names,
+                price: currentCheckoutItem.price
+            };
+            
+            orders.push(newOrder);
+            localStorage.setItem('uf_orders', JSON.stringify(orders)); // Save to local storage
+            
+            // Clear cart
+            cart = [];
+            updateCartBadge();
+
+            appDiv.innerHTML = `
+                <div class="fade-in flex flex-col items-center justify-center min-h-[70vh] p-4 text-center">
+                    <div class="w-24 h-24 bg-zinc-950 border-2 border-yellow-500 text-yellow-500 rounded-full flex items-center justify-center text-5xl mb-6 shadow-[0_0_20px_rgba(212,175,55,0.3)]">
+                        <i class="fa-solid fa-check"></i>
+                    </div>
+                    <h1 class="text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-yellow-300 to-yellow-600">Order Confirmed!</h1>
+                    <p class="text-gray-400 mt-4 text-lg">Thank you, <span class="text-white font-semibold">${name}</span>.</p>
+                    <p class="text-gray-400 mt-1">Your order for <b class="text-yellow-500">${currentCheckoutItem.names}</b> is being processed.</p>
+                    
+                    <div class="mt-6 bg-zinc-950 border border-yellow-600/30 p-4 rounded-lg w-full max-w-xs inline-block">
+                        <p class="text-sm text-gray-400">Amount to pay on delivery</p>
+                        <p class="text-2xl font-bold text-yellow-500">₹${currentCheckoutItem.price}</p>
+                    </div>
+                    
+                    <button onclick="goHome()" class="mt-8 border border-yellow-500 text-yellow-500 hover:bg-yellow-500 hover:text-black px-8 py-3 rounded font-bold shadow-md transition-all duration-300">Continue Shopping</button>
+                </div>
+            `;
+            window.scrollTo(0,0);
+        }
+
+        function renderAdmin() {
+            let ordersHTML = "";
+            
+            if (orders.length > 0) {
+                // Reverse to show newest first
+                [...orders].reverse().forEach(order => {
+                    ordersHTML += `
+                        <div class="border border-yellow-600/30 rounded-lg p-4 bg-zinc-950 shadow-[0_0_10px_rgba(0,0,0,0.5)]">
+                            <div class="flex justify-between items-start mb-2">
+                                <p class="font-bold text-yellow-500 text-lg">${order.product_name}</p>
+                                <span class="bg-green-900/50 text-green-400 text-xs px-2 py-1 rounded border border-green-700">New</span>
+                            </div>
+                            <div class="space-y-1 mt-3">
+                                <p class="text-xs text-gray-500 border-b border-gray-800 pb-1 mb-2">${order.date}</p>
+                                <p class="text-sm text-gray-300"><i class="fa-solid fa-user w-5 text-gray-500"></i> ${order.name} (${order.phone})</p>
+                                <p class="text-sm text-gray-300"><i class="fa-solid fa-location-dot w-5 text-gray-500"></i> ${order.address}</p>
+                                <p class="text-sm text-gray-300"><i class="fa-solid fa-money-bill w-5 text-gray-500"></i> ${order.payment} - <span class="font-bold text-white">₹${order.price}</span></p>
+                            </div>
+                        </div>
+                    `;
+                });
+            } else {
+                ordersHTML = `
+                    <div class="bg-zinc-950 border border-dashed border-gray-700 p-8 text-center rounded-lg mt-10">
+                        <i class="fa-solid fa-box-open text-4xl text-gray-600 mb-3"></i>
+                        <p class="text-gray-500 italic">No orders yet.</p>
+                    </div>
+                `;
+            }
+
+            appDiv.innerHTML = `
+                <div class="fade-in p-5">
+                    <h1 class="text-3xl font-bold mb-6 text-yellow-500 border-b border-yellow-600/30 pb-3">
+                        <i class="fa-solid fa-crown mr-2"></i> Admin Dashboard
+                    </h1>
+                    
+                    <div class="flex justify-between items-center mt-4 mb-4">
+                        <h2 class="text-xl font-semibold text-gray-200">Total Orders: ${orders.length}</h2>
+                        <button onclick="clearOrders()" class="text-sm text-red-500 border border-red-900 px-2 py-1 rounded">Clear All</button>
+                    </div>
+                    
+                    <div class="flex flex-col gap-4">
+                        ${ordersHTML}
+                    </div>
+                    
+                    <div class="mt-10 text-center">
+                        <button onclick="goHome()" class="text-yellow-500 border-b border-yellow-500 pb-1 hover:text-yellow-400"><i class="fa-solid fa-arrow-left mr-2"></i> Back to Store</button>
+                    </div>
+                </div>
+            `;
+            window.scrollTo(0,0);
+        }
+
+        // --- HELPER FUNCTIONS ---
+
+        function addToCart(id) {
+            const product = products.find(p => p.id === id);
+            cart.push(product);
+            updateCartBadge();
+            
+            // Change button text temporarily to show success
+            const btn = document.getElementById(`addBtn-${id}`);
+            if(btn) {
+                const originalText = btn.innerHTML;
+                btn.innerHTML = '<i class="fa-solid fa-check"></i> ADDED';
+                btn.classList.add('bg-green-900', 'text-white', 'border-green-500');
+                btn.classList.remove('bg-black', 'text-yellow-500', 'border-yellow-500');
+                
+                setTimeout(() => {
+                    btn.innerHTML = originalText;
+                    btn.classList.remove('bg-green-900', 'text-white', 'border-green-500');
+                    btn.classList.add('bg-black', 'text-yellow-500', 'border-yellow-500');
+                }, 1500);
+            }
+        }
+
+        function removeFromCart(index) {
+            cart.splice(index, 1);
+            updateCartBadge();
+            showCart(); // Refresh cart view
+        }
+
+        function updateCartBadge() {
+            const badge = document.getElementById('cartCount');
+            if (cart.length > 0) {
+                badge.innerText = cart.length;
+                badge.classList.remove('hidden');
+            } else {
+                badge.classList.add('hidden');
+            }
+        }
+
+        function toggleLike(element) {
+            element.classList.toggle('text-red-500');
+            element.classList.toggle('text-gray-500');
+        }
+
+        function clearOrders() {
+            if(confirm("Are you sure you want to delete all orders?")) {
+                orders = [];
+                localStorage.removeItem('uf_orders');
+                renderAdmin();
+            }
+        }
+
+        // --- SECRET ADMIN LOGIC ---
+        let clicks = 0;
+        document.getElementById('secretLogo').addEventListener('click', () => {
+            clicks++;
+            if(clicks >= 5) {
+                clicks = 0; // reset
+                renderAdmin();
+            }
+            // Reset click count if they click slowly
+            setTimeout(() => { clicks = 0; }, 2000);
+        });
+
+        // --- INITIALIZATION ---
+        // Start the app by showing the home page
+        goHome();
+
+    </script>
 </body>
 </html>
