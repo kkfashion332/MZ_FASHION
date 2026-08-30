@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <!-- Zoom disable karne ke liye user-scalable=no add kiya hai -->
+    <!-- Zoom disable kiya hai -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>MZ Fashion</title>
     <script src="https://cdn.tailwindcss.com"></script>
@@ -14,7 +14,6 @@
             from { opacity: 0; }
             to { opacity: 1; }
         }
-        /* Hide scrollbar for category section but keep it scrollable */
         .category-scroll {
             overflow-x: auto;
             scroll-behavior: smooth;
@@ -29,9 +28,7 @@
     <!-- Navbar -->
     <nav class="bg-zinc-950 p-4 flex justify-between items-center sticky top-0 z-50 border-b border-yellow-600/40 shadow-[0_4px_15px_rgba(212,175,55,0.1)]">
         <div class="flex items-center gap-3">
-            <!-- Logo image changed to logo.png -->
             <img id="secretLogo" src="logo.png" onerror="this.src='https://ui-avatars.com/api/?name=MZ&background=000&color=D4AF37'" alt="MZ Fashion" class="w-10 h-10 rounded-full cursor-pointer border border-yellow-500 object-cover shadow-[0_0_10px_rgba(212,175,55,0.4)]">
-            <!-- Text made smaller (text-base instead of text-xl) and changed to MZ FASHION -->
             <span onclick="goHome()" class="cursor-pointer font-bold text-base tracking-widest text-transparent bg-clip-text bg-gradient-to-r from-yellow-200 to-yellow-600">
                 MZ FASHION
             </span>
@@ -43,7 +40,7 @@
     </nav>
 
     <!-- Main App Container -->
-    <div id="app" class="max-w-md mx-auto bg-zinc-900 min-h-screen shadow-2xl pb-20">
+    <div id="app" class="max-w-md mx-auto bg-zinc-900 min-h-screen shadow-2xl pb-20 relative">
         <!-- Views will be injected here -->
     </div>
 
@@ -52,7 +49,6 @@
 
     <script>
         // --- DATA ---
-        // Categories with Images
         const categories = [
             { name: "All", img: "https://images.unsplash.com/photo-1490481651871-ab68de25d43d?w=150&q=80" },
             { name: "T-Shirts", img: "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=150&q=80" },
@@ -61,7 +57,6 @@
             { name: "Shoes", img: "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=150&q=80" }
         ];
 
-        // Products Data with Category mapping
         const products = [
             { id: 1, name: "Premium Black T-Shirt", price: 499, mrp: 999, discount: "50% OFF", category: "T-Shirts", img: "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=400&q=80" },
             { id: 2, name: "Funky Denim Jacket", price: 1299, mrp: 2599, discount: "50% OFF", category: "Shirts", img: "https://images.unsplash.com/photo-1576995853123-5a10305d93c0?w=400&q=80" },
@@ -73,20 +68,19 @@
         let orders = JSON.parse(localStorage.getItem('mz_orders')) || [];
         const appDiv = document.getElementById('app');
         let currentCheckoutItem = null;
-        let activeCategory = "All"; // Default
+        let activeCategory = "All";
 
         // --- VIEWS ---
 
         function goHome() {
-            // Filter products based on selected picture category
             let displayProducts = products;
             if(activeCategory !== "All") {
                 displayProducts = products.filter(p => p.category === activeCategory);
             }
 
-            // Image based Category HTML
+            // Image Categories
             let catHTML = categories.map(cat => `
-                <div onclick="filterCategory('${cat.name}')" class="flex-shrink-0 flex flex-col items-center gap-2 cursor-pointer w-16">
+                <div onclick="filterCategory('${cat.name}')" class="flex-shrink-0 flex flex-col items-center gap-2 cursor-pointer w-16 mt-2">
                     <div class="w-16 h-16 rounded-full overflow-hidden border-2 ${activeCategory === cat.name ? 'border-yellow-400 shadow-[0_0_10px_rgba(212,175,55,0.8)]' : 'border-gray-600'} transition-all">
                         <img src="${cat.img}" class="w-full h-full object-cover">
                     </div>
@@ -94,29 +88,24 @@
                 </div>
             `).join('');
             
-            // Products HTML (No Product detail page link, clicking image zooms it)
+            // Product Grid
             let prodHTML = displayProducts.map(item => `
                 <div class="bg-zinc-950 border border-yellow-600/30 rounded-lg shadow-lg relative flex flex-col justify-between overflow-hidden">
-                    
-                    <!-- Clicking Image opens full screen view -->
-                    <div onclick="openImage('${item.img}')" class="cursor-zoom-in relative">
+                    <div onclick="viewProduct(${item.id})" class="cursor-pointer relative">
                         <img src="${item.img}" class="w-full h-44 object-cover opacity-90 hover:opacity-100 transition duration-300">
-                        <div class="absolute bottom-1 right-1 bg-black/60 rounded p-1 text-white text-xs"><i class="fa-solid fa-expand"></i></div>
                     </div>
                     
                     <div class="p-3 flex flex-col flex-grow border-t border-yellow-600/20">
-                        <h3 class="text-sm font-semibold truncate text-gray-200">${item.name}</h3>
+                        <h3 onclick="viewProduct(${item.id})" class="text-sm font-semibold truncate text-gray-200 cursor-pointer">${item.name}</h3>
                         <div class="mt-1 flex items-center gap-2">
                             <span class="font-bold text-yellow-500">₹${item.price}</span>
                             <span class="text-xs line-through text-gray-500">₹${item.mrp}</span>
                         </div>
                         <span class="text-[10px] text-yellow-600 font-bold mt-1 bg-yellow-900/20 px-1 w-max rounded">${item.discount}</span>
                         
-                        <!-- Buttons: Add to Cart & Buy Now side by side -->
-                        <div class="flex gap-2 mt-3">
-                            <button id="addBtn-${item.id}" onclick="addToCart(${item.id})" class="w-1/2 bg-zinc-800 border border-yellow-500 text-yellow-500 font-bold py-1.5 rounded text-xs hover:bg-yellow-900/30 transition shadow-sm">CART</button>
-                            <button onclick="goToCheckout(${item.id})" class="w-1/2 bg-gradient-to-r from-yellow-600 to-yellow-400 text-black font-extrabold py-1.5 rounded shadow-[0_0_10px_rgba(212,175,55,0.4)] text-xs transition-all duration-300">BUY NOW</button>
-                        </div>
+                        <button onclick="goToCheckout(${item.id})" class="mt-4 block w-full bg-gradient-to-r from-yellow-600 to-yellow-400 hover:from-yellow-500 text-black font-extrabold text-center py-2 rounded shadow-[0_0_10px_rgba(212,175,55,0.3)] text-xs transition-all duration-300">
+                            BUY NOW
+                        </button>
                     </div>
                 </div>
             `).join('');
@@ -127,6 +116,15 @@
 
             appDiv.innerHTML = `
                 <div class="fade-in">
+                    <!-- Rectangular Banner Restored -->
+                    <div class="w-full h-44 bg-zinc-950 flex flex-col items-center justify-center overflow-hidden relative border-b border-yellow-600/30">
+                        <div class="absolute inset-0 bg-gradient-to-r from-black via-zinc-900 to-black opacity-80 z-0"></div>
+                        <h1 class="relative z-10 text-transparent bg-clip-text bg-gradient-to-r from-yellow-300 to-yellow-600 font-extrabold text-3xl tracking-widest drop-shadow-lg text-center px-2">
+                            PREMIUM COLLECTION
+                        </h1>
+                        <p class="relative z-10 text-yellow-200/70 text-sm mt-2 tracking-widest">UPTO 50% OFF</p>
+                    </div>
+
                     <!-- Picture Categories -->
                     <div class="flex category-scroll gap-4 p-4 bg-zinc-950 border-b border-yellow-600/20">
                         ${catHTML}
@@ -149,12 +147,55 @@
             goHome();
         }
 
+        // --- PRODUCT PAGE (Restored) ---
+        function viewProduct(id) {
+            const product = products.find(p => p.id === id);
+            appDiv.innerHTML = `
+                <div class="fade-in relative bg-black pb-24">
+                    <button onclick="goHome()" class="absolute top-4 left-4 bg-black/70 border border-yellow-500 text-yellow-500 rounded-full w-10 h-10 z-10 flex items-center justify-center backdrop-blur-sm shadow-lg">
+                        <i class="fa-solid fa-arrow-left"></i>
+                    </button>
+                    
+                    <!-- Clicking this image opens the full-screen view -->
+                    <div onclick="openImage('${product.img}')" class="relative cursor-zoom-in">
+                        <img src="${product.img}" class="w-full h-[450px] object-cover opacity-90">
+                        <div class="absolute bottom-3 right-3 bg-black/70 rounded-full w-8 h-8 flex items-center justify-center text-yellow-500 border border-yellow-500/50 shadow-lg">
+                            <i class="fa-solid fa-expand"></i>
+                        </div>
+                    </div>
+                    
+                    <div class="p-5 bg-zinc-900 min-h-[40vh]">
+                        <h1 class="text-2xl font-bold text-gray-100">${product.name}</h1>
+                        <div class="mt-3 flex items-center gap-3">
+                            <span class="text-3xl font-extrabold text-yellow-500">₹${product.price}</span>
+                            <span class="text-lg line-through text-gray-500">₹${product.mrp}</span>
+                            <span class="text-sm text-black font-bold bg-yellow-500 px-2 py-1 rounded">${product.discount}</span>
+                        </div>
+                        <div class="mt-6 border-t border-yellow-600/30 pt-4">
+                            <h3 class="text-yellow-500 font-semibold mb-2">Product Details</h3>
+                            <p class="text-gray-400 text-sm leading-relaxed">Experience the ultimate comfort and style with this premium quality apparel. Perfect for everyday wear, designed exclusively for your unique fashion sense.</p>
+                        </div>
+                    </div>
+                    
+                    <!-- Fixed Bottom Bar for Add to Cart & Buy Now -->
+                    <div class="fixed bottom-0 left-0 w-full bg-zinc-950 border-t border-yellow-600/40 p-3 max-w-md mx-auto flex gap-3 z-50 shadow-[0_-4px_15px_rgba(0,0,0,0.5)]">
+                        <button id="addBtn-${product.id}" onclick="addToCart(${product.id})" class="w-1/2 bg-black border border-yellow-500 text-yellow-500 font-bold py-3 rounded hover:bg-yellow-900/20 transition text-sm">ADD TO CART</button>
+                        <button onclick="goToCheckout(${product.id})" class="w-1/2 bg-gradient-to-r from-yellow-600 to-yellow-400 text-black font-extrabold py-3 rounded text-center block shadow-[0_0_15px_rgba(212,175,55,0.4)] text-sm">BUY NOW</button>
+                    </div>
+                </div>
+            `;
+            window.scrollTo(0,0);
+        }
+
         // --- FULL SCREEN IMAGE VIEWER ---
         function openImage(url) {
             const container = document.getElementById('imageModalContainer');
             container.innerHTML = `
-                <div class="fixed inset-0 z-[100] bg-black/95 flex items-center justify-center fade-in backdrop-blur-sm">
-                    <button onclick="closeImage()" class="absolute top-6 right-6 text-yellow-500 text-3xl z-[101] bg-black/50 w-10 h-10 rounded-full flex items-center justify-center border border-yellow-500"><i class="fa-solid fa-xmark"></i></button>
+                <div class="fixed inset-0 z-[100] bg-black/95 flex items-center justify-center fade-in backdrop-blur-md">
+                    <!-- Close button in top right exactly like screenshot -->
+                    <button onclick="closeImage()" class="absolute top-6 right-6 text-yellow-500 text-xl z-[101] bg-black border-2 border-yellow-500 w-10 h-10 rounded-full flex items-center justify-center shadow-[0_0_15px_rgba(212,175,55,0.5)]">
+                        <i class="fa-solid fa-xmark"></i>
+                    </button>
                     <img src="${url}" class="max-w-full max-h-full object-contain p-2">
                 </div>
             `;
@@ -244,8 +285,9 @@
             `).join('');
 
             appDiv.innerHTML = `
-                <div class="fade-in p-5">
+                <div class="fade-in p-5 pb-20">
                     <div class="flex items-center gap-3 mb-6 border-b border-yellow-600/30 pb-2">
+                        <!-- Clicking back from checkout goes home, or we can use history.back if preferred. goHome is safer -->
                         <button onclick="goHome()" class="text-yellow-500 text-xl"><i class="fa-solid fa-arrow-left"></i></button>
                         <h1 class="text-xl font-bold text-yellow-500">Checkout</h1>
                     </div>
@@ -269,19 +311,16 @@
                         <div>
                             <h2 class="font-bold text-gray-300 mt-2 mb-3 text-sm"><i class="fa-solid fa-wallet text-yellow-500 mr-2"></i>Payment Method</h2>
                             
-                            <!-- Prepaid Option -->
                             <div class="flex items-center gap-3 bg-zinc-950 p-3 rounded border border-gray-700 mb-2">
                                 <input type="radio" id="prepaid" name="payment" value="Prepaid" onchange="renderPaymentUI()" class="accent-yellow-500 w-4 h-4">
                                 <label for="prepaid" class="text-gray-200 font-medium text-sm">Prepaid (Full Payment)</label>
                             </div>
                             
-                            <!-- COD Option -->
                             <div class="flex items-center gap-3 bg-zinc-950 p-3 rounded border border-gray-700 mb-2">
                                 <input type="radio" id="cod" name="payment" value="COD" onchange="renderPaymentUI()" class="accent-yellow-500 w-4 h-4" checked>
                                 <label for="cod" class="text-gray-200 font-medium text-sm">Cash on Delivery (C.O.D)</label>
                             </div>
 
-                            <!-- Dynamic Payment UI Area -->
                             <div id="paymentUI" class="mt-4 p-4 bg-black border border-yellow-500 rounded-lg shadow-[0_0_10px_rgba(212,175,55,0.2)]"></div>
                         </div>
                         
@@ -292,7 +331,7 @@
                 </div>
             `;
             window.scrollTo(0,0);
-            renderPaymentUI(); // Trigger UI generation for default selected option
+            renderPaymentUI();
         }
 
         function renderPaymentUI() {
@@ -300,11 +339,9 @@
             const uiDiv = document.getElementById('paymentUI');
             const totalAmount = currentCheckoutItem.price;
             
-            // Generate a dummy QR for demonstration
             const qrUrl = "https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=upi://pay?pa=dummy@upi&pn=MZFASHION";
 
             if (!isCOD) {
-                // PREPAID UI
                 uiDiv.innerHTML = `
                     <p class="text-center text-sm text-gray-300 mb-2">Scan QR to pay Full Amount</p>
                     <p class="text-center font-bold text-xl text-yellow-500 mb-4">₹${totalAmount}</p>
@@ -314,7 +351,6 @@
                     <p class="text-xs text-center text-gray-500">After payment, click Place Order.</p>
                 `;
             } else {
-                // C.O.D UI (30% Token)
                 const tokenAmount = Math.round(totalAmount * 0.30);
                 uiDiv.innerHTML = `
                     <div class="bg-yellow-900/30 border border-yellow-600/50 p-2 rounded mb-3 text-center">
@@ -326,7 +362,6 @@
                     </div>
                     <p class="text-xs text-center text-gray-400 mb-3">Scan & Pay Token, then send screenshot below.</p>
                     
-                    <!-- WhatsApp Glowing Button -->
                     <a href="https://wa.me/919982437489" target="_blank" class="flex items-center justify-center gap-2 bg-green-500 hover:bg-green-600 text-white font-bold py-3 px-4 rounded-lg shadow-[0_0_15px_rgba(34,197,94,0.6)] animate-pulse transition">
                         <i class="fa-brands fa-whatsapp text-2xl"></i> SEND SCREENSHOT
                     </a>
@@ -382,15 +417,15 @@
             const btn = document.getElementById(`addBtn-${id}`);
             if(btn) {
                 const originalText = btn.innerHTML;
-                btn.innerHTML = '<i class="fa-solid fa-check"></i>';
+                btn.innerHTML = '<i class="fa-solid fa-check"></i> ADDED';
                 btn.classList.add('bg-green-600', 'text-white', 'border-green-500');
-                btn.classList.remove('bg-zinc-800', 'text-yellow-500', 'border-yellow-500');
+                btn.classList.remove('bg-black', 'text-yellow-500', 'border-yellow-500');
                 
                 setTimeout(() => {
                     btn.innerHTML = originalText;
                     btn.classList.remove('bg-green-600', 'text-white', 'border-green-500');
-                    btn.classList.add('bg-zinc-800', 'text-yellow-500', 'border-yellow-500');
-                }, 1000);
+                    btn.classList.add('bg-black', 'text-yellow-500', 'border-yellow-500');
+                }, 1500);
             }
         }
 
@@ -456,7 +491,6 @@
             }
         }
 
-        // --- SECRET ADMIN PANEL LOGIC ---
         let clicks = 0;
         document.getElementById('secretLogo').addEventListener('click', () => {
             clicks++;
