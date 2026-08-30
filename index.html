@@ -17,7 +17,6 @@
 </head>
 <body class="bg-black text-gray-200">
 
-    <!-- Navbar -->
     <nav class="bg-zinc-950 p-4 flex justify-between items-center sticky top-0 z-50 border-b border-yellow-600/40 shadow-[0_4px_15px_rgba(212,175,55,0.1)]">
         <div class="flex items-center gap-3">
             <img id="secretLogo" src="logo.png" onerror="this.src='https://ui-avatars.com/api/?name=MZ&background=000&color=D4AF37'" alt="MZ Fashion" class="w-10 h-10 rounded-full cursor-pointer border border-yellow-500 object-cover shadow-[0_0_10px_rgba(212,175,55,0.4)]">
@@ -26,11 +25,9 @@
             </span>
         </div>
         <div class="flex items-center gap-5">
-            <!-- User Profile / My Orders Icon -->
             <div class="cursor-pointer" onclick="showMyOrders()">
                 <i class="fa-solid fa-user text-xl text-yellow-500"></i>
             </div>
-            <!-- Cart Icon -->
             <div class="relative cursor-pointer" onclick="showCart()">
                 <i class="fa-solid fa-cart-shopping text-xl text-yellow-500"></i>
                 <span id="cartCount" class="absolute -top-2 -right-2 bg-red-600 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full hidden">0</span>
@@ -38,12 +35,9 @@
         </div>
     </nav>
 
-    <!-- Main App Container -->
     <div id="app" class="max-w-md mx-auto bg-zinc-900 min-h-screen shadow-2xl pb-20 relative">
-        <!-- Views will be injected here -->
-    </div>
+        </div>
 
-    <!-- Full Screen Image Modal Container -->
     <div id="imageModalContainer"></div>
 
     <script>
@@ -91,7 +85,6 @@
             let prodHTML = displayProducts.map(item => `
                 <div class="bg-zinc-950 border border-yellow-600/30 rounded-lg shadow-lg relative flex flex-col justify-between overflow-hidden">
                     
-                    <!-- Like Option -->
                     <button onclick="toggleLike(this)" class="absolute top-2 right-2 text-gray-500 z-10 text-xl bg-black/60 rounded-full w-8 h-8 flex items-center justify-center backdrop-blur-sm shadow-md transition-colors">
                         <i class="fa-solid fa-heart"></i>
                     </button>
@@ -108,7 +101,6 @@
                         </div>
                         <span class="text-[10px] text-yellow-600 font-bold mt-1 bg-yellow-900/20 px-1 w-max rounded">${item.discount}</span>
                         
-                        <!-- Buttons side by side -->
                         <div class="flex gap-2 mt-3">
                             <button id="addBtn-${item.id}" onclick="addToCart(${item.id})" class="w-1/2 bg-zinc-800 border border-yellow-500 text-yellow-500 font-bold py-1.5 rounded text-xs hover:bg-yellow-900/30 transition shadow-sm">CART</button>
                             <button onclick="goToCheckout(${item.id})" class="w-1/2 bg-gradient-to-r from-yellow-600 to-yellow-400 text-black font-extrabold py-1.5 rounded shadow-[0_0_10px_rgba(212,175,55,0.4)] text-xs transition-all duration-300">BUY NOW</button>
@@ -123,19 +115,15 @@
 
             appDiv.innerHTML = `
                 <div class="fade-in">
-                    <!-- Rectangular Banner with your Image -->
-                    <div class="w-full h-44 bg-zinc-950 flex flex-col items-center justify-center overflow-hidden relative border-b border-yellow-600/30">
+                    <div class="w-full h-44 mt-4 bg-zinc-950 flex flex-col items-center justify-center overflow-hidden relative border-y border-yellow-600/30">
                         <img src="256328.jpg" alt="Banner" class="w-full h-full object-cover opacity-90">
-                        <!-- Subtle gradient to make text readable if needed, or just let image shine -->
                         <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
                     </div>
 
-                    <!-- Categories (Strictly 5 columns Grid) -->
-                    <div class="grid grid-cols-5 gap-2 p-3 bg-zinc-950 border-b border-yellow-600/20">
+                    <div class="grid grid-cols-5 gap-2 p-3 bg-zinc-950 border-b border-yellow-600/20 mt-2">
                         ${catHTML}
                     </div>
                     
-                    <!-- Products -->
                     <div class="p-4">
                         <h2 class="font-bold text-lg mb-4 text-yellow-500 tracking-wide border-l-4 border-yellow-500 pl-2 uppercase">${activeCategory} Collection</h2>
                         <div class="grid grid-cols-2 gap-4">
@@ -369,7 +357,6 @@
                     </div>
                     <p class="text-xs text-center text-gray-400 mb-3">Scan & Pay Token, then send screenshot on WhatsApp.</p>
                     
-                    <!-- Glowing Green WhatsApp Button -->
                     <a href="https://wa.me/919982437489?text=Hello%20MZ%20Fashion,%20here%20is%20my%20token%20payment%20screenshot" target="_blank" class="flex w-full items-center justify-center gap-2 bg-green-500 hover:bg-green-600 text-white font-bold py-3 px-4 rounded-lg shadow-[0_0_15px_rgba(34,197,94,0.6)] animate-pulse transition">
                         <i class="fa-brands fa-whatsapp text-2xl"></i> SEND SCREENSHOT
                     </a>
@@ -419,7 +406,7 @@
             window.scrollTo(0,0);
         }
 
-        // --- NEW: CUSTOMER "MY ORDERS" PAGE ---
+        // --- CUSTOMER "MY ORDERS" PAGE ---
         function showMyOrders() {
             let myOrdersHTML = "";
             
@@ -468,7 +455,6 @@
                                 ${paymentStatus}
                             </div>
                             
-                            <!-- WhatsApp help button for each order -->
                             <a href="https://wa.me/919982437489?text=Hello,%20I%20have%20an%20issue%20with%20my%20order%20of%20${order.product_name}" target="_blank" class="mt-4 flex w-full items-center justify-center gap-2 bg-green-500/10 hover:bg-green-500/20 border border-green-500 text-green-500 font-bold py-2 px-4 rounded transition text-xs">
                                 <i class="fa-brands fa-whatsapp text-lg"></i> CONTACT SUPPORT
                             </a>
