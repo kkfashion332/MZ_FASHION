@@ -13,35 +13,57 @@
             from { opacity: 0; }
             to { opacity: 1; }
         }
+        
+        /* Light Mode Styles override */
+        body.light-mode { background-color: #f3f4f6 !important; color: #111827 !important; }
+        .light-mode .bg-zinc-950, .light-mode .bg-zinc-900, .light-mode .bg-black { background-color: #ffffff !important; border-color: #e5e7eb !important; }
+        .light-mode .text-gray-200, .light-mode .text-gray-300 { color: #1f2937 !important; }
+        .light-mode .text-gray-400, .light-mode .text-gray-500 { color: #4b5563 !important; }
+        .light-mode .border-gray-700, .light-mode .border-gray-800 { border-color: #e5e7eb !important; }
+        .light-mode .border-black { border-color: #ffffff !important; } /* For floating Home button border */
     </style>
 </head>
-<body class="bg-black text-gray-200">
+<body class="bg-black text-gray-200 transition-colors duration-300">
 
     <nav class="bg-zinc-950 p-4 flex justify-between items-center sticky top-0 z-50 border-b border-yellow-600/40 shadow-[0_4px_15px_rgba(212,175,55,0.1)]">
-        <div class="flex items-center gap-3">
-            <img id="secretLogo" src="logo.png" onerror="this.src='https://ui-avatars.com/api/?name=MZ&background=000&color=D4AF37'" alt="MZ Fashion" class="w-10 h-10 rounded-full cursor-pointer border border-yellow-500 object-cover shadow-[0_0_10px_rgba(212,175,55,0.4)]">
-            <span onclick="goHome()" class="cursor-pointer font-bold text-base tracking-widest text-transparent bg-clip-text bg-gradient-to-r from-yellow-200 to-yellow-600">
+        <div class="flex items-center gap-3 w-full justify-center relative">
+            <img id="secretLogo" src="logo.png" onerror="this.src='https://ui-avatars.com/api/?name=MZ&background=000&color=D4AF37'" alt="MZ Fashion" class="absolute left-0 w-10 h-10 rounded-full cursor-pointer border border-yellow-500 object-cover shadow-[0_0_10px_rgba(212,175,55,0.4)]">
+            <span onclick="goHome()" class="cursor-pointer font-bold text-lg tracking-widest text-transparent bg-clip-text bg-gradient-to-r from-yellow-200 to-yellow-600">
                 MZ FASHION
             </span>
         </div>
-        <div class="flex items-center gap-5">
-            <div class="cursor-pointer" onclick="showMyOrders()">
-                <i class="fa-solid fa-user text-xl text-yellow-500"></i>
-            </div>
-            <div class="relative cursor-pointer" onclick="showCart()">
-                <i class="fa-solid fa-cart-shopping text-xl text-yellow-500"></i>
-                <span id="cartCount" class="absolute -top-2 -right-2 bg-red-600 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full hidden">0</span>
-            </div>
-        </div>
     </nav>
 
-    <div id="app" class="max-w-md mx-auto bg-zinc-900 min-h-screen shadow-2xl pb-20 relative">
+    <div id="app" class="max-w-md mx-auto bg-zinc-900 min-h-screen shadow-2xl pb-24 relative">
         </div>
+
+    <div class="fixed bottom-0 left-0 w-full bg-zinc-950 border-t border-yellow-600/40 p-2 max-w-md mx-auto z-50 flex justify-around items-center h-16 shadow-[0_-4px_15px_rgba(0,0,0,0.3)]">
+        <div onclick="showLikes()" class="flex flex-col items-center w-1/5 text-gray-500 hover:text-yellow-500 cursor-pointer transition-colors">
+            <i class="fa-solid fa-heart text-lg"></i><span class="text-[9px] mt-1 font-semibold">Likes</span>
+        </div>
+        <div onclick="showMyOrders()" class="flex flex-col items-center w-1/5 text-gray-500 hover:text-yellow-500 cursor-pointer transition-colors">
+            <i class="fa-solid fa-box text-lg"></i><span class="text-[9px] mt-1 font-semibold">Orders</span>
+        </div>
+        
+        <div class="w-1/5 flex justify-center relative">
+            <div onclick="goHome()" class="absolute -top-10 w-14 h-14 bg-gradient-to-r from-yellow-600 to-yellow-400 rounded-full flex items-center justify-center text-black text-2xl shadow-[0_0_15px_rgba(212,175,55,0.5)] border-4 border-black cursor-pointer z-50 transition-transform active:scale-95">
+                <i class="fa-solid fa-house"></i>
+            </div>
+        </div>
+        
+        <div onclick="showCart()" class="flex flex-col items-center w-1/5 text-gray-500 hover:text-yellow-500 cursor-pointer relative transition-colors">
+            <i class="fa-solid fa-cart-shopping text-lg"></i><span class="text-[9px] mt-1 font-semibold">Cart</span>
+            <span id="bottomCartCount" class="absolute -top-1 right-2 bg-red-600 text-white text-[9px] font-bold px-1.5 py-0.5 rounded-full hidden">0</span>
+        </div>
+        <div onclick="showProfile()" class="flex flex-col items-center w-1/5 text-gray-500 hover:text-yellow-500 cursor-pointer transition-colors">
+            <i class="fa-solid fa-user text-lg"></i><span class="text-[9px] mt-1 font-semibold">Profile</span>
+        </div>
+    </div>
 
     <div id="imageModalContainer"></div>
 
     <script>
-        // --- DATA ---
+        // --- DATA & STATE ---
         const categories = [
             { name: "All", img: "https://images.unsplash.com/photo-1490481651871-ab68de25d43d?w=150&q=80" },
             { name: "T-Shirts", img: "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=150&q=80" },
@@ -59,19 +81,35 @@
         
         let cart = [];
         let orders = JSON.parse(localStorage.getItem('mz_orders')) || [];
-        const appDiv = document.getElementById('app');
-        let currentCheckoutItem = null;
+        let likedItems = JSON.parse(localStorage.getItem('mz_likes')) || [];
+        let isLightMode = localStorage.getItem('mz_theme') === 'light';
         let activeCategory = "All";
+        let tempCheckoutData = null; // To hold address before payment
+        
+        const appDiv = document.getElementById('app');
+
+        // --- THEME LOGIC ---
+        function applyTheme() {
+            if(isLightMode) document.body.classList.add('light-mode');
+            else document.body.classList.remove('light-mode');
+        }
+        function toggleTheme() {
+            isLightMode = !isLightMode;
+            localStorage.setItem('mz_theme', isLightMode ? 'light' : 'dark');
+            applyTheme();
+            showProfile(); // Re-render profile to update button text
+        }
+        applyTheme();
 
         // --- VIEWS ---
 
+        // 1. HOME PAGE
         function goHome() {
             let displayProducts = products;
             if(activeCategory !== "All") {
                 displayProducts = products.filter(p => p.category === activeCategory);
             }
 
-            // Categories updated to Grid (5 columns horizontally)
             let catHTML = categories.map(cat => `
                 <div onclick="filterCategory('${cat.name}')" class="flex flex-col items-center gap-1 cursor-pointer w-full mt-2">
                     <div class="w-12 h-12 md:w-14 md:h-14 rounded-full overflow-hidden border-2 ${activeCategory === cat.name ? 'border-yellow-400 shadow-[0_0_10px_rgba(212,175,55,0.8)]' : 'border-gray-600'} transition-all mx-auto">
@@ -81,11 +119,11 @@
                 </div>
             `).join('');
             
-            // Products (Like option restored)
-            let prodHTML = displayProducts.map(item => `
+            let prodHTML = displayProducts.map(item => {
+                const isLiked = likedItems.includes(item.id);
+                return `
                 <div class="bg-zinc-950 border border-yellow-600/30 rounded-lg shadow-lg relative flex flex-col justify-between overflow-hidden">
-                    
-                    <button onclick="toggleLike(this)" class="absolute top-2 right-2 text-gray-500 z-10 text-xl bg-black/60 rounded-full w-8 h-8 flex items-center justify-center backdrop-blur-sm shadow-md transition-colors">
+                    <button onclick="toggleLike(this, ${item.id})" class="absolute top-2 right-2 ${isLiked ? 'text-red-500' : 'text-gray-500'} z-10 text-xl bg-black/60 rounded-full w-8 h-8 flex items-center justify-center backdrop-blur-sm shadow-md transition-colors">
                         <i class="fa-solid fa-heart"></i>
                     </button>
 
@@ -103,14 +141,14 @@
                         
                         <div class="flex gap-2 mt-3">
                             <button id="addBtn-${item.id}" onclick="addToCart(${item.id})" class="w-1/2 bg-zinc-800 border border-yellow-500 text-yellow-500 font-bold py-1.5 rounded text-xs hover:bg-yellow-900/30 transition shadow-sm">CART</button>
-                            <button onclick="goToCheckout(${item.id})" class="w-1/2 bg-gradient-to-r from-yellow-600 to-yellow-400 text-black font-extrabold py-1.5 rounded shadow-[0_0_10px_rgba(212,175,55,0.4)] text-xs transition-all duration-300">BUY NOW</button>
+                            <button onclick="goToAddress(${item.id})" class="w-1/2 bg-gradient-to-r from-yellow-600 to-yellow-400 text-black font-extrabold py-1.5 rounded shadow-[0_0_10px_rgba(212,175,55,0.4)] text-xs transition-all duration-300">BUY NOW</button>
                         </div>
                     </div>
                 </div>
-            `).join('');
+            `}).join('');
 
             if(displayProducts.length === 0) {
-                prodHTML = `<div class="col-span-2 text-center text-gray-500 py-10">No products found in this category.</div>`;
+                prodHTML = `<div class="col-span-2 text-center text-gray-500 py-10">No products found.</div>`;
             }
 
             appDiv.innerHTML = `
@@ -135,15 +173,104 @@
             window.scrollTo(0,0);
         }
 
-        function filterCategory(catName) {
-            activeCategory = catName;
-            goHome();
+        function filterCategory(catName) { activeCategory = catName; goHome(); }
+
+        // 2. LIKES PAGE
+        function toggleLike(btn, id) {
+            const index = likedItems.indexOf(id);
+            if (index > -1) {
+                likedItems.splice(index, 1);
+                btn.classList.remove('text-red-500');
+                btn.classList.add('text-gray-500');
+            } else {
+                likedItems.push(id);
+                btn.classList.remove('text-gray-500');
+                btn.classList.add('text-red-500');
+            }
+            localStorage.setItem('mz_likes', JSON.stringify(likedItems));
         }
 
-        // Like toggle logic
-        function toggleLike(btn) {
-            btn.classList.toggle('text-red-500');
-            btn.classList.toggle('text-gray-500');
+        function showLikes() {
+            let likedProducts = products.filter(p => likedItems.includes(p.id));
+            let html = "";
+
+            if (likedProducts.length === 0) {
+                html = `
+                    <div class="text-center p-10 mt-10">
+                        <i class="fa-solid fa-heart-crack text-5xl text-gray-600 mb-4"></i>
+                        <h2 class="text-gray-400 font-semibold">No Liked Items</h2>
+                        <p class="text-xs text-gray-500 mt-2">Heart your favorite products to see them here.</p>
+                    </div>
+                `;
+            } else {
+                html = `<div class="grid grid-cols-2 gap-4">` + likedProducts.map(item => `
+                    <div class="bg-zinc-950 border border-yellow-600/30 rounded-lg shadow-lg relative flex flex-col justify-between overflow-hidden">
+                        <button onclick="toggleLike(this, ${item.id}); setTimeout(showLikes, 300);" class="absolute top-2 right-2 text-red-500 z-10 text-xl bg-black/60 rounded-full w-8 h-8 flex items-center justify-center backdrop-blur-sm shadow-md transition-colors">
+                            <i class="fa-solid fa-heart"></i>
+                        </button>
+                        <div onclick="viewProduct(${item.id})" class="cursor-pointer relative">
+                            <img src="${item.img}" class="w-full h-44 object-cover opacity-90 hover:opacity-100 transition duration-300">
+                        </div>
+                        <div class="p-3 flex flex-col flex-grow border-t border-yellow-600/20">
+                            <h3 class="text-sm font-semibold truncate text-gray-200">${item.name}</h3>
+                            <div class="mt-1 flex items-center gap-2">
+                                <span class="font-bold text-yellow-500">₹${item.price}</span>
+                            </div>
+                            <button onclick="goToAddress(${item.id})" class="mt-3 block w-full bg-gradient-to-r from-yellow-600 to-yellow-400 text-black font-extrabold py-1.5 rounded text-xs">BUY NOW</button>
+                        </div>
+                    </div>
+                `).join('') + `</div>`;
+            }
+
+            appDiv.innerHTML = `
+                <div class="fade-in p-4 pb-10">
+                    <h1 class="text-xl font-bold text-yellow-500 mb-6 border-b border-yellow-600/30 pb-2"><i class="fa-solid fa-heart mr-2"></i> My Likes</h1>
+                    ${html}
+                </div>
+            `;
+            window.scrollTo(0,0);
+        }
+
+        // 3. PROFILE PAGE (Theme, Info, Support)
+        function showProfile() {
+            let userName = localStorage.getItem('mz_userName') || 'Fashion Lover';
+            let userPhone = localStorage.getItem('mz_userPhone') || '+91 - Update Number';
+            
+            appDiv.innerHTML = `
+                <div class="fade-in p-5 pb-10">
+                    <h1 class="text-xl font-bold text-yellow-500 mb-6 border-b border-yellow-600/30 pb-2">My Profile</h1>
+                    
+                    <div class="bg-zinc-950 p-4 rounded-lg border border-yellow-600/30 mb-6 flex items-center gap-4 shadow-md">
+                        <div class="w-16 h-16 bg-gradient-to-r from-yellow-600 to-yellow-400 rounded-full flex items-center justify-center text-black text-2xl font-bold shadow-[0_0_10px_rgba(212,175,55,0.4)]">
+                            <i class="fa-solid fa-user"></i>
+                        </div>
+                        <div>
+                            <p class="font-bold text-lg text-gray-200">${userName}</p>
+                            <p class="text-sm text-gray-400">${userPhone}</p>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-zinc-950 rounded-lg border border-yellow-600/30 overflow-hidden mb-6 shadow-md">
+                        <div class="p-4 flex justify-between items-center">
+                            <span class="font-semibold text-gray-200"><i class="fa-solid ${isLightMode ? 'fa-sun' : 'fa-moon'} text-yellow-500 mr-2 w-5 text-center"></i> Theme</span>
+                            <button onclick="toggleTheme()" class="bg-zinc-800 px-4 py-1.5 rounded text-xs font-bold text-yellow-500 border border-yellow-500/50 shadow-sm transition active:scale-95">
+                                ${isLightMode ? 'Switch to Dark' : 'Switch to Light'}
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <h2 class="font-bold text-yellow-500 mb-3 ml-1"><i class="fa-solid fa-headset mr-2"></i> Support & Contact</h2>
+                    <div class="flex flex-col gap-3">
+                        <a href="https://wa.me/919982437489" target="_blank" class="flex w-full items-center justify-center gap-3 bg-green-500 hover:bg-green-600 text-white font-bold py-3.5 px-4 rounded-lg shadow-md transition">
+                            <i class="fa-brands fa-whatsapp text-2xl"></i> WhatsApp Support
+                        </a>
+                        <a href="#" target="_blank" class="flex w-full items-center justify-center gap-3 bg-gradient-to-r from-purple-500 via-pink-500 to-orange-500 hover:opacity-90 text-white font-bold py-3.5 px-4 rounded-lg shadow-md transition">
+                            <i class="fa-brands fa-instagram text-2xl"></i> Instagram Support
+                        </a>
+                    </div>
+                </div>
+            `;
+            window.scrollTo(0,0);
         }
 
         // --- PRODUCT PAGE ---
@@ -174,11 +301,6 @@
                             <p class="text-gray-400 text-sm leading-relaxed">Experience the ultimate comfort and style with this premium quality apparel. Perfect for everyday wear, designed exclusively for your unique fashion sense.</p>
                         </div>
                     </div>
-                    
-                    <div class="fixed bottom-0 left-0 w-full bg-zinc-950 border-t border-yellow-600/40 p-3 max-w-md mx-auto flex gap-3 z-50 shadow-[0_-4px_15px_rgba(0,0,0,0.5)]">
-                        <button id="addBtn-${product.id}" onclick="addToCart(${product.id})" class="w-1/2 bg-black border border-yellow-500 text-yellow-500 font-bold py-3 rounded hover:bg-yellow-900/20 transition text-sm">ADD TO CART</button>
-                        <button onclick="goToCheckout(${product.id})" class="w-1/2 bg-gradient-to-r from-yellow-600 to-yellow-400 text-black font-extrabold py-3 rounded text-center block shadow-[0_0_15px_rgba(212,175,55,0.4)] text-sm">BUY NOW</button>
-                    </div>
                 </div>
             `;
             window.scrollTo(0,0);
@@ -195,11 +317,9 @@
                 </div>
             `;
         }
-        function closeImage() {
-            document.getElementById('imageModalContainer').innerHTML = '';
-        }
+        function closeImage() { document.getElementById('imageModalContainer').innerHTML = ''; }
 
-        // --- CART & CHECKOUT ---
+        // --- CART SYSTEM ---
         function showCart() {
             if (cart.length === 0) {
                 appDiv.innerHTML = `
@@ -212,11 +332,10 @@
                 return;
             }
 
-            let cartHTML = '';
             let total = 0;
-            cart.forEach((item, index) => {
+            let cartHTML = cart.map((item, index) => {
                 total += item.price;
-                cartHTML += `
+                return `
                     <div class="flex gap-4 items-center bg-zinc-950 p-3 rounded-lg border border-yellow-600/30 mb-3 shadow-md">
                         <img src="${item.img}" class="w-20 h-20 object-cover rounded border border-gray-700">
                         <div class="flex-grow">
@@ -226,100 +345,120 @@
                         <button onclick="removeFromCart(${index})" class="text-red-500 p-2"><i class="fa-solid fa-trash"></i></button>
                     </div>
                 `;
-            });
+            }).join('');
 
             appDiv.innerHTML = `
                 <div class="fade-in p-5 pb-24">
-                    <div class="flex items-center gap-3 mb-6 border-b border-yellow-600/30 pb-2">
-                        <button onclick="goHome()" class="text-yellow-500"><i class="fa-solid fa-arrow-left"></i></button>
-                        <h1 class="text-xl font-bold text-yellow-500">Your Cart</h1>
-                    </div>
+                    <h1 class="text-xl font-bold text-yellow-500 mb-6 border-b border-yellow-600/30 pb-2">Your Cart</h1>
                     ${cartHTML}
-                    
-                    <div class="mt-6 p-4 bg-black border border-yellow-600/50 rounded-lg">
-                        <div class="flex justify-between text-gray-300 text-sm mb-2"><span>Subtotal</span><span>₹${total}</span></div>
-                        <div class="flex justify-between font-bold text-yellow-500 text-lg border-t border-gray-800 pt-2 mt-2">
+                    <div class="mt-6 p-4 bg-zinc-950 border border-yellow-600/50 rounded-lg">
+                        <div class="flex justify-between font-bold text-yellow-500 text-lg">
                             <span>Total</span><span>₹${total}</span>
                         </div>
                     </div>
-
-                    <div class="fixed bottom-0 left-0 w-full bg-zinc-950 border-t border-yellow-600/40 p-3 max-w-md mx-auto z-50">
-                        <button onclick="goToCheckout('cart')" class="w-full bg-gradient-to-r from-yellow-600 to-yellow-400 text-black font-extrabold py-3 rounded text-center block shadow-[0_0_15px_rgba(212,175,55,0.4)] tracking-wide">CHECKOUT (₹${total})</button>
-                    </div>
+                    <button onclick="goToAddress('cart')" class="w-full mt-6 bg-gradient-to-r from-yellow-600 to-yellow-400 text-black font-extrabold py-3 rounded shadow-[0_0_15px_rgba(212,175,55,0.4)] tracking-wide">PROCEED TO BUY</button>
                 </div>
             `;
             window.scrollTo(0,0);
         }
 
-        function goToCheckout(source) {
-            let checkoutItems = [];
+        function addToCart(id) {
+            cart.push(products.find(p => p.id === id));
+            updateCartBadge();
+            const btn = document.getElementById(`addBtn-${id}`);
+            if(btn) {
+                const originalText = btn.innerHTML;
+                btn.innerHTML = '<i class="fa-solid fa-check"></i> ADDED';
+                btn.classList.add('bg-green-600', 'text-white', 'border-green-500');
+                btn.classList.remove('bg-zinc-800', 'text-yellow-500', 'border-yellow-500');
+                setTimeout(() => {
+                    btn.innerHTML = originalText;
+                    btn.classList.remove('bg-green-600', 'text-white', 'border-green-500');
+                    btn.classList.add('bg-zinc-800', 'text-yellow-500', 'border-yellow-500');
+                }, 1500);
+            }
+        }
+        function removeFromCart(index) { cart.splice(index, 1); updateCartBadge(); showCart(); }
+        function updateCartBadge() {
+            const badge = document.getElementById('bottomCartCount');
+            if (cart.length > 0) { badge.innerText = cart.length; badge.classList.remove('hidden'); } 
+            else { badge.classList.add('hidden'); }
+        }
+
+        // --- SPLIT CHECKOUT: STEP 1 (ADDRESS) ---
+        function goToAddress(source) {
             let total = 0;
             let productNames = "";
             let primaryImg = "";
 
             if (source === 'cart') {
-                checkoutItems = cart;
                 total = cart.reduce((sum, item) => sum + item.price, 0);
                 productNames = cart.map(i => i.name).join(", ");
                 primaryImg = cart[0].img;
             } else {
                 const product = products.find(p => p.id === source);
-                checkoutItems = [product];
                 total = product.price;
                 productNames = product.name;
                 primaryImg = product.img;
             }
 
-            // Save info to be used when confirming order
-            currentCheckoutItem = { names: productNames, price: total, img: primaryImg };
-
-            let itemsHTML = checkoutItems.map(item => `
-                <div class="flex gap-4 items-center mb-3 border-b border-gray-800 pb-2 last:border-0 last:pb-0">
-                    <img src="${item.img}" class="w-12 h-12 object-cover rounded border border-gray-700">
-                    <div>
-                        <p class="font-bold text-gray-200 text-sm">${item.name}</p>
-                        <p class="text-yellow-500 text-sm font-semibold">₹${item.price}</p>
-                    </div>
-                </div>
-            `).join('');
+            tempCheckoutData = { names: productNames, price: total, img: primaryImg };
 
             appDiv.innerHTML = `
                 <div class="fade-in p-5 pb-20">
-                    <div class="flex items-center gap-3 mb-6 border-b border-yellow-600/30 pb-2">
-                        <button onclick="goHome()" class="text-yellow-500 text-xl"><i class="fa-solid fa-arrow-left"></i></button>
-                        <h1 class="text-xl font-bold text-yellow-500">Checkout</h1>
-                    </div>
+                    <h1 class="text-xl font-bold text-yellow-500 mb-6 border-b border-yellow-600/30 pb-2">Delivery Details</h1>
                     
-                    <div class="bg-zinc-950 p-4 rounded-lg border border-yellow-600/30 mb-6 shadow-md">
-                        ${itemsHTML}
-                        <div class="border-t border-yellow-600/30 mt-3 pt-3 flex justify-between font-bold text-lg text-yellow-500">
-                            <span>Total to Pay:</span>
-                            <span>₹${total}</span>
-                        </div>
-                    </div>
-
-                    <form id="checkoutForm" onsubmit="confirmOrder(event)" class="flex flex-col gap-4">
+                    <form onsubmit="goToPayment(event)" class="flex flex-col gap-4">
                         <div>
-                            <h2 class="font-bold text-gray-300 mb-3 text-sm"><i class="fa-solid fa-location-dot text-yellow-500 mr-2"></i>Shipping Details</h2>
-                            <input type="text" id="custName" placeholder="Full Name" required class="bg-zinc-950 border border-gray-700 focus:border-yellow-500 outline-none text-white p-3 rounded w-full mb-3 text-sm">
+                            <input type="text" id="custName" placeholder="Name" required class="bg-zinc-950 border border-gray-700 focus:border-yellow-500 outline-none text-white p-3 rounded w-full mb-3 text-sm">
                             <input type="tel" id="custPhone" placeholder="Phone Number" required class="bg-zinc-950 border border-gray-700 focus:border-yellow-500 outline-none text-white p-3 rounded w-full mb-3 text-sm">
                             <textarea id="custAddress" placeholder="Complete Address (House No, Street, City)" required class="bg-zinc-950 border border-gray-700 focus:border-yellow-500 outline-none text-white p-3 rounded w-full text-sm" rows="3"></textarea>
                         </div>
                         
-                        <div>
-                            <h2 class="font-bold text-gray-300 mt-2 mb-3 text-sm"><i class="fa-solid fa-wallet text-yellow-500 mr-2"></i>Payment Method</h2>
-                            <div class="flex items-center gap-3 bg-zinc-950 p-3 rounded border border-gray-700 mb-2">
-                                <input type="radio" id="prepaid" name="payment" value="Prepaid" onchange="renderPaymentUI()" class="accent-yellow-500 w-4 h-4">
-                                <label for="prepaid" class="text-gray-200 font-medium text-sm">Prepaid (Full Payment)</label>
+                        <button type="submit" class="mt-4 bg-gradient-to-r from-yellow-600 to-yellow-400 text-black font-extrabold py-3.5 rounded shadow-[0_0_15px_rgba(212,175,55,0.4)] w-full tracking-wide">
+                            NEXT: PAYMENT
+                        </button>
+                    </form>
+                </div>
+            `;
+            window.scrollTo(0,0);
+        }
+
+        // --- SPLIT CHECKOUT: STEP 2 (PAYMENT) ---
+        function goToPayment(event) {
+            event.preventDefault();
+            
+            // Save address info to temp storage and also update Profile info
+            tempCheckoutData.name = document.getElementById('custName').value;
+            tempCheckoutData.phone = document.getElementById('custPhone').value;
+            tempCheckoutData.address = document.getElementById('custAddress').value;
+            
+            localStorage.setItem('mz_userName', tempCheckoutData.name);
+            localStorage.setItem('mz_userPhone', tempCheckoutData.phone);
+
+            appDiv.innerHTML = `
+                <div class="fade-in p-5 pb-20">
+                    <h1 class="text-xl font-bold text-yellow-500 mb-6 border-b border-yellow-600/30 pb-2">Select Payment</h1>
+                    
+                    <div class="bg-zinc-950 p-4 rounded-lg border border-yellow-600/30 mb-6 flex justify-between font-bold text-lg text-yellow-500 shadow-md">
+                        <span>Total to Pay:</span>
+                        <span>₹${tempCheckoutData.price}</span>
+                    </div>
+
+                    <form onsubmit="confirmOrder(event)">
+                        <div class="mb-6">
+                            <div class="flex items-center gap-3 bg-zinc-950 p-3 rounded border border-gray-700 mb-2 cursor-pointer">
+                                <input type="radio" id="prepaid" name="payment" value="Prepaid" onchange="renderPaymentUI()" class="accent-yellow-500 w-4 h-4 cursor-pointer">
+                                <label for="prepaid" class="text-gray-200 font-medium text-sm cursor-pointer w-full">Prepaid (Full Payment)</label>
                             </div>
-                            <div class="flex items-center gap-3 bg-zinc-950 p-3 rounded border border-gray-700 mb-2">
-                                <input type="radio" id="cod" name="payment" value="COD" onchange="renderPaymentUI()" class="accent-yellow-500 w-4 h-4" checked>
-                                <label for="cod" class="text-gray-200 font-medium text-sm">Cash on Delivery (C.O.D)</label>
+                            <div class="flex items-center gap-3 bg-zinc-950 p-3 rounded border border-gray-700 mb-2 cursor-pointer">
+                                <input type="radio" id="cod" name="payment" value="COD" onchange="renderPaymentUI()" class="accent-yellow-500 w-4 h-4 cursor-pointer" checked>
+                                <label for="cod" class="text-gray-200 font-medium text-sm cursor-pointer w-full">Cash on Delivery (C.O.D)</label>
                             </div>
-                            <div id="paymentUI" class="mt-4 p-4 bg-black border border-yellow-500 rounded-lg shadow-[0_0_10px_rgba(212,175,55,0.2)]"></div>
+                            <div id="paymentUI" class="mt-4 p-4 bg-zinc-950 border border-yellow-500 rounded-lg shadow-[0_0_10px_rgba(212,175,55,0.2)]"></div>
                         </div>
                         
-                        <button type="submit" class="mt-4 bg-gradient-to-r from-yellow-600 to-yellow-400 text-black font-extrabold py-4 rounded shadow-[0_0_15px_rgba(212,175,55,0.4)] w-full text-lg tracking-wide">
+                        <button type="submit" class="bg-gradient-to-r from-yellow-600 to-yellow-400 text-black font-extrabold py-3.5 rounded shadow-[0_0_15px_rgba(212,175,55,0.4)] w-full tracking-wide">
                             PLACE ORDER
                         </button>
                     </form>
@@ -332,8 +471,7 @@
         function renderPaymentUI() {
             const isCOD = document.getElementById('cod').checked;
             const uiDiv = document.getElementById('paymentUI');
-            const totalAmount = currentCheckoutItem.price;
-            
+            const totalAmount = tempCheckoutData.price;
             const qrUrl = "https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=upi://pay?pa=dummy@upi&pn=MZFASHION";
 
             if (!isCOD) {
@@ -355,10 +493,9 @@
                     <div class="flex justify-center mb-4">
                         <img src="${qrUrl}" class="w-32 h-32 border-4 border-yellow-500 rounded p-1 bg-white shadow-lg">
                     </div>
-                    <p class="text-xs text-center text-gray-400 mb-3">Scan & Pay Token, then send screenshot on WhatsApp.</p>
-                    
+                    <p class="text-xs text-center text-gray-400 mb-3">Scan & Pay Token, then send screenshot below.</p>
                     <a href="https://wa.me/919982437489?text=Hello%20MZ%20Fashion,%20here%20is%20my%20token%20payment%20screenshot" target="_blank" class="flex w-full items-center justify-center gap-2 bg-green-500 hover:bg-green-600 text-white font-bold py-3 px-4 rounded-lg shadow-[0_0_15px_rgba(34,197,94,0.6)] animate-pulse transition">
-                        <i class="fa-brands fa-whatsapp text-2xl"></i> SEND SCREENSHOT
+                        <i class="fa-brands fa-whatsapp text-xl"></i> SEND SCREENSHOT
                     </a>
                 `;
             }
@@ -366,22 +503,18 @@
 
         function confirmOrder(event) {
             event.preventDefault();
-            
-            const name = document.getElementById('custName').value;
-            const phone = document.getElementById('custPhone').value;
-            const address = document.getElementById('custAddress').value;
             const paymentType = document.getElementById('cod').checked ? "COD" : "Prepaid";
             
             const newOrder = {
                 id: Date.now(),
                 date: new Date().toLocaleString(),
-                name: name,
-                phone: phone,
-                address: address,
+                name: tempCheckoutData.name,
+                phone: tempCheckoutData.phone,
+                address: tempCheckoutData.address,
                 payment: paymentType,
-                product_name: currentCheckoutItem.names,
-                price: currentCheckoutItem.price,
-                img: currentCheckoutItem.img // Saving image for "My Orders" page
+                product_name: tempCheckoutData.names,
+                price: tempCheckoutData.price,
+                img: tempCheckoutData.img 
             };
             
             orders.push(newOrder);
@@ -396,22 +529,20 @@
                         <i class="fa-solid fa-check"></i>
                     </div>
                     <h1 class="text-2xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-yellow-300 to-yellow-600">Order Placed!</h1>
-                    <p class="text-gray-400 mt-4 text-sm">Thank you, <span class="text-white font-semibold">${name}</span>.</p>
-                    <p class="text-gray-400 mt-1 text-sm">Order for <b class="text-yellow-500">${currentCheckoutItem.names}</b> is processing.</p>
+                    <p class="text-gray-400 mt-4 text-sm">Thank you, <span class="text-white font-semibold">${tempCheckoutData.name}</span>.</p>
+                    <p class="text-gray-400 mt-1 text-sm">Order for <b class="text-yellow-500">${tempCheckoutData.names}</b> is processing.</p>
                     
-                    <button onclick="showMyOrders()" class="mt-6 bg-gradient-to-r from-yellow-600 to-yellow-400 text-black px-8 py-3 rounded font-bold shadow-md transition-all w-full max-w-xs">View My Orders</button>
+                    <button onclick="showMyOrders()" class="mt-8 bg-gradient-to-r from-yellow-600 to-yellow-400 text-black px-8 py-3 rounded font-bold shadow-md transition-all w-full max-w-xs">View My Orders</button>
                     <button onclick="goHome()" class="mt-3 border border-yellow-500 text-yellow-500 hover:bg-yellow-500 hover:text-black px-8 py-3 rounded font-bold transition-all w-full max-w-xs">Continue Shopping</button>
                 </div>
             `;
             window.scrollTo(0,0);
         }
 
-        // --- CUSTOMER "MY ORDERS" PAGE ---
+        // --- MY ORDERS PAGE ---
         function showMyOrders() {
             let myOrdersHTML = "";
-            
             if (orders.length > 0) {
-                // Show newest orders first
                 [...orders].reverse().forEach(order => {
                     let paymentStatus = "";
                     let tokenAmount = 0;
@@ -442,22 +573,15 @@
                                     <span class="inline-block mt-2 px-2 py-0.5 bg-yellow-900/30 text-yellow-500 text-[10px] rounded border border-yellow-600/50 uppercase">${order.payment}</span>
                                 </div>
                             </div>
-                            
                             <div class="mb-3">
                                 <p class="text-sm text-gray-300 font-semibold"><i class="fa-solid fa-location-dot text-yellow-500 mr-1 w-4"></i> Deliver To:</p>
                                 <p class="text-xs text-gray-400 ml-5">${order.name}</p>
                                 <p class="text-xs text-gray-400 ml-5">${order.address}</p>
-                                <p class="text-xs text-gray-400 ml-5">${order.phone}</p>
                             </div>
-                            
                             <div class="bg-black p-3 rounded border border-gray-800">
                                 <p class="text-sm text-gray-300 font-semibold mb-1"><i class="fa-solid fa-wallet text-yellow-500 mr-1 w-4"></i> Payment Info:</p>
                                 ${paymentStatus}
                             </div>
-                            
-                            <a href="https://wa.me/919982437489?text=Hello,%20I%20have%20an%20issue%20with%20my%20order%20of%20${order.product_name}" target="_blank" class="mt-4 flex w-full items-center justify-center gap-2 bg-green-500/10 hover:bg-green-500/20 border border-green-500 text-green-500 font-bold py-2 px-4 rounded transition text-xs">
-                                <i class="fa-brands fa-whatsapp text-lg"></i> CONTACT SUPPORT
-                            </a>
                         </div>
                     `;
                 });
@@ -466,7 +590,6 @@
                     <div class="text-center p-10 bg-zinc-950 rounded-lg border border-gray-800 mt-4">
                         <i class="fa-solid fa-box-open text-5xl text-gray-600 mb-4"></i>
                         <h2 class="text-gray-400 font-semibold">No Orders Found</h2>
-                        <p class="text-xs text-gray-500 mt-2">Looks like you haven't bought anything yet.</p>
                         <button onclick="goHome()" class="mt-4 border border-yellow-500 text-yellow-500 px-6 py-2 rounded text-sm font-bold">Start Shopping</button>
                     </div>
                 `;
@@ -474,51 +597,11 @@
 
             appDiv.innerHTML = `
                 <div class="fade-in p-4 pb-20">
-                    <div class="flex items-center gap-3 mb-6 border-b border-yellow-600/30 pb-2">
-                        <button onclick="goHome()" class="text-yellow-500 text-xl"><i class="fa-solid fa-arrow-left"></i></button>
-                        <h1 class="text-xl font-bold text-yellow-500">My Orders</h1>
-                    </div>
+                    <h1 class="text-xl font-bold text-yellow-500 mb-6 border-b border-yellow-600/30 pb-2"><i class="fa-solid fa-box mr-2"></i> My Orders</h1>
                     ${myOrdersHTML}
                 </div>
             `;
             window.scrollTo(0,0);
-        }
-
-        // Add to Cart
-        function addToCart(id) {
-            const product = products.find(p => p.id === id);
-            cart.push(product);
-            updateCartBadge();
-            
-            const btn = document.getElementById(`addBtn-${id}`);
-            if(btn) {
-                const originalText = btn.innerHTML;
-                btn.innerHTML = '<i class="fa-solid fa-check"></i> ADDED';
-                btn.classList.add('bg-green-600', 'text-white', 'border-green-500');
-                btn.classList.remove('bg-zinc-800', 'text-yellow-500', 'border-yellow-500');
-                
-                setTimeout(() => {
-                    btn.innerHTML = originalText;
-                    btn.classList.remove('bg-green-600', 'text-white', 'border-green-500');
-                    btn.classList.add('bg-zinc-800', 'text-yellow-500', 'border-yellow-500');
-                }, 1500);
-            }
-        }
-
-        function removeFromCart(index) {
-            cart.splice(index, 1);
-            updateCartBadge();
-            showCart();
-        }
-
-        function updateCartBadge() {
-            const badge = document.getElementById('cartCount');
-            if (cart.length > 0) {
-                badge.innerText = cart.length;
-                badge.classList.remove('hidden');
-            } else {
-                badge.classList.add('hidden');
-            }
         }
 
         // --- SECRET ADMIN PANEL ---
@@ -545,16 +628,13 @@
             }
 
             appDiv.innerHTML = `
-                <div class="fade-in p-5">
+                <div class="fade-in p-5 pb-20">
                     <h1 class="text-2xl font-bold mb-4 text-yellow-500 border-b border-yellow-600/30 pb-3">Admin Panel</h1>
                     <div class="flex justify-between items-center mb-4">
                         <h2 class="text-sm font-semibold text-gray-200">Total Orders: ${orders.length}</h2>
                         <button onclick="clearOrders()" class="text-[10px] text-red-500 border border-red-900 px-2 py-1 rounded">Clear All</button>
                     </div>
                     <div class="flex flex-col gap-3">${ordersHTML}</div>
-                    <div class="mt-8 text-center">
-                        <button onclick="goHome()" class="text-yellow-500 text-sm"><i class="fa-solid fa-arrow-left mr-1"></i> Back to Store</button>
-                    </div>
                 </div>
             `;
             window.scrollTo(0,0);
@@ -571,15 +651,13 @@
         let clicks = 0;
         document.getElementById('secretLogo').addEventListener('click', () => {
             clicks++;
-            if(clicks >= 5) {
-                clicks = 0;
-                renderAdmin();
-            }
+            if(clicks >= 5) { clicks = 0; renderAdmin(); }
             setTimeout(() => { clicks = 0; }, 2000);
         });
 
-        // Initialize App
+        // Init
         goHome();
+        updateCartBadge();
     </script>
 </body>
 </html>
