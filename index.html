@@ -25,6 +25,7 @@
 </head>
 <body class="bg-black text-gray-200">
 
+    <!-- Top Navbar -->
     <nav id="topNav" class="hidden bg-zinc-950 p-4 flex justify-between items-center sticky top-0 z-50 border-b border-yellow-600/40 shadow-[0_4px_15px_rgba(212,175,55,0.1)]">
         <div class="flex items-center gap-3 w-full justify-center relative">
             <img id="secretLogo" src="logo.png" onerror="this.src='https://ui-avatars.com/api/?name=MZ&background=000&color=D4AF37'" alt="MZ Fashion" class="absolute left-0 w-10 h-10 rounded-full cursor-pointer border border-yellow-500 object-cover shadow-[0_0_10px_rgba(212,175,55,0.4)]">
@@ -34,9 +35,12 @@
         </div>
     </nav>
 
+    <!-- Main App Container -->
     <div id="app" class="max-w-md mx-auto bg-zinc-900 min-h-screen shadow-2xl content-padding relative">
-        </div>
+        <!-- Views will be injected here -->
+    </div>
 
+    <!-- Bottom Navigation Bar -->
     <div id="bottomNav" class="hidden fixed bottom-0 left-0 w-full bg-zinc-950 border-t border-yellow-600/40 p-2 max-w-md mx-auto z-[60] flex justify-around items-center h-16 shadow-[0_-4px_15px_rgba(0,0,0,0.3)]">
         <div onclick="showLikes()" class="flex flex-col items-center w-1/5 text-gray-500 hover:text-yellow-500 cursor-pointer transition-colors">
             <i class="fa-solid fa-heart text-lg"></i><span class="text-[9px] mt-1 font-semibold">Likes</span>
@@ -87,7 +91,7 @@
         let likedItems = JSON.parse(localStorage.getItem('mz_likes')) || [];
         let activeCategory = "All";
         let tempCheckoutData = null; 
-        let currentSelectedSize = null; // Store selected size temporarily
+        let currentSelectedSize = null; 
         
         const appDiv = document.getElementById('app');
         const topNav = document.getElementById('topNav');
@@ -253,8 +257,10 @@
                         </div>
                         <span class="text-[10px] text-yellow-600 font-bold mt-1 bg-yellow-900/20 px-1 w-max rounded">${item.discount}</span>
                         
-                        <div class="mt-3">
-                            <button onclick="viewProduct(${item.id})" class="w-full bg-zinc-800 border border-yellow-500 text-yellow-500 font-bold py-2 rounded text-xs hover:bg-yellow-900/30 transition shadow-sm">SELECT SIZE & BUY</button>
+                        <!-- Fixed Buttons: CART & BUY NOW -->
+                        <div class="flex justify-between gap-1.5 mt-3">
+                            <button onclick="viewProduct(${item.id})" class="flex-1 bg-zinc-800 border border-yellow-500 text-yellow-500 font-bold py-1.5 rounded text-[10px] hover:bg-yellow-900/30 transition shadow-sm">CART</button>
+                            <button onclick="viewProduct(${item.id})" class="flex-1 bg-gradient-to-r from-yellow-600 to-yellow-400 text-black font-extrabold py-1.5 rounded shadow-[0_0_10px_rgba(212,175,55,0.4)] text-[10px] transition-all duration-300">BUY NOW</button>
                         </div>
                     </div>
                 </div>
@@ -266,12 +272,13 @@
 
             appDiv.innerHTML = `
                 <div class="fade-in">
-                    <div class="w-full h-44 mt-4 bg-zinc-950 flex flex-col items-center justify-center overflow-hidden relative border-y border-yellow-600/30">
+                    <!-- Banner with margin/space on sides as requested -->
+                    <div class="h-44 mx-4 mt-4 rounded-xl bg-zinc-950 flex flex-col items-center justify-center overflow-hidden relative border border-yellow-600/30 shadow-[0_0_10px_rgba(212,175,55,0.1)]">
                         <img src="256328.jpg" alt="Banner" class="w-full h-full object-cover opacity-90">
                         <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
                     </div>
 
-                    <div class="grid grid-cols-5 gap-2 p-3 bg-zinc-950 border-b border-yellow-600/20 mt-2">
+                    <div class="grid grid-cols-5 gap-2 p-3 bg-zinc-950 border-b border-yellow-600/20 mt-4">
                         ${catHTML}
                     </div>
                     
@@ -330,7 +337,12 @@
                             <div class="mt-1 flex items-center gap-2">
                                 <span class="font-bold text-yellow-500">₹${item.price}</span>
                             </div>
-                            <button onclick="viewProduct(${item.id})" class="mt-3 block w-full bg-zinc-800 border border-yellow-500 text-yellow-500 font-bold py-1.5 rounded text-xs">SELECT SIZE</button>
+                            
+                            <!-- Fixed Buttons: CART & BUY NOW -->
+                            <div class="flex justify-between gap-1.5 mt-3">
+                                <button onclick="viewProduct(${item.id})" class="flex-1 bg-zinc-800 border border-yellow-500 text-yellow-500 font-bold py-1.5 rounded text-[10px] shadow-sm">CART</button>
+                                <button onclick="viewProduct(${item.id})" class="flex-1 bg-gradient-to-r from-yellow-600 to-yellow-400 text-black font-extrabold py-1.5 rounded shadow-[0_0_10px_rgba(212,175,55,0.4)] text-[10px]">BUY NOW</button>
+                            </div>
                         </div>
                     </div>
                 `).join('') + `</div>`;
@@ -366,6 +378,7 @@
                         </div>
                     </div>
                     
+                    <!-- Support Accordion -->
                     <div class="bg-zinc-950 rounded-lg border border-yellow-600/30 overflow-hidden mb-6 shadow-md">
                         <div onclick="document.getElementById('supportPanel').classList.toggle('hidden')" class="p-4 flex justify-between items-center cursor-pointer hover:bg-zinc-900">
                             <span class="font-semibold text-yellow-500"><i class="fa-solid fa-headset mr-2 w-5 text-center"></i> Support & Help</span>
@@ -383,6 +396,7 @@
                         </div>
                     </div>
                     
+                    <!-- Logout -->
                     <button onclick="logout()" class="w-full bg-red-600/20 text-red-500 border border-red-600/50 font-bold py-3 rounded-lg mt-4 shadow-sm hover:bg-red-600 hover:text-white transition">
                         <i class="fa-solid fa-right-from-bracket mr-2"></i> LOGOUT
                     </button>
@@ -471,6 +485,7 @@
                             <span class="text-sm text-black font-bold bg-yellow-500 px-2 py-1 rounded">${product.discount}</span>
                         </div>
                         
+                        <!-- Size Selection -->
                         <div class="mt-6 mb-4">
                             <p class="font-bold text-gray-300 mb-3 uppercase tracking-wide text-sm">Select Size</p>
                             <div class="flex flex-wrap gap-3">
@@ -478,6 +493,7 @@
                             </div>
                         </div>
 
+                        <!-- More Products instead of details -->
                         <h3 class="font-bold text-yellow-500 mt-8 border-t border-yellow-600/30 pt-4 mb-4 uppercase tracking-wide">More Products</h3>
                         <div class="grid grid-cols-2 gap-3 mb-6">
                             ${moreProdHTML}
@@ -685,7 +701,7 @@
             const qrUrl = "https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=upi://pay?pa=dummy@upi&pn=MZFASHION";
 
             if (!isCOD) {
-                // PREPAID: Now includes WhatsApp button too!
+                // PREPAID
                 uiDiv.innerHTML = `
                     <p class="text-center text-sm text-gray-400 mb-2">Scan QR to pay Full Amount</p>
                     <p class="text-center font-bold text-xl text-yellow-500 mb-4">₹${totalAmount}</p>
@@ -759,7 +775,6 @@
         function showMyOrders() {
             if(!checkAuth()) return;
             let myOrdersHTML = "";
-            // Filter orders for current logged in user (optional, but good practice. Assuming orders are mixed, here we show all for simplicity or filter by phone)
             let userOrders = orders.filter(o => o.phone === currentUser.phone);
 
             if (userOrders.length > 0) {
