@@ -14,18 +14,24 @@
             to { opacity: 1; }
         }
         
-        /* Light Mode Styles override */
-        body.light-mode { background-color: #f3f4f6 !important; color: #111827 !important; }
-        .light-mode .bg-zinc-950, .light-mode .bg-zinc-900, .light-mode .bg-black { background-color: #ffffff !important; border-color: #e5e7eb !important; }
+        /* Premium Light Mode Styles */
+        body.light-mode { background-color: #f9fafb !important; color: #111827 !important; }
+        .light-mode .bg-zinc-950, .light-mode .bg-black { background-color: #ffffff !important; border-color: #e5e7eb !important; }
+        .light-mode .bg-zinc-900 { background-color: #f3f4f6 !important; }
         .light-mode .text-gray-200, .light-mode .text-gray-300 { color: #1f2937 !important; }
         .light-mode .text-gray-400, .light-mode .text-gray-500 { color: #4b5563 !important; }
-        .light-mode .border-gray-700, .light-mode .border-gray-800 { border-color: #e5e7eb !important; }
-        .light-mode .border-black { border-color: #ffffff !important; } /* For floating Home button border */
+        .light-mode .border-gray-700, .light-mode .border-gray-800, .light-mode .border-yellow-600\/30, .light-mode .border-yellow-600\/20 { border-color: #e5e7eb !important; }
+        .light-mode .border-black { border-color: #ffffff !important; }
+        .light-mode .shadow-lg { box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05) !important; }
+        
+        /* Adjusting fixed bottom margin for content so it doesn't hide behind nav */
+        .content-padding { padding-bottom: 90px; }
     </style>
 </head>
 <body class="bg-black text-gray-200 transition-colors duration-300">
 
-    <nav class="bg-zinc-950 p-4 flex justify-between items-center sticky top-0 z-50 border-b border-yellow-600/40 shadow-[0_4px_15px_rgba(212,175,55,0.1)]">
+    <!-- Top Navbar -->
+    <nav class="bg-zinc-950 p-4 flex justify-between items-center sticky top-0 z-50 border-b border-yellow-600/40 shadow-[0_4px_15px_rgba(212,175,55,0.1)] transition-colors">
         <div class="flex items-center gap-3 w-full justify-center relative">
             <img id="secretLogo" src="logo.png" onerror="this.src='https://ui-avatars.com/api/?name=MZ&background=000&color=D4AF37'" alt="MZ Fashion" class="absolute left-0 w-10 h-10 rounded-full cursor-pointer border border-yellow-500 object-cover shadow-[0_0_10px_rgba(212,175,55,0.4)]">
             <span onclick="goHome()" class="cursor-pointer font-bold text-lg tracking-widest text-transparent bg-clip-text bg-gradient-to-r from-yellow-200 to-yellow-600">
@@ -34,32 +40,41 @@
         </div>
     </nav>
 
-    <div id="app" class="max-w-md mx-auto bg-zinc-900 min-h-screen shadow-2xl pb-24 relative">
-        </div>
+    <!-- Main App Container -->
+    <div id="app" class="max-w-md mx-auto bg-zinc-900 min-h-screen shadow-2xl content-padding relative transition-colors">
+        <!-- Views will be injected here -->
+    </div>
 
-    <div class="fixed bottom-0 left-0 w-full bg-zinc-950 border-t border-yellow-600/40 p-2 max-w-md mx-auto z-50 flex justify-around items-center h-16 shadow-[0_-4px_15px_rgba(0,0,0,0.3)]">
+    <!-- Bottom Navigation Bar (Floating Tabs) -->
+    <div class="fixed bottom-0 left-0 w-full bg-zinc-950 border-t border-yellow-600/40 p-2 max-w-md mx-auto z-[60] flex justify-around items-center h-16 shadow-[0_-4px_15px_rgba(0,0,0,0.3)] transition-colors">
+        <!-- Likes -->
         <div onclick="showLikes()" class="flex flex-col items-center w-1/5 text-gray-500 hover:text-yellow-500 cursor-pointer transition-colors">
             <i class="fa-solid fa-heart text-lg"></i><span class="text-[9px] mt-1 font-semibold">Likes</span>
         </div>
+        <!-- Orders -->
         <div onclick="showMyOrders()" class="flex flex-col items-center w-1/5 text-gray-500 hover:text-yellow-500 cursor-pointer transition-colors">
             <i class="fa-solid fa-box text-lg"></i><span class="text-[9px] mt-1 font-semibold">Orders</span>
         </div>
         
+        <!-- Center Raised HOME Button -->
         <div class="w-1/5 flex justify-center relative">
             <div onclick="goHome()" class="absolute -top-10 w-14 h-14 bg-gradient-to-r from-yellow-600 to-yellow-400 rounded-full flex items-center justify-center text-black text-2xl shadow-[0_0_15px_rgba(212,175,55,0.5)] border-4 border-black cursor-pointer z-50 transition-transform active:scale-95">
                 <i class="fa-solid fa-house"></i>
             </div>
         </div>
         
+        <!-- Cart -->
         <div onclick="showCart()" class="flex flex-col items-center w-1/5 text-gray-500 hover:text-yellow-500 cursor-pointer relative transition-colors">
             <i class="fa-solid fa-cart-shopping text-lg"></i><span class="text-[9px] mt-1 font-semibold">Cart</span>
             <span id="bottomCartCount" class="absolute -top-1 right-2 bg-red-600 text-white text-[9px] font-bold px-1.5 py-0.5 rounded-full hidden">0</span>
         </div>
+        <!-- Profile -->
         <div onclick="showProfile()" class="flex flex-col items-center w-1/5 text-gray-500 hover:text-yellow-500 cursor-pointer transition-colors">
             <i class="fa-solid fa-user text-lg"></i><span class="text-[9px] mt-1 font-semibold">Profile</span>
         </div>
     </div>
 
+    <!-- Full Screen Image Modal -->
     <div id="imageModalContainer"></div>
 
     <script>
@@ -84,7 +99,7 @@
         let likedItems = JSON.parse(localStorage.getItem('mz_likes')) || [];
         let isLightMode = localStorage.getItem('mz_theme') === 'light';
         let activeCategory = "All";
-        let tempCheckoutData = null; // To hold address before payment
+        let tempCheckoutData = null; 
         
         const appDiv = document.getElementById('app');
 
@@ -97,7 +112,7 @@
             isLightMode = !isLightMode;
             localStorage.setItem('mz_theme', isLightMode ? 'light' : 'dark');
             applyTheme();
-            showProfile(); // Re-render profile to update button text
+            showProfile(); 
         }
         applyTheme();
 
@@ -122,7 +137,7 @@
             let prodHTML = displayProducts.map(item => {
                 const isLiked = likedItems.includes(item.id);
                 return `
-                <div class="bg-zinc-950 border border-yellow-600/30 rounded-lg shadow-lg relative flex flex-col justify-between overflow-hidden">
+                <div class="bg-zinc-950 border border-yellow-600/30 rounded-lg shadow-lg relative flex flex-col justify-between overflow-hidden transition-colors">
                     <button onclick="toggleLike(this, ${item.id})" class="absolute top-2 right-2 ${isLiked ? 'text-red-500' : 'text-gray-500'} z-10 text-xl bg-black/60 rounded-full w-8 h-8 flex items-center justify-center backdrop-blur-sm shadow-md transition-colors">
                         <i class="fa-solid fa-heart"></i>
                     </button>
@@ -139,9 +154,10 @@
                         </div>
                         <span class="text-[10px] text-yellow-600 font-bold mt-1 bg-yellow-900/20 px-1 w-max rounded">${item.discount}</span>
                         
-                        <div class="flex gap-2 mt-3">
-                            <button id="addBtn-${item.id}" onclick="addToCart(${item.id})" class="w-1/2 bg-zinc-800 border border-yellow-500 text-yellow-500 font-bold py-1.5 rounded text-xs hover:bg-yellow-900/30 transition shadow-sm">CART</button>
-                            <button onclick="goToAddress(${item.id})" class="w-1/2 bg-gradient-to-r from-yellow-600 to-yellow-400 text-black font-extrabold py-1.5 rounded shadow-[0_0_10px_rgba(212,175,55,0.4)] text-xs transition-all duration-300">BUY NOW</button>
+                        <!-- CHIPNE WALI PROBLEM FIXED HERE (Added gap, smaller text) -->
+                        <div class="flex justify-between gap-1.5 mt-3">
+                            <button id="addBtn-${item.id}" onclick="addToCart(${item.id})" class="flex-1 bg-zinc-800 border border-yellow-500 text-yellow-500 font-bold py-1.5 rounded text-[10px] hover:bg-yellow-900/30 transition shadow-sm">CART</button>
+                            <button onclick="goToAddress(${item.id})" class="flex-1 bg-gradient-to-r from-yellow-600 to-yellow-400 text-black font-extrabold py-1.5 rounded shadow-[0_0_10px_rgba(212,175,55,0.4)] text-[10px] transition-all duration-300">BUY NOW</button>
                         </div>
                     </div>
                 </div>
@@ -153,12 +169,12 @@
 
             appDiv.innerHTML = `
                 <div class="fade-in">
-                    <div class="w-full h-44 mt-4 bg-zinc-950 flex flex-col items-center justify-center overflow-hidden relative border-y border-yellow-600/30">
+                    <div class="w-full h-44 mt-4 bg-zinc-950 flex flex-col items-center justify-center overflow-hidden relative border-y border-yellow-600/30 transition-colors">
                         <img src="256328.jpg" alt="Banner" class="w-full h-full object-cover opacity-90">
                         <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
                     </div>
 
-                    <div class="grid grid-cols-5 gap-2 p-3 bg-zinc-950 border-b border-yellow-600/20 mt-2">
+                    <div class="grid grid-cols-5 gap-2 p-3 bg-zinc-950 border-b border-yellow-600/20 mt-2 transition-colors">
                         ${catHTML}
                     </div>
                     
@@ -197,14 +213,14 @@
             if (likedProducts.length === 0) {
                 html = `
                     <div class="text-center p-10 mt-10">
-                        <i class="fa-solid fa-heart-crack text-5xl text-gray-600 mb-4"></i>
-                        <h2 class="text-gray-400 font-semibold">No Liked Items</h2>
+                        <i class="fa-solid fa-heart-crack text-5xl text-gray-400 mb-4"></i>
+                        <h2 class="text-gray-500 font-semibold">No Liked Items</h2>
                         <p class="text-xs text-gray-500 mt-2">Heart your favorite products to see them here.</p>
                     </div>
                 `;
             } else {
                 html = `<div class="grid grid-cols-2 gap-4">` + likedProducts.map(item => `
-                    <div class="bg-zinc-950 border border-yellow-600/30 rounded-lg shadow-lg relative flex flex-col justify-between overflow-hidden">
+                    <div class="bg-zinc-950 border border-yellow-600/30 rounded-lg shadow-lg relative flex flex-col justify-between overflow-hidden transition-colors">
                         <button onclick="toggleLike(this, ${item.id}); setTimeout(showLikes, 300);" class="absolute top-2 right-2 text-red-500 z-10 text-xl bg-black/60 rounded-full w-8 h-8 flex items-center justify-center backdrop-blur-sm shadow-md transition-colors">
                             <i class="fa-solid fa-heart"></i>
                         </button>
@@ -240,7 +256,7 @@
                 <div class="fade-in p-5 pb-10">
                     <h1 class="text-xl font-bold text-yellow-500 mb-6 border-b border-yellow-600/30 pb-2">My Profile</h1>
                     
-                    <div class="bg-zinc-950 p-4 rounded-lg border border-yellow-600/30 mb-6 flex items-center gap-4 shadow-md">
+                    <div class="bg-zinc-950 p-4 rounded-lg border border-yellow-600/30 mb-6 flex items-center gap-4 shadow-md transition-colors">
                         <div class="w-16 h-16 bg-gradient-to-r from-yellow-600 to-yellow-400 rounded-full flex items-center justify-center text-black text-2xl font-bold shadow-[0_0_10px_rgba(212,175,55,0.4)]">
                             <i class="fa-solid fa-user"></i>
                         </div>
@@ -250,15 +266,17 @@
                         </div>
                     </div>
                     
-                    <div class="bg-zinc-950 rounded-lg border border-yellow-600/30 overflow-hidden mb-6 shadow-md">
+                    <!-- Theme Toggle Fixed for Light/Dark -->
+                    <div class="bg-zinc-950 rounded-lg border border-yellow-600/30 overflow-hidden mb-6 shadow-md transition-colors">
                         <div class="p-4 flex justify-between items-center">
                             <span class="font-semibold text-gray-200"><i class="fa-solid ${isLightMode ? 'fa-sun' : 'fa-moon'} text-yellow-500 mr-2 w-5 text-center"></i> Theme</span>
-                            <button onclick="toggleTheme()" class="bg-zinc-800 px-4 py-1.5 rounded text-xs font-bold text-yellow-500 border border-yellow-500/50 shadow-sm transition active:scale-95">
-                                ${isLightMode ? 'Switch to Dark' : 'Switch to Light'}
+                            <button onclick="toggleTheme()" class="bg-zinc-800 border border-gray-600 px-4 py-1.5 rounded text-xs font-bold text-yellow-500 shadow-sm transition active:scale-95">
+                                ${isLightMode ? 'Dark Mode' : 'Light Mode'}
                             </button>
                         </div>
                     </div>
                     
+                    <!-- Support Section -->
                     <h2 class="font-bold text-yellow-500 mb-3 ml-1"><i class="fa-solid fa-headset mr-2"></i> Support & Contact</h2>
                     <div class="flex flex-col gap-3">
                         <a href="https://wa.me/919982437489" target="_blank" class="flex w-full items-center justify-center gap-3 bg-green-500 hover:bg-green-600 text-white font-bold py-3.5 px-4 rounded-lg shadow-md transition">
@@ -277,7 +295,7 @@
         function viewProduct(id) {
             const product = products.find(p => p.id === id);
             appDiv.innerHTML = `
-                <div class="fade-in relative bg-black pb-24">
+                <div class="fade-in relative transition-colors">
                     <button onclick="goHome()" class="absolute top-4 left-4 bg-black/70 border border-yellow-500 text-yellow-500 rounded-full w-10 h-10 z-10 flex items-center justify-center backdrop-blur-sm shadow-lg">
                         <i class="fa-solid fa-arrow-left"></i>
                     </button>
@@ -289,7 +307,7 @@
                         </div>
                     </div>
                     
-                    <div class="p-5 bg-zinc-900 min-h-[40vh]">
+                    <div class="p-5 bg-zinc-900 min-h-[40vh] transition-colors">
                         <h1 class="text-2xl font-bold text-gray-100">${product.name}</h1>
                         <div class="mt-3 flex items-center gap-3">
                             <span class="text-3xl font-extrabold text-yellow-500">₹${product.price}</span>
@@ -300,6 +318,12 @@
                             <h3 class="text-yellow-500 font-semibold mb-2">Product Details</h3>
                             <p class="text-gray-400 text-sm leading-relaxed">Experience the ultimate comfort and style with this premium quality apparel. Perfect for everyday wear, designed exclusively for your unique fashion sense.</p>
                         </div>
+                    </div>
+                    
+                    <!-- Fixed bottom bar moved up to avoid overlapping with bottom Nav -->
+                    <div class="fixed bottom-[64px] left-0 w-full bg-zinc-950 border-t border-yellow-600/40 p-3 max-w-md mx-auto flex gap-3 z-40 shadow-[0_-4px_15px_rgba(0,0,0,0.5)] transition-colors">
+                        <button id="addBtn-${product.id}" onclick="addToCart(${product.id})" class="w-1/2 bg-black border border-yellow-500 text-yellow-500 font-bold py-3 rounded hover:bg-yellow-900/20 transition text-sm">ADD TO CART</button>
+                        <button onclick="goToAddress(${product.id})" class="w-1/2 bg-gradient-to-r from-yellow-600 to-yellow-400 text-black font-extrabold py-3 rounded text-center block shadow-[0_0_15px_rgba(212,175,55,0.4)] text-sm">BUY NOW</button>
                     </div>
                 </div>
             `;
@@ -324,7 +348,7 @@
             if (cart.length === 0) {
                 appDiv.innerHTML = `
                     <div class="fade-in p-5 text-center flex flex-col items-center justify-center min-h-[70vh]">
-                        <i class="fa-solid fa-cart-shopping text-6xl text-gray-700 mb-4"></i>
+                        <i class="fa-solid fa-cart-shopping text-6xl text-gray-400 mb-4"></i>
                         <h2 class="text-xl text-yellow-500 font-bold mb-4">Your Cart is Empty</h2>
                         <button onclick="goHome()" class="border border-yellow-500 text-yellow-500 px-6 py-2 rounded font-bold">Go Shopping</button>
                     </div>
@@ -336,7 +360,7 @@
             let cartHTML = cart.map((item, index) => {
                 total += item.price;
                 return `
-                    <div class="flex gap-4 items-center bg-zinc-950 p-3 rounded-lg border border-yellow-600/30 mb-3 shadow-md">
+                    <div class="flex gap-4 items-center bg-zinc-950 p-3 rounded-lg border border-yellow-600/30 mb-3 shadow-md transition-colors">
                         <img src="${item.img}" class="w-20 h-20 object-cover rounded border border-gray-700">
                         <div class="flex-grow">
                             <p class="font-bold text-gray-200 text-sm">${item.name}</p>
@@ -351,12 +375,16 @@
                 <div class="fade-in p-5 pb-24">
                     <h1 class="text-xl font-bold text-yellow-500 mb-6 border-b border-yellow-600/30 pb-2">Your Cart</h1>
                     ${cartHTML}
-                    <div class="mt-6 p-4 bg-zinc-950 border border-yellow-600/50 rounded-lg">
+                    <div class="mt-6 p-4 bg-zinc-950 border border-yellow-600/50 rounded-lg transition-colors">
                         <div class="flex justify-between font-bold text-yellow-500 text-lg">
                             <span>Total</span><span>₹${total}</span>
                         </div>
                     </div>
-                    <button onclick="goToAddress('cart')" class="w-full mt-6 bg-gradient-to-r from-yellow-600 to-yellow-400 text-black font-extrabold py-3 rounded shadow-[0_0_15px_rgba(212,175,55,0.4)] tracking-wide">PROCEED TO BUY</button>
+                    
+                    <!-- Fixed bottom button moved up slightly to avoid nav overlap -->
+                    <div class="fixed bottom-[64px] left-0 w-full bg-zinc-950 border-t border-yellow-600/40 p-3 max-w-md mx-auto z-40 transition-colors">
+                        <button onclick="goToAddress('cart')" class="w-full bg-gradient-to-r from-yellow-600 to-yellow-400 text-black font-extrabold py-3 rounded shadow-[0_0_15px_rgba(212,175,55,0.4)] tracking-wide">PROCEED TO BUY</button>
+                    </div>
                 </div>
             `;
             window.scrollTo(0,0);
@@ -410,9 +438,9 @@
                     
                     <form onsubmit="goToPayment(event)" class="flex flex-col gap-4">
                         <div>
-                            <input type="text" id="custName" placeholder="Name" required class="bg-zinc-950 border border-gray-700 focus:border-yellow-500 outline-none text-white p-3 rounded w-full mb-3 text-sm">
-                            <input type="tel" id="custPhone" placeholder="Phone Number" required class="bg-zinc-950 border border-gray-700 focus:border-yellow-500 outline-none text-white p-3 rounded w-full mb-3 text-sm">
-                            <textarea id="custAddress" placeholder="Complete Address (House No, Street, City)" required class="bg-zinc-950 border border-gray-700 focus:border-yellow-500 outline-none text-white p-3 rounded w-full text-sm" rows="3"></textarea>
+                            <input type="text" id="custName" placeholder="Name" required class="bg-zinc-950 border border-gray-700 focus:border-yellow-500 outline-none text-gray-200 p-3 rounded w-full mb-3 text-sm transition-colors">
+                            <input type="tel" id="custPhone" placeholder="Phone Number" required class="bg-zinc-950 border border-gray-700 focus:border-yellow-500 outline-none text-gray-200 p-3 rounded w-full mb-3 text-sm transition-colors">
+                            <textarea id="custAddress" placeholder="Complete Address (House No, Street, City)" required class="bg-zinc-950 border border-gray-700 focus:border-yellow-500 outline-none text-gray-200 p-3 rounded w-full text-sm transition-colors" rows="3"></textarea>
                         </div>
                         
                         <button type="submit" class="mt-4 bg-gradient-to-r from-yellow-600 to-yellow-400 text-black font-extrabold py-3.5 rounded shadow-[0_0_15px_rgba(212,175,55,0.4)] w-full tracking-wide">
@@ -428,7 +456,6 @@
         function goToPayment(event) {
             event.preventDefault();
             
-            // Save address info to temp storage and also update Profile info
             tempCheckoutData.name = document.getElementById('custName').value;
             tempCheckoutData.phone = document.getElementById('custPhone').value;
             tempCheckoutData.address = document.getElementById('custAddress').value;
@@ -440,22 +467,22 @@
                 <div class="fade-in p-5 pb-20">
                     <h1 class="text-xl font-bold text-yellow-500 mb-6 border-b border-yellow-600/30 pb-2">Select Payment</h1>
                     
-                    <div class="bg-zinc-950 p-4 rounded-lg border border-yellow-600/30 mb-6 flex justify-between font-bold text-lg text-yellow-500 shadow-md">
+                    <div class="bg-zinc-950 p-4 rounded-lg border border-yellow-600/30 mb-6 flex justify-between font-bold text-lg text-yellow-500 shadow-md transition-colors">
                         <span>Total to Pay:</span>
                         <span>₹${tempCheckoutData.price}</span>
                     </div>
 
                     <form onsubmit="confirmOrder(event)">
                         <div class="mb-6">
-                            <div class="flex items-center gap-3 bg-zinc-950 p-3 rounded border border-gray-700 mb-2 cursor-pointer">
+                            <div class="flex items-center gap-3 bg-zinc-950 p-3 rounded border border-gray-700 mb-2 cursor-pointer transition-colors">
                                 <input type="radio" id="prepaid" name="payment" value="Prepaid" onchange="renderPaymentUI()" class="accent-yellow-500 w-4 h-4 cursor-pointer">
                                 <label for="prepaid" class="text-gray-200 font-medium text-sm cursor-pointer w-full">Prepaid (Full Payment)</label>
                             </div>
-                            <div class="flex items-center gap-3 bg-zinc-950 p-3 rounded border border-gray-700 mb-2 cursor-pointer">
+                            <div class="flex items-center gap-3 bg-zinc-950 p-3 rounded border border-gray-700 mb-2 cursor-pointer transition-colors">
                                 <input type="radio" id="cod" name="payment" value="COD" onchange="renderPaymentUI()" class="accent-yellow-500 w-4 h-4 cursor-pointer" checked>
                                 <label for="cod" class="text-gray-200 font-medium text-sm cursor-pointer w-full">Cash on Delivery (C.O.D)</label>
                             </div>
-                            <div id="paymentUI" class="mt-4 p-4 bg-zinc-950 border border-yellow-500 rounded-lg shadow-[0_0_10px_rgba(212,175,55,0.2)]"></div>
+                            <div id="paymentUI" class="mt-4 p-4 bg-zinc-950 border border-yellow-500 rounded-lg shadow-[0_0_10px_rgba(212,175,55,0.2)] transition-colors"></div>
                         </div>
                         
                         <button type="submit" class="bg-gradient-to-r from-yellow-600 to-yellow-400 text-black font-extrabold py-3.5 rounded shadow-[0_0_15px_rgba(212,175,55,0.4)] w-full tracking-wide">
@@ -476,7 +503,7 @@
 
             if (!isCOD) {
                 uiDiv.innerHTML = `
-                    <p class="text-center text-sm text-gray-300 mb-2">Scan QR to pay Full Amount</p>
+                    <p class="text-center text-sm text-gray-400 mb-2">Scan QR to pay Full Amount</p>
                     <p class="text-center font-bold text-xl text-yellow-500 mb-4">₹${totalAmount}</p>
                     <div class="flex justify-center mb-4">
                         <img src="${qrUrl}" class="w-32 h-32 border-4 border-yellow-500 rounded p-1 bg-white shadow-lg">
@@ -529,7 +556,7 @@
                         <i class="fa-solid fa-check"></i>
                     </div>
                     <h1 class="text-2xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-yellow-300 to-yellow-600">Order Placed!</h1>
-                    <p class="text-gray-400 mt-4 text-sm">Thank you, <span class="text-white font-semibold">${tempCheckoutData.name}</span>.</p>
+                    <p class="text-gray-400 mt-4 text-sm">Thank you, <span class="text-gray-200 font-semibold">${tempCheckoutData.name}</span>.</p>
                     <p class="text-gray-400 mt-1 text-sm">Order for <b class="text-yellow-500">${tempCheckoutData.names}</b> is processing.</p>
                     
                     <button onclick="showMyOrders()" class="mt-8 bg-gradient-to-r from-yellow-600 to-yellow-400 text-black px-8 py-3 rounded font-bold shadow-md transition-all w-full max-w-xs">View My Orders</button>
@@ -564,7 +591,7 @@
                     }
 
                     myOrdersHTML += `
-                        <div class="bg-zinc-950 border border-yellow-600/30 rounded-lg p-4 shadow-md mb-4">
+                        <div class="bg-zinc-950 border border-yellow-600/30 rounded-lg p-4 shadow-md mb-4 transition-colors">
                             <div class="flex gap-4 border-b border-gray-800 pb-3 mb-3">
                                 <img src="${order.img}" class="w-20 h-20 object-cover rounded border border-gray-700">
                                 <div class="flex-grow">
@@ -578,7 +605,7 @@
                                 <p class="text-xs text-gray-400 ml-5">${order.name}</p>
                                 <p class="text-xs text-gray-400 ml-5">${order.address}</p>
                             </div>
-                            <div class="bg-black p-3 rounded border border-gray-800">
+                            <div class="bg-zinc-900 p-3 rounded border border-gray-800 transition-colors">
                                 <p class="text-sm text-gray-300 font-semibold mb-1"><i class="fa-solid fa-wallet text-yellow-500 mr-1 w-4"></i> Payment Info:</p>
                                 ${paymentStatus}
                             </div>
@@ -587,9 +614,9 @@
                 });
             } else {
                 myOrdersHTML = `
-                    <div class="text-center p-10 bg-zinc-950 rounded-lg border border-gray-800 mt-4">
-                        <i class="fa-solid fa-box-open text-5xl text-gray-600 mb-4"></i>
-                        <h2 class="text-gray-400 font-semibold">No Orders Found</h2>
+                    <div class="text-center p-10 bg-zinc-950 rounded-lg border border-gray-800 mt-4 transition-colors">
+                        <i class="fa-solid fa-box-open text-5xl text-gray-400 mb-4"></i>
+                        <h2 class="text-gray-500 font-semibold">No Orders Found</h2>
                         <button onclick="goHome()" class="mt-4 border border-yellow-500 text-yellow-500 px-6 py-2 rounded text-sm font-bold">Start Shopping</button>
                     </div>
                 `;
@@ -610,7 +637,7 @@
             if (orders.length > 0) {
                 [...orders].reverse().forEach(order => {
                     ordersHTML += `
-                        <div class="border border-yellow-600/30 rounded-lg p-4 bg-zinc-950 shadow-[0_0_10px_rgba(0,0,0,0.5)]">
+                        <div class="border border-yellow-600/30 rounded-lg p-4 bg-zinc-950 shadow-[0_0_10px_rgba(0,0,0,0.5)] transition-colors">
                             <div class="flex justify-between items-start mb-2">
                                 <p class="font-bold text-yellow-500 text-sm">${order.product_name}</p>
                             </div>
@@ -618,13 +645,13 @@
                                 <p class="text-[10px] text-gray-500 border-b border-gray-800 pb-1 mb-2">${order.date}</p>
                                 <p class="text-xs text-gray-300"><i class="fa-solid fa-user w-4 text-gray-500"></i> ${order.name} (${order.phone})</p>
                                 <p class="text-xs text-gray-300"><i class="fa-solid fa-location-dot w-4 text-gray-500"></i> ${order.address}</p>
-                                <p class="text-xs text-gray-300"><i class="fa-solid fa-money-bill w-4 text-gray-500"></i> ${order.payment} - <span class="font-bold text-white">₹${order.price}</span></p>
+                                <p class="text-xs text-gray-300"><i class="fa-solid fa-money-bill w-4 text-gray-500"></i> ${order.payment} - <span class="font-bold text-gray-200">₹${order.price}</span></p>
                             </div>
                         </div>
                     `;
                 });
             } else {
-                ordersHTML = `<div class="bg-zinc-950 border border-dashed border-gray-700 p-8 text-center rounded-lg mt-5"><p class="text-gray-500 italic">No orders yet.</p></div>`;
+                ordersHTML = `<div class="bg-zinc-950 border border-dashed border-gray-700 p-8 text-center rounded-lg mt-5 transition-colors"><p class="text-gray-500 italic">No orders yet.</p></div>`;
             }
 
             appDiv.innerHTML = `
