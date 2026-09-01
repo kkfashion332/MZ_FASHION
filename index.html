@@ -19,6 +19,8 @@
             to { opacity: 1; }
         }
         .content-padding { padding-bottom: 90px; }
+        
+        /* Size selection radio button hidden logic */
         .size-radio:checked + label {
             background-color: #eab308;
             color: #000;
@@ -68,18 +70,18 @@
     <div id="imageModalContainer"></div>
 
     <script>
-        // --- FIREBASE INITIALIZATION (Realtime Database Version) ---
+        // --- FIREBASE INITIALIZATION ---
         const firebaseConfig = {
             apiKey: "AIzaSyDYbppZ6nR4qs9tTZswSnVwurPI-Z5EqJ8",
             authDomain: "mzfashion.firebaseapp.com",
-            databaseURL: "https://mzfashion-default-rtdb.firebaseio.com", // <-- Database URL added
+            databaseURL: "https://mzfashion-default-rtdb.firebaseio.com",
             projectId: "mzfashion",
             storageBucket: "mzfashion.firebasestorage.app",
             messagingSenderId: "355960541786",
             appId: "1:355960541786:web:df4b50d44291d0dd0c3e63"
         };
         firebase.initializeApp(firebaseConfig);
-        const db = firebase.database(); // <-- Connects to Realtime Database
+        const db = firebase.database();
 
         // --- DATA & STATE ---
         const categories = [
@@ -115,7 +117,7 @@
         const topNav = document.getElementById('topNav');
         const bottomNav = document.getElementById('bottomNav');
 
-        // --- AUTHENTICATION (Realtime DB Version) ---
+        // --- AUTHENTICATION ---
         function checkAuth() {
             if (!currentUser) {
                 topNav.classList.add('hidden');
@@ -262,8 +264,9 @@
                 displayProducts = products.filter(p => p.category === activeCategory);
             }
 
+            // Categories updated to Grid (5 columns horizontally), no scrolling
             let catHTML = categories.map(cat => `
-                <div onclick="filterCategory('${cat.name}')" class="flex flex-col items-center gap-1 cursor-pointer w-full mt-2">
+                <div onclick="filterCategory('${cat.name}')" class="flex flex-col items-center gap-1 cursor-pointer w-full">
                     <div class="w-12 h-12 md:w-14 md:h-14 rounded-full overflow-hidden border-2 ${activeCategory === cat.name ? 'border-yellow-400 shadow-[0_0_10px_rgba(212,175,55,0.8)]' : 'border-gray-600'} transition-all mx-auto">
                         <img src="${cat.img}" class="w-full h-full object-cover">
                     </div>
@@ -305,13 +308,13 @@
 
             appDiv.innerHTML = `
                 <div class="fade-in">
-                    <!-- Banner with margin/space on sides as requested -->
                     <div class="h-44 mx-4 mt-4 rounded-xl bg-zinc-950 flex flex-col items-center justify-center overflow-hidden relative border border-yellow-600/30 shadow-[0_0_10px_rgba(212,175,55,0.1)]">
                         <img src="256328.jpg" alt="Banner" class="w-full h-full object-cover opacity-90">
                         <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
                     </div>
 
-                    <div class="grid grid-cols-6 gap-2 p-3 bg-zinc-950 border-b border-yellow-600/20 mt-4 overflow-x-auto no-scrollbar">
+                    <!-- 5 Column Grid for Categories -->
+                    <div class="grid grid-cols-5 gap-y-4 gap-x-2 p-3 bg-zinc-950 border-b border-yellow-600/20 mt-4 justify-items-center">
                         ${catHTML}
                     </div>
                     
@@ -389,7 +392,7 @@
             window.scrollTo(0,0);
         }
 
-        // 3. PROFILE PAGE (Edit Name, Support)
+        // 3. PROFILE PAGE
         function showProfile() {
             if(!checkAuth()) return;
             
@@ -410,7 +413,7 @@
                         </div>
                     </div>
                     
-                    <!-- Support Accordion (Instagram Removed) -->
+                    <!-- Support Accordion -->
                     <div class="bg-zinc-950 rounded-lg border border-yellow-600/30 overflow-hidden mb-6 shadow-md">
                         <div onclick="document.getElementById('supportPanel').classList.toggle('hidden')" class="p-4 flex justify-between items-center cursor-pointer hover:bg-zinc-900">
                             <span class="font-semibold text-yellow-500"><i class="fa-solid fa-headset mr-2 w-5 text-center"></i> Support & Help</span>
@@ -425,7 +428,6 @@
                         </div>
                     </div>
                     
-                    <!-- Logout -->
                     <button onclick="logout()" class="w-full bg-red-600/20 text-red-500 border border-red-600/50 font-bold py-3 rounded-lg mt-4 shadow-sm hover:bg-red-600 hover:text-white transition">
                         <i class="fa-solid fa-right-from-bracket mr-2"></i> LOGOUT
                     </button>
@@ -714,6 +716,47 @@
                         <div>
                             <input type="text" id="custName" value="${currentUser.name}" required class="bg-zinc-950 border border-gray-700 focus:border-yellow-500 outline-none text-gray-200 p-3 rounded w-full mb-3 text-sm">
                             <input type="tel" id="custPhone" value="${currentUser.phone}" required class="bg-zinc-950 border border-gray-700 focus:border-yellow-500 outline-none text-gray-200 p-3 rounded w-full mb-3 text-sm">
+                            
+                            <!-- STATE FIELD WITH DATALIST -->
+                            <input list="states" id="custState" placeholder="Select or Type State" required class="bg-zinc-950 border border-gray-700 focus:border-yellow-500 outline-none text-yellow-500 p-3 rounded w-full mb-3 text-sm font-semibold">
+                            <datalist id="states">
+                                <option value="Andaman and Nicobar Islands">
+                                <option value="Andhra Pradesh">
+                                <option value="Arunachal Pradesh">
+                                <option value="Assam">
+                                <option value="Bihar">
+                                <option value="Chandigarh">
+                                <option value="Chhattisgarh">
+                                <option value="Dadra and Nagar Haveli">
+                                <option value="Daman and Diu">
+                                <option value="Delhi">
+                                <option value="Goa">
+                                <option value="Gujarat">
+                                <option value="Haryana">
+                                <option value="Himachal Pradesh">
+                                <option value="Jharkhand">
+                                <option value="Karnataka">
+                                <option value="Kerala">
+                                <option value="Lakshadweep">
+                                <option value="Madhya Pradesh">
+                                <option value="Maharashtra">
+                                <option value="Manipur">
+                                <option value="Meghalaya">
+                                <option value="Mizoram">
+                                <option value="Nagaland">
+                                <option value="Odisha">
+                                <option value="Puducherry">
+                                <option value="Punjab">
+                                <option value="Rajasthan">
+                                <option value="Sikkim">
+                                <option value="Tamil Nadu">
+                                <option value="Telangana">
+                                <option value="Tripura">
+                                <option value="Uttar Pradesh">
+                                <option value="Uttarakhand">
+                                <option value="West Bengal">
+                            </datalist>
+
                             <input type="text" id="custPincode" placeholder="6-Digit PIN Code" required pattern="[0-9]{6}" maxlength="6" minlength="6" title="Please enter a valid 6-digit Pincode" class="bg-zinc-950 border border-gray-700 focus:border-yellow-500 outline-none text-yellow-500 p-3 rounded w-full mb-3 text-sm font-bold tracking-widest">
                             <textarea id="custAddress" placeholder="Complete Address (House No, Street, City)" required class="bg-zinc-950 border border-gray-700 focus:border-yellow-500 outline-none text-gray-200 p-3 rounded w-full text-sm" rows="3"></textarea>
                         </div>
@@ -733,10 +776,11 @@
             
             tempCheckoutData.name = document.getElementById('custName').value;
             tempCheckoutData.phone = document.getElementById('custPhone').value;
+            const state = document.getElementById('custState').value;
             const pincode = document.getElementById('custPincode').value;
             const baseAddress = document.getElementById('custAddress').value;
             
-            tempCheckoutData.address = `${baseAddress} (PIN: ${pincode})`;
+            tempCheckoutData.address = `${baseAddress}, State: ${state} (PIN: ${pincode})`;
             
             appDiv.innerHTML = `
                 <div class="fade-in p-5 pb-20">
@@ -968,12 +1012,21 @@
                         <h1 class="text-2xl font-bold mb-4 text-yellow-500 border-b border-yellow-600/30 pb-3">Admin Panel</h1>
                         <div class="flex justify-between items-center mb-4">
                             <h2 class="text-sm font-semibold text-gray-200">Total Orders: ${allOrders.length}</h2>
+                            <button onclick="clearOrders()" class="text-[10px] text-red-500 border border-red-900 px-2 py-1 rounded">Clear All</button>
                         </div>
                         <div class="flex flex-col gap-3">${ordersHTML}</div>
                     </div>
                 `;
             } catch (error) {
                 appDiv.innerHTML = `<div class="p-10 text-center text-red-500">Error fetching admin data. Check Realtime Database rules.</div>`;
+            }
+        }
+
+        function clearOrders() {
+            if(confirm("Delete all orders?")) {
+                orders = [];
+                localStorage.removeItem('mz_orders');
+                renderAdmin();
             }
         }
 
