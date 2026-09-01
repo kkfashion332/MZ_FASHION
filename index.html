@@ -7,8 +7,9 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     
+    <!-- Firebase SDK (Realtime Database Version) -->
     <script src="https://www.gstatic.com/firebasejs/10.4.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.4.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.4.0/firebase-database-compat.js"></script>
 
     <style>
         .no-scrollbar::-webkit-scrollbar { display: none; }
@@ -27,6 +28,7 @@
 </head>
 <body class="bg-black text-gray-200">
 
+    <!-- Top Navbar -->
     <nav id="topNav" class="hidden bg-zinc-950 p-4 flex justify-between items-center sticky top-0 z-50 border-b border-yellow-600/40 shadow-[0_4px_15px_rgba(212,175,55,0.1)]">
         <div class="flex items-center gap-3 w-full justify-center relative">
             <img id="secretLogo" src="logo.png" onerror="this.src='https://ui-avatars.com/api/?name=MZ&background=000&color=D4AF37'" alt="MZ Fashion" class="absolute left-0 w-10 h-10 rounded-full cursor-pointer border border-yellow-500 object-cover shadow-[0_0_10px_rgba(212,175,55,0.4)]">
@@ -36,9 +38,12 @@
         </div>
     </nav>
 
+    <!-- Main App Container -->
     <div id="app" class="max-w-md mx-auto bg-zinc-900 min-h-screen shadow-2xl content-padding relative">
-        </div>
+        <!-- Views will be injected here -->
+    </div>
 
+    <!-- Bottom Navigation Bar -->
     <div id="bottomNav" class="hidden fixed bottom-0 left-0 w-full bg-zinc-950 border-t border-yellow-600/40 p-2 max-w-md mx-auto z-[60] flex justify-around items-center h-16 shadow-[0_-4px_15px_rgba(0,0,0,0.3)]">
         <div onclick="showLikes()" class="flex flex-col items-center w-1/5 text-gray-500 hover:text-yellow-500 cursor-pointer transition-colors">
             <i class="fa-solid fa-heart text-lg"></i><span class="text-[9px] mt-1 font-semibold">Likes</span>
@@ -63,17 +68,18 @@
     <div id="imageModalContainer"></div>
 
     <script>
-        // --- FIREBASE INITIALIZATION ---
+        // --- FIREBASE INITIALIZATION (Realtime Database Version) ---
         const firebaseConfig = {
             apiKey: "AIzaSyDYbppZ6nR4qs9tTZswSnVwurPI-Z5EqJ8",
             authDomain: "mzfashion.firebaseapp.com",
+            databaseURL: "https://mzfashion-default-rtdb.firebaseio.com", // <-- Database URL added
             projectId: "mzfashion",
             storageBucket: "mzfashion.firebasestorage.app",
             messagingSenderId: "355960541786",
             appId: "1:355960541786:web:df4b50d44291d0dd0c3e63"
         };
         firebase.initializeApp(firebaseConfig);
-        const db = firebase.firestore();
+        const db = firebase.database(); // <-- Connects to Realtime Database
 
         // --- DATA & STATE ---
         const categories = [
@@ -109,7 +115,7 @@
         const topNav = document.getElementById('topNav');
         const bottomNav = document.getElementById('bottomNav');
 
-        // --- AUTHENTICATION (FIREBASE CONNECTED) ---
+        // --- AUTHENTICATION (Realtime DB Version) ---
         function checkAuth() {
             if (!currentUser) {
                 topNav.classList.add('hidden');
@@ -195,9 +201,9 @@
             btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin mr-2"></i> LOGGING IN...`;
 
             try {
-                const doc = await db.collection('users').doc(phone).get();
-                if (doc.exists && doc.data().password === pass) {
-                    currentUser = doc.data();
+                const snapshot = await db.ref('users/' + phone).once('value');
+                if (snapshot.exists() && snapshot.val().password === pass) {
+                    currentUser = snapshot.val();
                     localStorage.setItem('mz_currentUser', JSON.stringify(currentUser));
                     updateCartBadge();
                     goHome();
@@ -206,7 +212,7 @@
                     btn.innerHTML = "LOGIN";
                 }
             } catch (error) {
-                alert("Database Error! Make sure Firestore rules are set to True.");
+                alert("Database Error! Make sure Realtime Database rules are set to True.");
                 btn.innerHTML = "LOGIN";
             }
         }
@@ -220,23 +226,21 @@
             btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin mr-2"></i> CREATING ACCOUNT...`;
             
             try {
-                const userRef = db.collection('users').doc(phone);
-                const doc = await userRef.get();
-                if (doc.exists) {
+                const snapshot = await db.ref('users/' + phone).once('value');
+                if (snapshot.exists()) {
                     document.getElementById('regError').classList.remove('hidden');
                     btn.innerHTML = "CREATE ACCOUNT";
                     return;
                 }
                 
-                // Demo email added to database profile exactly as requested
                 const newUser = { name, phone, password: pass, linkedEmail: "mzfashion@gmail.com" };
-                await userRef.set(newUser);
+                await db.ref('users/' + phone).set(newUser);
                 
                 currentUser = newUser;
                 localStorage.setItem('mz_currentUser', JSON.stringify(newUser));
                 goHome();
             } catch (error) {
-                alert("Database Error! Make sure Firestore rules are set to True.");
+                alert("Database Error! Make sure Realtime Database rules are set to True.");
                 btn.innerHTML = "CREATE ACCOUNT";
             }
         }
@@ -301,6 +305,7 @@
 
             appDiv.innerHTML = `
                 <div class="fade-in">
+                    <!-- Banner with margin/space on sides as requested -->
                     <div class="h-44 mx-4 mt-4 rounded-xl bg-zinc-950 flex flex-col items-center justify-center overflow-hidden relative border border-yellow-600/30 shadow-[0_0_10px_rgba(212,175,55,0.1)]">
                         <img src="256328.jpg" alt="Banner" class="w-full h-full object-cover opacity-90">
                         <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
@@ -405,6 +410,7 @@
                         </div>
                     </div>
                     
+                    <!-- Support Accordion (Instagram Removed) -->
                     <div class="bg-zinc-950 rounded-lg border border-yellow-600/30 overflow-hidden mb-6 shadow-md">
                         <div onclick="document.getElementById('supportPanel').classList.toggle('hidden')" class="p-4 flex justify-between items-center cursor-pointer hover:bg-zinc-900">
                             <span class="font-semibold text-yellow-500"><i class="fa-solid fa-headset mr-2 w-5 text-center"></i> Support & Help</span>
@@ -419,6 +425,7 @@
                         </div>
                     </div>
                     
+                    <!-- Logout -->
                     <button onclick="logout()" class="w-full bg-red-600/20 text-red-500 border border-red-600/50 font-bold py-3 rounded-lg mt-4 shadow-sm hover:bg-red-600 hover:text-white transition">
                         <i class="fa-solid fa-right-from-bracket mr-2"></i> LOGOUT
                     </button>
@@ -434,7 +441,7 @@
                 localStorage.setItem('mz_currentUser', JSON.stringify(currentUser));
                 
                 try {
-                    await db.collection('users').doc(currentUser.phone).update({ name: currentUser.name });
+                    await db.ref('users/' + currentUser.phone).update({ name: currentUser.name });
                 } catch(e) {
                     console.log("Error updating name in Firebase");
                 }
@@ -819,8 +826,7 @@
             window.scrollTo(0,0);
 
             try {
-                // SAVING ORDER DIRECTLY TO FIREBASE
-                await db.collection('orders').doc(newOrder.id).set(newOrder);
+                await db.ref('orders/' + newOrder.id).set(newOrder);
                 
                 cart = [];
                 localStorage.setItem('mz_cart', JSON.stringify(cart));
@@ -840,12 +846,12 @@
                     </div>
                 `;
             } catch (error) {
-                alert("Database Error! Order not placed. Check Firestore permissions.");
+                alert("Database Error! Order not placed. Check Realtime Database permissions.");
                 goHome();
             }
         }
 
-        // --- MY ORDERS PAGE (FIREBASE FETCH) ---
+        // --- MY ORDERS PAGE ---
         async function showMyOrders() {
             if(!checkAuth()) return;
             
@@ -853,12 +859,10 @@
             window.scrollTo(0,0);
 
             try {
-                // Fetching orders from Firebase where phone number matches
-                const snapshot = await db.collection('orders').where('phone', '==', currentUser.phone).get();
+                const snapshot = await db.ref('orders').orderByChild('phone').equalTo(currentUser.phone).once('value');
                 let userOrders = [];
-                snapshot.forEach(doc => userOrders.push(doc.data()));
+                snapshot.forEach(childSnapshot => { userOrders.push(childSnapshot.val()); });
                 
-                // Sort array to show newest first
                 userOrders.sort((a, b) => b.id - a.id);
 
                 let myOrdersHTML = "";
@@ -922,19 +926,19 @@
                     </div>
                 `;
             } catch (error) {
-                appDiv.innerHTML = `<div class="p-10 text-center text-red-500">Error connecting to database. Please check Firestore permissions.</div>`;
+                appDiv.innerHTML = `<div class="p-10 text-center text-red-500">Error connecting to database. Please check Realtime Database permissions.</div>`;
             }
         }
 
-        // --- SECRET ADMIN PANEL (FIREBASE FETCH) ---
+        // --- SECRET ADMIN PANEL ---
         async function renderAdmin() {
             appDiv.innerHTML = `<div class="min-h-[70vh] flex flex-col items-center justify-center text-yellow-500"><i class="fa-solid fa-spinner fa-spin text-5xl mb-4"></i><p class="font-bold tracking-widest">LOADING ADMIN...</p></div>`;
             window.scrollTo(0,0);
             
             try {
-                const snapshot = await db.collection('orders').get();
+                const snapshot = await db.ref('orders').once('value');
                 let allOrders = [];
-                snapshot.forEach(doc => allOrders.push(doc.data()));
+                snapshot.forEach(childSnapshot => { allOrders.push(childSnapshot.val()); });
                 
                 allOrders.sort((a, b) => b.id - a.id);
 
@@ -969,7 +973,7 @@
                     </div>
                 `;
             } catch (error) {
-                appDiv.innerHTML = `<div class="p-10 text-center text-red-500">Error fetching admin data. Check Firestore rules.</div>`;
+                appDiv.innerHTML = `<div class="p-10 text-center text-red-500">Error fetching admin data. Check Realtime Database rules.</div>`;
             }
         }
 
