@@ -71,7 +71,8 @@
             { name: "T-Shirts", img: "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=150&q=80" },
             { name: "Shirts", img: "https://images.unsplash.com/photo-1596755094514-f87e32f85ec8?w=150&q=80" },
             { name: "Jeans", img: "https://images.unsplash.com/photo-1541099649105-f69ad21f3246?w=150&q=80" },
-            { name: "Shoes", img: "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=150&q=80" }
+            { name: "Shoes", img: "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=150&q=80" },
+            { name: "Combos", img: "https://images.unsplash.com/photo-1516257984-b1b4d707412e?w=150&q=80" } // NEW COMBO CATEGORY
         ];
 
         const products = [
@@ -80,7 +81,8 @@
             { id: 3, name: "Aesthetic Sneakers", price: 899, mrp: 1499, discount: "40% OFF", category: "Shoes", img: "https://images.unsplash.com/photo-1525966222134-fcfa99b8ae77?w=400&q=80" },
             { id: 4, name: "Casual Chinos", price: 799, mrp: 1299, discount: "38% OFF", category: "Jeans", img: "https://images.unsplash.com/photo-1473966968600-fa801b869a1a?w=400&q=80" },
             { id: 5, name: "Classic White Shirt", price: 599, mrp: 1199, discount: "50% OFF", category: "Shirts", img: "https://images.unsplash.com/photo-1596755094514-f87e32f85ec8?w=400&q=80" },
-            { id: 6, name: "Ripped Blue Jeans", price: 1099, mrp: 1999, discount: "45% OFF", category: "Jeans", img: "https://images.unsplash.com/photo-1541099649105-f69ad21f3246?w=400&q=80" }
+            { id: 6, name: "Ripped Blue Jeans", price: 1099, mrp: 1999, discount: "45% OFF", category: "Jeans", img: "https://images.unsplash.com/photo-1541099649105-f69ad21f3246?w=400&q=80" },
+            { id: 7, name: "Combo (White Shirt + Blue Jeans)", price: 1499, mrp: 3198, discount: "53% OFF", category: "Combos", img: "https://images.unsplash.com/photo-1516257984-b1b4d707412e?w=400&q=80" } // NEW COMBO PRODUCT
         ];
         
         let users = JSON.parse(localStorage.getItem('mz_users')) || [];
@@ -91,7 +93,10 @@
         let likedItems = JSON.parse(localStorage.getItem('mz_likes')) || [];
         let activeCategory = "All";
         let tempCheckoutData = null; 
+        
         let currentSelectedSize = null; 
+        let currentComboSize1 = null; // For Shirt in Combo
+        let currentComboSize2 = null; // For Jeans in Combo
         
         const appDiv = document.getElementById('app');
         const topNav = document.getElementById('topNav');
@@ -257,7 +262,6 @@
                         </div>
                         <span class="text-[10px] text-yellow-600 font-bold mt-1 bg-yellow-900/20 px-1 w-max rounded">${item.discount}</span>
                         
-                        <!-- Fixed Buttons: CART & BUY NOW -->
                         <div class="flex justify-between gap-1.5 mt-3">
                             <button onclick="viewProduct(${item.id})" class="flex-1 bg-zinc-800 border border-yellow-500 text-yellow-500 font-bold py-1.5 rounded text-[10px] hover:bg-yellow-900/30 transition shadow-sm">CART</button>
                             <button onclick="viewProduct(${item.id})" class="flex-1 bg-gradient-to-r from-yellow-600 to-yellow-400 text-black font-extrabold py-1.5 rounded shadow-[0_0_10px_rgba(212,175,55,0.4)] text-[10px] transition-all duration-300">BUY NOW</button>
@@ -272,7 +276,6 @@
 
             appDiv.innerHTML = `
                 <div class="fade-in">
-                    <!-- Banner with margin/space on sides as requested -->
                     <div class="h-44 mx-4 mt-4 rounded-xl bg-zinc-950 flex flex-col items-center justify-center overflow-hidden relative border border-yellow-600/30 shadow-[0_0_10px_rgba(212,175,55,0.1)]">
                         <img src="256328.jpg" alt="Banner" class="w-full h-full object-cover opacity-90">
                         <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
@@ -338,7 +341,6 @@
                                 <span class="font-bold text-yellow-500">₹${item.price}</span>
                             </div>
                             
-                            <!-- Fixed Buttons: CART & BUY NOW -->
                             <div class="flex justify-between gap-1.5 mt-3">
                                 <button onclick="viewProduct(${item.id})" class="flex-1 bg-zinc-800 border border-yellow-500 text-yellow-500 font-bold py-1.5 rounded text-[10px] shadow-sm">CART</button>
                                 <button onclick="viewProduct(${item.id})" class="flex-1 bg-gradient-to-r from-yellow-600 to-yellow-400 text-black font-extrabold py-1.5 rounded shadow-[0_0_10px_rgba(212,175,55,0.4)] text-[10px]">BUY NOW</button>
@@ -378,7 +380,7 @@
                         </div>
                     </div>
                     
-                    <!-- Support Accordion -->
+                    <!-- Support Accordion (Instagram Removed) -->
                     <div class="bg-zinc-950 rounded-lg border border-yellow-600/30 overflow-hidden mb-6 shadow-md">
                         <div onclick="document.getElementById('supportPanel').classList.toggle('hidden')" class="p-4 flex justify-between items-center cursor-pointer hover:bg-zinc-900">
                             <span class="font-semibold text-yellow-500"><i class="fa-solid fa-headset mr-2 w-5 text-center"></i> Support & Help</span>
@@ -388,9 +390,6 @@
                             <div class="flex flex-col gap-3">
                                 <a href="https://wa.me/919982437489" target="_blank" class="flex w-full items-center justify-center gap-3 bg-green-500 hover:bg-green-600 text-white font-bold py-3.5 px-4 rounded-lg shadow-md transition">
                                     <i class="fa-brands fa-whatsapp text-2xl"></i> WhatsApp Support
-                                </a>
-                                <a href="#" target="_blank" class="flex w-full items-center justify-center gap-3 bg-gradient-to-r from-purple-500 via-pink-500 to-orange-500 hover:opacity-90 text-white font-bold py-3.5 px-4 rounded-lg shadow-md transition">
-                                    <i class="fa-brands fa-instagram text-2xl"></i> Instagram Support
                                 </a>
                             </div>
                         </div>
@@ -411,7 +410,6 @@
                 currentUser.name = newName.trim();
                 localStorage.setItem('mz_currentUser', JSON.stringify(currentUser));
                 
-                // Update in users array too
                 let userIndex = users.findIndex(u => u.phone === currentUser.phone);
                 if(userIndex > -1) {
                     users[userIndex].name = currentUser.name;
@@ -422,35 +420,71 @@
         }
 
         // --- PRODUCT PAGE (Sizes & More Products) ---
-        function selectSize(size) {
-            currentSelectedSize = size;
-        }
+        function selectSize(size) { currentSelectedSize = size; }
+        function selectComboSize1(size) { currentComboSize1 = size; }
+        function selectComboSize2(size) { currentComboSize2 = size; }
 
         function viewProduct(id) {
             if(!checkAuth()) return;
             const product = products.find(p => p.id === id);
-            currentSelectedSize = null; // Reset size on load
             
-            // Determine size options based on category
-            let sizes = [];
-            if(product.category === "T-Shirts" || product.category === "Shirts") {
-                sizes = ["S", "M", "L", "XL", "XXL"];
-            } else if (product.category === "Jeans") {
-                sizes = ["28", "30", "32", "34", "36"];
-            } else if (product.category === "Shoes") {
-                sizes = ["6", "7", "8", "9", "10"];
+            // Reset selections
+            currentSelectedSize = null; 
+            currentComboSize1 = null;
+            currentComboSize2 = null;
+            
+            let sizeHTML = "";
+
+            if (product.category === "Combos") {
+                // COMBO SIZE SELECTION (SHIRT + JEANS)
+                sizeHTML = `
+                    <p class="font-bold text-gray-300 mb-2 mt-2 text-xs uppercase tracking-wide text-yellow-500 border-l-2 border-yellow-500 pl-2">Select Shirt Size</p>
+                    <div class="flex flex-wrap gap-2">
+                        ${["S", "M", "L", "XL", "XXL"].map(s => `
+                            <div>
+                                <input type="radio" name="comboShirt" id="cs1-${s}" value="${s}" class="hidden size-radio" onchange="selectComboSize1('${s}')">
+                                <label for="cs1-${s}" class="cursor-pointer border border-gray-600 text-gray-300 font-semibold px-3 py-1.5 text-xs rounded-md hover:border-yellow-500 transition">${s}</label>
+                            </div>
+                        `).join('')}
+                    </div>
+                    
+                    <p class="font-bold text-gray-300 mb-2 mt-5 text-xs uppercase tracking-wide text-yellow-500 border-l-2 border-yellow-500 pl-2">Select Jeans Size</p>
+                    <div class="flex flex-wrap gap-2">
+                        ${["28", "30", "32", "34", "36"].map(s => `
+                            <div>
+                                <input type="radio" name="comboJeans" id="cs2-${s}" value="${s}" class="hidden size-radio" onchange="selectComboSize2('${s}')">
+                                <label for="cs2-${s}" class="cursor-pointer border border-gray-600 text-gray-300 font-semibold px-3 py-1.5 text-xs rounded-md hover:border-yellow-500 transition">${s}</label>
+                            </div>
+                        `).join('')}
+                    </div>
+                `;
             } else {
-                sizes = ["Free Size"];
+                // NORMAL PRODUCT SIZE SELECTION
+                let sizes = [];
+                if(product.category === "T-Shirts" || product.category === "Shirts") {
+                    sizes = ["S", "M", "L", "XL", "XXL"];
+                } else if (product.category === "Jeans") {
+                    sizes = ["28", "30", "32", "34", "36"];
+                } else if (product.category === "Shoes") {
+                    sizes = ["6", "7", "8", "9", "10"];
+                } else {
+                    sizes = ["Free Size"];
+                }
+
+                sizeHTML = `
+                    <p class="font-bold text-gray-300 mb-3 uppercase tracking-wide text-sm">Select Size</p>
+                    <div class="flex flex-wrap gap-3">
+                        ${sizes.map(s => `
+                            <div>
+                                <input type="radio" name="productSize" id="size-${s}" value="${s}" class="hidden size-radio" onchange="selectSize('${s}')">
+                                <label for="size-${s}" class="cursor-pointer border border-gray-600 text-gray-300 font-semibold px-4 py-2 rounded-md hover:border-yellow-500 transition">${s}</label>
+                            </div>
+                        `).join('')}
+                    </div>
+                `;
             }
 
-            let sizeHTML = sizes.map(s => `
-                <div>
-                    <input type="radio" name="productSize" id="size-${s}" value="${s}" class="hidden size-radio" onchange="selectSize('${s}')">
-                    <label for="size-${s}" class="cursor-pointer border border-gray-600 text-gray-300 font-semibold px-4 py-2 rounded-md hover:border-yellow-500 transition">${s}</label>
-                </div>
-            `).join('');
-
-            // Random More Products (Filter out current, shuffle, take 4)
+            // Random More Products
             let moreProducts = products.filter(p => p.id !== id).sort(() => 0.5 - Math.random()).slice(0, 4);
             let moreProdHTML = moreProducts.map(item => `
                 <div class="bg-zinc-950 border border-yellow-600/30 rounded-lg shadow-lg relative flex flex-col justify-between overflow-hidden">
@@ -485,12 +519,9 @@
                             <span class="text-sm text-black font-bold bg-yellow-500 px-2 py-1 rounded">${product.discount}</span>
                         </div>
                         
-                        <!-- Size Selection -->
-                        <div class="mt-6 mb-4">
-                            <p class="font-bold text-gray-300 mb-3 uppercase tracking-wide text-sm">Select Size</p>
-                            <div class="flex flex-wrap gap-3">
-                                ${sizeHTML}
-                            </div>
+                        <!-- Size Selection Block -->
+                        <div class="mt-6 mb-4 bg-zinc-950 p-4 rounded-lg border border-yellow-600/30">
+                            ${sizeHTML}
                         </div>
 
                         <!-- More Products instead of details -->
@@ -544,7 +575,7 @@
                         <img src="${item.img}" class="w-20 h-20 object-cover rounded border border-gray-700">
                         <div class="flex-grow">
                             <p class="font-bold text-gray-200 text-sm">${item.name}</p>
-                            <p class="text-xs text-gray-400 mt-0.5">Size: <span class="text-yellow-500 font-bold">${item.size}</span></p>
+                            <p class="text-[10px] text-gray-400 mt-0.5">Size: <span class="text-yellow-500 font-bold">${item.size}</span></p>
                             <p class="text-yellow-500 font-semibold mt-1">₹${item.price}</p>
                         </div>
                         <button onclick="removeFromCart(${index})" class="text-red-500 p-2"><i class="fa-solid fa-trash"></i></button>
@@ -570,13 +601,27 @@
             window.scrollTo(0,0);
         }
 
+        // Add size validation for Combo vs Normal products
+        function getValidatedSize(product) {
+            if (product.category === "Combos") {
+                if(!currentComboSize1 || !currentComboSize2) return null;
+                return `Shirt: ${currentComboSize1}, Jeans: ${currentComboSize2}`;
+            } else {
+                if(!currentSelectedSize) return null;
+                return currentSelectedSize;
+            }
+        }
+
         function addToCart(id) {
-            if(!currentSelectedSize) {
-                alert("Please select a size first!");
+            const product = products.find(p => p.id === id);
+            const finalSize = getValidatedSize(product);
+            
+            if(!finalSize) {
+                alert(product.category === "Combos" ? "Please select both Shirt and Jeans sizes!" : "Please select a size first!");
                 return;
             }
-            const product = products.find(p => p.id === id);
-            cart.push({ ...product, size: currentSelectedSize, cartId: Date.now() });
+
+            cart.push({ ...product, size: finalSize, cartId: Date.now() });
             localStorage.setItem('mz_cart', JSON.stringify(cart));
             updateCartBadge();
             
@@ -595,10 +640,15 @@
         }
 
         function handleBuyNow(id) {
-            if(!currentSelectedSize) {
-                alert("Please select a size first!");
+            const product = products.find(p => p.id === id);
+            const finalSize = getValidatedSize(product);
+
+            if(!finalSize) {
+                alert(product.category === "Combos" ? "Please select both Shirt and Jeans sizes!" : "Please select a size first!");
                 return;
             }
+            // Temporarily store size to pass to checkout if direct buy
+            currentSelectedSize = finalSize; 
             goToAddress(id);
         }
 
@@ -615,7 +665,7 @@
             else { badge.classList.add('hidden'); }
         }
 
-        // --- SPLIT CHECKOUT: STEP 1 (ADDRESS) ---
+        // --- SPLIT CHECKOUT: STEP 1 (ADDRESS & PINCODE) ---
         function goToAddress(source) {
             let total = 0;
             let productNames = "";
@@ -642,6 +692,8 @@
                         <div>
                             <input type="text" id="custName" value="${currentUser.name}" required class="bg-zinc-950 border border-gray-700 focus:border-yellow-500 outline-none text-gray-200 p-3 rounded w-full mb-3 text-sm">
                             <input type="tel" id="custPhone" value="${currentUser.phone}" required class="bg-zinc-950 border border-gray-700 focus:border-yellow-500 outline-none text-gray-200 p-3 rounded w-full mb-3 text-sm">
+                            <!-- PINCODE ADDED HERE -->
+                            <input type="text" id="custPincode" placeholder="6-Digit PIN Code" required pattern="[0-9]{6}" maxlength="6" minlength="6" title="Please enter a valid 6-digit Pincode" class="bg-zinc-950 border border-gray-700 focus:border-yellow-500 outline-none text-yellow-500 p-3 rounded w-full mb-3 text-sm font-bold tracking-widest">
                             <textarea id="custAddress" placeholder="Complete Address (House No, Street, City)" required class="bg-zinc-950 border border-gray-700 focus:border-yellow-500 outline-none text-gray-200 p-3 rounded w-full text-sm" rows="3"></textarea>
                         </div>
                         
@@ -660,7 +712,11 @@
             
             tempCheckoutData.name = document.getElementById('custName').value;
             tempCheckoutData.phone = document.getElementById('custPhone').value;
-            tempCheckoutData.address = document.getElementById('custAddress').value;
+            const pincode = document.getElementById('custPincode').value;
+            const baseAddress = document.getElementById('custAddress').value;
+            
+            // Combine address and pincode
+            tempCheckoutData.address = `${baseAddress} (PIN: ${pincode})`;
             
             appDiv.innerHTML = `
                 <div class="fade-in p-5 pb-20">
