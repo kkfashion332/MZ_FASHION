@@ -7,30 +7,23 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     
-    <!-- Firebase SDK (Realtime Database Version) -->
+    <!-- Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/10.4.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.4.0/firebase-database-compat.js"></script>
 
     <style>
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .fade-in { animation: fadeIn 0.3s ease-in-out; }
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
         .content-padding { padding-bottom: 90px; }
-        
-        /* Size selection radio button hidden logic */
         .size-radio:checked + label {
             background-color: #eab308;
             color: #000;
             border-color: #eab308;
         }
-        
-        /* Dropdown custom dark styling */
         select option {
             background-color: #000;
-            color: #d1d5db; /* gray-300 */
+            color: #d1d5db;
         }
     </style>
 </head>
@@ -48,29 +41,21 @@
 
     <!-- Main App Container -->
     <div id="app" class="max-w-md mx-auto bg-zinc-900 min-h-screen shadow-2xl content-padding relative">
-        <!-- Views will be injected here -->
+        <div class="min-h-screen flex flex-col items-center justify-center text-yellow-500">
+            <i class="fa-solid fa-spinner fa-spin text-5xl mb-4"></i>
+            <p class="font-bold tracking-widest">LOADING STORE...</p>
+        </div>
     </div>
 
     <!-- Bottom Navigation Bar -->
     <div id="bottomNav" class="hidden fixed bottom-0 left-0 w-full bg-zinc-950 border-t border-yellow-600/40 p-2 max-w-md mx-auto z-[60] flex justify-around items-center h-16 shadow-[0_-4px_15px_rgba(0,0,0,0.3)]">
-        <div onclick="showLikes()" class="flex flex-col items-center w-1/5 text-gray-500 hover:text-yellow-500 cursor-pointer transition-colors">
-            <i class="fa-solid fa-heart text-lg"></i><span class="text-[9px] mt-1 font-semibold">Likes</span>
-        </div>
-        <div onclick="showMyOrders()" class="flex flex-col items-center w-1/5 text-gray-500 hover:text-yellow-500 cursor-pointer transition-colors">
-            <i class="fa-solid fa-box text-lg"></i><span class="text-[9px] mt-1 font-semibold">Orders</span>
-        </div>
+        <div onclick="showLikes()" class="flex flex-col items-center w-1/5 text-gray-500 hover:text-yellow-500 cursor-pointer transition-colors"><i class="fa-solid fa-heart text-lg"></i><span class="text-[9px] mt-1 font-semibold">Likes</span></div>
+        <div onclick="showMyOrders()" class="flex flex-col items-center w-1/5 text-gray-500 hover:text-yellow-500 cursor-pointer transition-colors"><i class="fa-solid fa-box text-lg"></i><span class="text-[9px] mt-1 font-semibold">Orders</span></div>
         <div class="w-1/5 flex justify-center relative">
-            <div onclick="goHome()" class="absolute -top-10 w-14 h-14 bg-gradient-to-r from-yellow-600 to-yellow-400 rounded-full flex items-center justify-center text-black text-2xl shadow-[0_0_15px_rgba(212,175,55,0.5)] border-4 border-black cursor-pointer z-50 transition-transform active:scale-95">
-                <i class="fa-solid fa-house"></i>
-            </div>
+            <div onclick="goHome()" class="absolute -top-10 w-14 h-14 bg-gradient-to-r from-yellow-600 to-yellow-400 rounded-full flex items-center justify-center text-black text-2xl shadow-[0_0_15px_rgba(212,175,55,0.5)] border-4 border-black cursor-pointer z-50 transition-transform active:scale-95"><i class="fa-solid fa-house"></i></div>
         </div>
-        <div onclick="showCart()" class="flex flex-col items-center w-1/5 text-gray-500 hover:text-yellow-500 cursor-pointer relative transition-colors">
-            <i class="fa-solid fa-cart-shopping text-lg"></i><span class="text-[9px] mt-1 font-semibold">Cart</span>
-            <span id="bottomCartCount" class="absolute -top-1 right-2 bg-red-600 text-white text-[9px] font-bold px-1.5 py-0.5 rounded-full hidden">0</span>
-        </div>
-        <div onclick="showProfile()" class="flex flex-col items-center w-1/5 text-gray-500 hover:text-yellow-500 cursor-pointer transition-colors">
-            <i class="fa-solid fa-user text-lg"></i><span class="text-[9px] mt-1 font-semibold">Profile</span>
-        </div>
+        <div onclick="showCart()" class="flex flex-col items-center w-1/5 text-gray-500 hover:text-yellow-500 cursor-pointer relative transition-colors"><i class="fa-solid fa-cart-shopping text-lg"></i><span class="text-[9px] mt-1 font-semibold">Cart</span><span id="bottomCartCount" class="absolute -top-1 right-2 bg-red-600 text-white text-[9px] font-bold px-1.5 py-0.5 rounded-full hidden">0</span></div>
+        <div onclick="showProfile()" class="flex flex-col items-center w-1/5 text-gray-500 hover:text-yellow-500 cursor-pointer transition-colors"><i class="fa-solid fa-user text-lg"></i><span class="text-[9px] mt-1 font-semibold">Profile</span></div>
     </div>
 
     <div id="imageModalContainer"></div>
@@ -89,32 +74,18 @@
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
 
-        // --- DATA & STATE ---
-        const categories = [
-            { name: "All", img: "https://images.unsplash.com/photo-1490481651871-ab68de25d43d?w=150&q=80" },
-            { name: "T-Shirts", img: "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=150&q=80" },
-            { name: "Shirts", img: "https://images.unsplash.com/photo-1596755094514-f87e32f85ec8?w=150&q=80" },
-            { name: "Jeans", img: "https://images.unsplash.com/photo-1541099649105-f69ad21f3246?w=150&q=80" },
-            { name: "Shoes", img: "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=150&q=80" },
-            { name: "Combos", img: "https://images.unsplash.com/photo-1516257984-b1b4d707412e?w=150&q=80" }
-        ];
-
-        const products = [
-            { id: 1, name: "Premium Black T-Shirt", price: 499, mrp: 999, discount: "50% OFF", category: "T-Shirts", img: "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=400&q=80" },
-            { id: 2, name: "Funky Denim Jacket", price: 1299, mrp: 2599, discount: "50% OFF", category: "Shirts", img: "https://images.unsplash.com/photo-1576995853123-5a10305d93c0?w=400&q=80" },
-            { id: 3, name: "Aesthetic Sneakers", price: 899, mrp: 1499, discount: "40% OFF", category: "Shoes", img: "https://images.unsplash.com/photo-1525966222134-fcfa99b8ae77?w=400&q=80" },
-            { id: 4, name: "Casual Chinos", price: 799, mrp: 1299, discount: "38% OFF", category: "Jeans", img: "https://images.unsplash.com/photo-1473966968600-fa801b869a1a?w=400&q=80" },
-            { id: 5, name: "Classic White Shirt", price: 599, mrp: 1199, discount: "50% OFF", category: "Shirts", img: "https://images.unsplash.com/photo-1596755094514-f87e32f85ec8?w=400&q=80" },
-            { id: 6, name: "Ripped Blue Jeans", price: 1099, mrp: 1999, discount: "45% OFF", category: "Jeans", img: "https://images.unsplash.com/photo-1541099649105-f69ad21f3246?w=400&q=80" },
-            { id: 7, name: "Combo (White Shirt + Blue Jeans)", price: 1499, mrp: 3198, discount: "53% OFF", category: "Combos", img: "https://images.unsplash.com/photo-1516257984-b1b4d707412e?w=400&q=80" }
-        ];
+        // --- DYNAMIC DATA STATE ---
+        let categories = [{ id: "all", name: "All", img: "https://images.unsplash.com/photo-1490481651871-ab68de25d43d?w=150&q=80" }];
+        let products = [];
+        let banners = [];
+        let paymentSettings = { qr_url: "", upi_id: "", whatsapp: "919982437489" };
         
         let currentUser = JSON.parse(localStorage.getItem('mz_currentUser')) || null;
         let cart = JSON.parse(localStorage.getItem('mz_cart')) || [];
         let likedItems = JSON.parse(localStorage.getItem('mz_likes')) || [];
-        
         let activeCategory = "All";
         let tempCheckoutData = null; 
+        
         let currentSelectedSize = null; 
         let currentComboSize1 = null; 
         let currentComboSize2 = null; 
@@ -122,6 +93,74 @@
         const appDiv = document.getElementById('app');
         const topNav = document.getElementById('topNav');
         const bottomNav = document.getElementById('bottomNav');
+
+        // --- REALTIME DATABASE SYNC ---
+        async function initApp() {
+            // Seed DB if it's empty so you can test right away
+            const prodSnap = await db.ref('products').once('value');
+            if (!prodSnap.exists()) {
+                await seedInitialData();
+            }
+
+            // Listeners to automatically update Frontend when Admin makes changes
+            db.ref('categories').on('value', snap => {
+                if(snap.exists()) {
+                    categories = [{ id: "all", name: "All", img: "https://images.unsplash.com/photo-1490481651871-ab68de25d43d?w=150&q=80" }];
+                    snap.forEach(child => categories.push(child.val()));
+                    if(currentUser && document.getElementById('homeView')) goHome();
+                }
+            });
+
+            db.ref('products').on('value', snap => {
+                if(snap.exists()) {
+                    products = [];
+                    snap.forEach(child => products.push(child.val()));
+                    if(currentUser && document.getElementById('homeView')) goHome();
+                }
+            });
+
+            db.ref('banners').on('value', snap => {
+                if(snap.exists()) {
+                    banners = [];
+                    snap.forEach(child => banners.push(child.val()));
+                    if(currentUser && document.getElementById('homeView')) goHome();
+                }
+            });
+
+            db.ref('settings/payment').on('value', snap => {
+                if(snap.exists()) paymentSettings = snap.val();
+            });
+
+            // Delay slighty to wait for data load
+            setTimeout(() => {
+                if(checkAuth()) {
+                    goHome();
+                    updateCartBadge();
+                }
+            }, 1000);
+        }
+
+        async function seedInitialData() {
+            await db.ref('settings/payment').set({
+                qr_url: "https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=upi://pay?pa=dummy@upi&pn=MZFASHION",
+                upi_id: "dummy@upi",
+                whatsapp: "919982437489"
+            });
+            await db.ref('banners').set({
+                b1: { id: "b1", img: "256328.jpg", target_link: "#" },
+                b2: { id: "b2", img: "https://images.unsplash.com/photo-1441984904996-e0b6ba687e04?w=800&q=80", target_link: "#" }
+            });
+            await db.ref('categories').set({
+                c1: { id: "c1", name: "T-Shirts", img: "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=150&q=80" },
+                c2: { id: "c2", name: "Jeans", img: "https://images.unsplash.com/photo-1541099649105-f69ad21f3246?w=150&q=80" },
+                c3: { id: "c3", name: "Combos", img: "https://images.unsplash.com/photo-1516257984-b1b4d707412e?w=150&q=80" }
+            });
+            await db.ref('products').set({
+                p1: { id: "p1", name: "Premium Black T-Shirt", price: 499, mrp: 999, discount: "50% OFF", category: "T-Shirts", img: "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=400&q=80", shirtSizes: "S, M, L, XL, XXL", jeansSizes: "" },
+                p2: { id: "p2", name: "Ripped Blue Jeans", price: 1099, mrp: 1999, discount: "45% OFF", category: "Jeans", img: "https://images.unsplash.com/photo-1541099649105-f69ad21f3246?w=400&q=80", shirtSizes: "", jeansSizes: "28, 30, 32, 34, 36" },
+                p3: { id: "p3", name: "Combo (Shirt + Jeans)", price: 1499, mrp: 3198, discount: "53% OFF", category: "Combos", img: "https://images.unsplash.com/photo-1516257984-b1b4d707412e?w=400&q=80", shirtSizes: "S, M, L, XL, XXL", jeansSizes: "28, 30, 32, 34, 36" }
+            });
+        }
 
         // --- AUTHENTICATION ---
         function checkAuth() {
@@ -148,18 +187,10 @@
                     </div>
                     
                     <form onsubmit="handleLogin(event)" class="flex flex-col gap-4">
-                        <div class="relative">
-                            <i class="fa-solid fa-phone absolute left-4 top-4 text-gray-500"></i>
-                            <input type="tel" id="loginPhone" placeholder="Phone Number" required class="bg-zinc-950 border border-gray-700 focus:border-yellow-500 outline-none text-white p-3 pl-12 rounded-lg w-full">
-                        </div>
-                        <div class="relative">
-                            <i class="fa-solid fa-lock absolute left-4 top-4 text-gray-500"></i>
-                            <input type="password" id="loginPassword" placeholder="Password" required class="bg-zinc-950 border border-gray-700 focus:border-yellow-500 outline-none text-white p-3 pl-12 rounded-lg w-full">
-                        </div>
+                        <div class="relative"><i class="fa-solid fa-phone absolute left-4 top-4 text-gray-500"></i><input type="tel" id="loginPhone" placeholder="Phone Number" required class="bg-zinc-950 border border-gray-700 focus:border-yellow-500 outline-none text-white p-3 pl-12 rounded-lg w-full"></div>
+                        <div class="relative"><i class="fa-solid fa-lock absolute left-4 top-4 text-gray-500"></i><input type="password" id="loginPassword" placeholder="Password" required class="bg-zinc-950 border border-gray-700 focus:border-yellow-500 outline-none text-white p-3 pl-12 rounded-lg w-full"></div>
                         <p id="loginError" class="text-red-500 text-xs text-center hidden">Invalid phone or password.</p>
-                        <button type="submit" id="loginBtn" class="mt-4 bg-gradient-to-r from-yellow-600 to-yellow-400 text-black font-extrabold py-3.5 rounded-lg shadow-[0_0_15px_rgba(212,175,55,0.4)] w-full tracking-wide transition">
-                            LOGIN
-                        </button>
+                        <button type="submit" id="loginBtn" class="mt-4 bg-gradient-to-r from-yellow-600 to-yellow-400 text-black font-extrabold py-3.5 rounded-lg shadow-[0_0_15px_rgba(212,175,55,0.4)] w-full tracking-wide transition">LOGIN</button>
                     </form>
                     
                     <p class="text-center text-gray-400 mt-6 text-sm">Don't have an account? <span onclick="showRegister()" class="text-yellow-500 font-bold cursor-pointer">Register Now</span></p>
@@ -177,22 +208,11 @@
                     </div>
                     
                     <form onsubmit="handleRegister(event)" class="flex flex-col gap-4">
-                        <div class="relative">
-                            <i class="fa-solid fa-user absolute left-4 top-4 text-gray-500"></i>
-                            <input type="text" id="regName" placeholder="Full Name" required class="bg-zinc-950 border border-gray-700 focus:border-yellow-500 outline-none text-white p-3 pl-12 rounded-lg w-full">
-                        </div>
-                        <div class="relative">
-                            <i class="fa-solid fa-phone absolute left-4 top-4 text-gray-500"></i>
-                            <input type="tel" id="regPhone" placeholder="Phone Number" required class="bg-zinc-950 border border-gray-700 focus:border-yellow-500 outline-none text-white p-3 pl-12 rounded-lg w-full">
-                        </div>
-                        <div class="relative">
-                            <i class="fa-solid fa-lock absolute left-4 top-4 text-gray-500"></i>
-                            <input type="password" id="regPassword" placeholder="Password" required class="bg-zinc-950 border border-gray-700 focus:border-yellow-500 outline-none text-white p-3 pl-12 rounded-lg w-full">
-                        </div>
+                        <div class="relative"><i class="fa-solid fa-user absolute left-4 top-4 text-gray-500"></i><input type="text" id="regName" placeholder="Full Name" required class="bg-zinc-950 border border-gray-700 focus:border-yellow-500 outline-none text-white p-3 pl-12 rounded-lg w-full"></div>
+                        <div class="relative"><i class="fa-solid fa-phone absolute left-4 top-4 text-gray-500"></i><input type="tel" id="regPhone" placeholder="Phone Number" required class="bg-zinc-950 border border-gray-700 focus:border-yellow-500 outline-none text-white p-3 pl-12 rounded-lg w-full"></div>
+                        <div class="relative"><i class="fa-solid fa-lock absolute left-4 top-4 text-gray-500"></i><input type="password" id="regPassword" placeholder="Password" required class="bg-zinc-950 border border-gray-700 focus:border-yellow-500 outline-none text-white p-3 pl-12 rounded-lg w-full"></div>
                         <p id="regError" class="text-red-500 text-xs text-center hidden">Phone number already registered.</p>
-                        <button type="submit" id="regBtn" class="mt-4 bg-gradient-to-r from-yellow-600 to-yellow-400 text-black font-extrabold py-3.5 rounded-lg shadow-[0_0_15px_rgba(212,175,55,0.4)] w-full tracking-wide transition">
-                            CREATE ACCOUNT
-                        </button>
+                        <button type="submit" id="regBtn" class="mt-4 bg-gradient-to-r from-yellow-600 to-yellow-400 text-black font-extrabold py-3.5 rounded-lg shadow-[0_0_15px_rgba(212,175,55,0.4)] w-full tracking-wide transition">CREATE ACCOUNT</button>
                     </form>
                     
                     <p class="text-center text-gray-400 mt-6 text-sm">Already have an account? <span onclick="showLogin()" class="text-yellow-500 font-bold cursor-pointer">Login Here</span></p>
@@ -220,7 +240,7 @@
                     btn.innerHTML = "LOGIN";
                 }
             } catch (error) {
-                alert("Database Error! Make sure Realtime Database rules are set to True.");
+                alert("Database Error!");
                 btn.innerHTML = "LOGIN";
             }
         }
@@ -240,15 +260,13 @@
                     btn.innerHTML = "CREATE ACCOUNT";
                     return;
                 }
-                
                 const newUser = { name, phone, password: pass, linkedEmail: "mzfashion@gmail.com" };
                 await db.ref('users/' + phone).set(newUser);
-                
                 currentUser = newUser;
                 localStorage.setItem('mz_currentUser', JSON.stringify(newUser));
                 goHome();
             } catch (error) {
-                alert("Database Error! Make sure Realtime Database rules are set to True.");
+                alert("Database Error!");
                 btn.innerHTML = "CREATE ACCOUNT";
             }
         }
@@ -270,7 +288,6 @@
                 displayProducts = products.filter(p => p.category === activeCategory);
             }
 
-            // Categories updated to Grid (5 columns horizontally), it will wrap naturally
             let catHTML = categories.map(cat => `
                 <div onclick="filterCategory('${cat.name}')" class="flex flex-col items-center gap-1 cursor-pointer w-full">
                     <div class="w-12 h-12 md:w-14 md:h-14 rounded-full overflow-hidden border-2 ${activeCategory === cat.name ? 'border-yellow-400 shadow-[0_0_10px_rgba(212,175,55,0.8)]' : 'border-gray-600'} transition-all mx-auto">
@@ -284,16 +301,14 @@
                 const isLiked = likedItems.includes(item.id);
                 return `
                 <div class="bg-zinc-950 border border-yellow-600/30 rounded-lg shadow-lg relative flex flex-col justify-between overflow-hidden">
-                    <button onclick="toggleLike(this, ${item.id})" class="absolute top-2 right-2 ${isLiked ? 'text-red-500' : 'text-gray-500'} z-10 text-xl bg-black/60 rounded-full w-8 h-8 flex items-center justify-center backdrop-blur-sm shadow-md transition-colors">
+                    <button onclick="toggleLike(this, '${item.id}')" class="absolute top-2 right-2 ${isLiked ? 'text-red-500' : 'text-gray-500'} z-10 text-xl bg-black/60 rounded-full w-8 h-8 flex items-center justify-center backdrop-blur-sm shadow-md transition-colors">
                         <i class="fa-solid fa-heart"></i>
                     </button>
-
-                    <div onclick="viewProduct(${item.id})" class="cursor-pointer relative">
+                    <div onclick="viewProduct('${item.id}')" class="cursor-pointer relative">
                         <img src="${item.img}" class="w-full h-44 object-cover opacity-90 hover:opacity-100 transition duration-300">
                     </div>
-                    
                     <div class="p-3 flex flex-col flex-grow border-t border-yellow-600/20">
-                        <h3 onclick="viewProduct(${item.id})" class="text-sm font-semibold truncate text-gray-200 cursor-pointer">${item.name}</h3>
+                        <h3 onclick="viewProduct('${item.id}')" class="text-sm font-semibold truncate text-gray-200 cursor-pointer">${item.name}</h3>
                         <div class="mt-1 flex items-center gap-2">
                             <span class="font-bold text-yellow-500">₹${item.price}</span>
                             <span class="text-xs line-through text-gray-500">₹${item.mrp}</span>
@@ -301,8 +316,8 @@
                         <span class="text-[10px] text-yellow-600 font-bold mt-1 bg-yellow-900/20 px-1 w-max rounded">${item.discount}</span>
                         
                         <div class="flex justify-between gap-1.5 mt-3">
-                            <button onclick="viewProduct(${item.id})" class="flex-1 bg-zinc-800 border border-yellow-500 text-yellow-500 font-bold py-1.5 rounded text-[10px] hover:bg-yellow-900/30 transition shadow-sm">CART</button>
-                            <button onclick="viewProduct(${item.id})" class="flex-1 bg-gradient-to-r from-yellow-600 to-yellow-400 text-black font-extrabold py-1.5 rounded shadow-[0_0_10px_rgba(212,175,55,0.4)] text-[10px] transition-all duration-300">BUY NOW</button>
+                            <button onclick="viewProduct('${item.id}')" class="flex-1 bg-zinc-800 border border-yellow-500 text-yellow-500 font-bold py-1.5 rounded text-[10px] shadow-sm">CART</button>
+                            <button onclick="viewProduct('${item.id}')" class="flex-1 bg-gradient-to-r from-yellow-600 to-yellow-400 text-black font-extrabold py-1.5 rounded shadow-[0_0_10px_rgba(212,175,55,0.4)] text-[10px]">BUY NOW</button>
                         </div>
                     </div>
                 </div>
@@ -312,14 +327,21 @@
                 prodHTML = `<div class="col-span-2 text-center text-gray-500 py-10">No products found.</div>`;
             }
 
+            // Banner Carousel (Horizontal Swipe)
+            let bannerHTML = banners.map(b => `
+                <a href="${b.target_link || '#'}" class="min-w-full flex-shrink-0 snap-center relative h-44 block">
+                    <img src="${b.img}" class="w-full h-full object-cover opacity-90">
+                    <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
+                </a>
+            `).join('');
+
             appDiv.innerHTML = `
-                <div class="fade-in">
-                    <div class="h-44 mx-4 mt-4 rounded-xl bg-zinc-950 flex flex-col items-center justify-center overflow-hidden relative border border-yellow-600/30 shadow-[0_0_10px_rgba(212,175,55,0.1)]">
-                        <img src="256328.jpg" alt="Banner" class="w-full h-full object-cover opacity-90">
-                        <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
+                <div id="homeView" class="fade-in">
+                    <!-- Banner Slider -->
+                    <div class="flex overflow-x-auto snap-x snap-mandatory no-scrollbar mx-4 mt-4 rounded-xl bg-zinc-950 border border-yellow-600/30 shadow-[0_0_10px_rgba(212,175,55,0.1)]">
+                        ${bannerHTML}
                     </div>
 
-                    <!-- 5 Column Grid for Categories -->
                     <div class="grid grid-cols-5 gap-y-4 gap-x-2 p-3 bg-zinc-950 border-b border-yellow-600/20 mt-4 justify-items-center">
                         ${catHTML}
                     </div>
@@ -368,10 +390,10 @@
             } else {
                 html = `<div class="grid grid-cols-2 gap-4">` + likedProducts.map(item => `
                     <div class="bg-zinc-950 border border-yellow-600/30 rounded-lg shadow-lg relative flex flex-col justify-between overflow-hidden">
-                        <button onclick="toggleLike(this, ${item.id}); setTimeout(showLikes, 300);" class="absolute top-2 right-2 text-red-500 z-10 text-xl bg-black/60 rounded-full w-8 h-8 flex items-center justify-center backdrop-blur-sm shadow-md transition-colors">
+                        <button onclick="toggleLike(this, '${item.id}'); setTimeout(showLikes, 300);" class="absolute top-2 right-2 text-red-500 z-10 text-xl bg-black/60 rounded-full w-8 h-8 flex items-center justify-center backdrop-blur-sm shadow-md transition-colors">
                             <i class="fa-solid fa-heart"></i>
                         </button>
-                        <div onclick="viewProduct(${item.id})" class="cursor-pointer relative">
+                        <div onclick="viewProduct('${item.id}')" class="cursor-pointer relative">
                             <img src="${item.img}" class="w-full h-44 object-cover opacity-90 hover:opacity-100 transition duration-300">
                         </div>
                         <div class="p-3 flex flex-col flex-grow border-t border-yellow-600/20">
@@ -379,10 +401,9 @@
                             <div class="mt-1 flex items-center gap-2">
                                 <span class="font-bold text-yellow-500">₹${item.price}</span>
                             </div>
-                            
                             <div class="flex justify-between gap-1.5 mt-3">
-                                <button onclick="viewProduct(${item.id})" class="flex-1 bg-zinc-800 border border-yellow-500 text-yellow-500 font-bold py-1.5 rounded text-[10px] shadow-sm">CART</button>
-                                <button onclick="viewProduct(${item.id})" class="flex-1 bg-gradient-to-r from-yellow-600 to-yellow-400 text-black font-extrabold py-1.5 rounded shadow-[0_0_10px_rgba(212,175,55,0.4)] text-[10px]">BUY NOW</button>
+                                <button onclick="viewProduct('${item.id}')" class="flex-1 bg-zinc-800 border border-yellow-500 text-yellow-500 font-bold py-1.5 rounded text-[10px] shadow-sm">CART</button>
+                                <button onclick="viewProduct('${item.id}')" class="flex-1 bg-gradient-to-r from-yellow-600 to-yellow-400 text-black font-extrabold py-1.5 rounded shadow-[0_0_10px_rgba(212,175,55,0.4)] text-[10px]">BUY NOW</button>
                             </div>
                         </div>
                     </div>
@@ -426,7 +447,7 @@
                         </div>
                         <div id="supportPanel" class="hidden p-4 border-t border-gray-800 bg-black">
                             <div class="flex flex-col gap-3">
-                                <a href="https://wa.me/919982437489" target="_blank" class="flex w-full items-center justify-center gap-3 bg-green-500 hover:bg-green-600 text-white font-bold py-3.5 px-4 rounded-lg shadow-md transition">
+                                <a href="https://wa.me/${paymentSettings.whatsapp}" target="_blank" class="flex w-full items-center justify-center gap-3 bg-green-500 hover:bg-green-600 text-white font-bold py-3.5 px-4 rounded-lg shadow-md transition">
                                     <i class="fa-brands fa-whatsapp text-2xl"></i> WhatsApp Support
                                 </a>
                             </div>
@@ -446,12 +467,9 @@
             if(newName && newName.trim() !== "") {
                 currentUser.name = newName.trim();
                 localStorage.setItem('mz_currentUser', JSON.stringify(currentUser));
-                
                 try {
                     await db.ref('users/' + currentUser.phone).update({ name: currentUser.name });
-                } catch(e) {
-                    console.log("Error updating name in Firebase");
-                }
+                } catch(e) {}
                 showProfile();
             }
         }
@@ -465,55 +483,36 @@
             if(!checkAuth()) return;
             const product = products.find(p => p.id === id);
             
-            currentSelectedSize = null; 
-            currentComboSize1 = null;
-            currentComboSize2 = null;
-            
+            currentSelectedSize = null; currentComboSize1 = null; currentComboSize2 = null;
             let sizeHTML = "";
+            
+            // Checking dynamic DB properties for sizes
+            let hasShirt = !!product.shirtSizes && product.shirtSizes.trim() !== "";
+            let hasJeans = !!product.jeansSizes && product.jeansSizes.trim() !== "";
 
-            if (product.category === "Combos") {
-                sizeHTML = `
-                    <p class="font-bold text-gray-300 mb-2 mt-2 text-xs uppercase tracking-wide text-yellow-500 border-l-2 border-yellow-500 pl-2">Select Shirt Size</p>
-                    <div class="flex flex-wrap gap-2">
-                        ${["S", "M", "L", "XL", "XXL"].map(s => `
-                            <div>
-                                <input type="radio" name="comboShirt" id="cs1-${s}" value="${s}" class="hidden size-radio" onchange="selectComboSize1('${s}')">
-                                <label for="cs1-${s}" class="cursor-pointer border border-gray-600 text-gray-300 font-semibold px-3 py-1.5 text-xs rounded-md hover:border-yellow-500 transition">${s}</label>
-                            </div>
-                        `).join('')}
-                    </div>
-                    
-                    <p class="font-bold text-gray-300 mb-2 mt-5 text-xs uppercase tracking-wide text-yellow-500 border-l-2 border-yellow-500 pl-2">Select Jeans Size</p>
-                    <div class="flex flex-wrap gap-2">
-                        ${["28", "30", "32", "34", "36"].map(s => `
-                            <div>
-                                <input type="radio" name="comboJeans" id="cs2-${s}" value="${s}" class="hidden size-radio" onchange="selectComboSize2('${s}')">
-                                <label for="cs2-${s}" class="cursor-pointer border border-gray-600 text-gray-300 font-semibold px-3 py-1.5 text-xs rounded-md hover:border-yellow-500 transition">${s}</label>
-                            </div>
-                        `).join('')}
+            if (hasShirt) {
+                let sArr = product.shirtSizes.split(',').map(s => s.trim());
+                sizeHTML += `
+                    <p class="font-bold text-gray-300 mb-2 mt-2 text-xs uppercase text-yellow-500 border-l-2 border-yellow-500 pl-2">Select Top / Shirt Size</p>
+                    <div class="flex flex-wrap gap-2 mb-3">
+                        ${sArr.map(s => `<div><input type="radio" name="comboShirt" id="cs1-${s}" value="${s}" class="hidden size-radio" onchange="selectComboSize1('${s}')"><label for="cs1-${s}" class="cursor-pointer border border-gray-600 text-gray-300 font-semibold px-3 py-1.5 text-xs rounded-md hover:border-yellow-500 transition">${s}</label></div>`).join('')}
                     </div>
                 `;
-            } else {
-                let sizes = [];
-                if(product.category === "T-Shirts" || product.category === "Shirts") {
-                    sizes = ["S", "M", "L", "XL", "XXL"];
-                } else if (product.category === "Jeans") {
-                    sizes = ["28", "30", "32", "34", "36"];
-                } else if (product.category === "Shoes") {
-                    sizes = ["6", "7", "8", "9", "10"];
-                } else {
-                    sizes = ["Free Size"];
-                }
-
-                sizeHTML = `
+            }
+            if (hasJeans) {
+                let jArr = product.jeansSizes.split(',').map(s => s.trim());
+                sizeHTML += `
+                    <p class="font-bold text-gray-300 mb-2 mt-2 text-xs uppercase text-yellow-500 border-l-2 border-yellow-500 pl-2">Select Bottom / Jeans Size</p>
+                    <div class="flex flex-wrap gap-2 mb-3">
+                        ${jArr.map(s => `<div><input type="radio" name="comboJeans" id="cs2-${s}" value="${s}" class="hidden size-radio" onchange="selectComboSize2('${s}')"><label for="cs2-${s}" class="cursor-pointer border border-gray-600 text-gray-300 font-semibold px-3 py-1.5 text-xs rounded-md hover:border-yellow-500 transition">${s}</label></div>`).join('')}
+                    </div>
+                `;
+            }
+            if (!hasShirt && !hasJeans) {
+                sizeHTML += `
                     <p class="font-bold text-gray-300 mb-3 uppercase tracking-wide text-sm">Select Size</p>
                     <div class="flex flex-wrap gap-3">
-                        ${sizes.map(s => `
-                            <div>
-                                <input type="radio" name="productSize" id="size-${s}" value="${s}" class="hidden size-radio" onchange="selectSize('${s}')">
-                                <label for="size-${s}" class="cursor-pointer border border-gray-600 text-gray-300 font-semibold px-4 py-2 rounded-md hover:border-yellow-500 transition">${s}</label>
-                            </div>
-                        `).join('')}
+                        <div><input type="radio" name="productSize" id="size-Free" value="Free Size" class="hidden size-radio" onchange="selectSize('Free Size')"><label for="size-Free" class="cursor-pointer border border-gray-600 text-gray-300 font-semibold px-4 py-2 rounded-md hover:border-yellow-500 transition">Free Size</label></div>
                     </div>
                 `;
             }
@@ -521,11 +520,11 @@
             let moreProducts = products.filter(p => p.id !== id).sort(() => 0.5 - Math.random()).slice(0, 4);
             let moreProdHTML = moreProducts.map(item => `
                 <div class="bg-zinc-950 border border-yellow-600/30 rounded-lg shadow-lg relative flex flex-col justify-between overflow-hidden">
-                    <div onclick="viewProduct(${item.id})" class="cursor-pointer relative">
+                    <div onclick="viewProduct('${item.id}')" class="cursor-pointer relative">
                         <img src="${item.img}" class="w-full h-32 object-cover opacity-90 hover:opacity-100 transition duration-300">
                     </div>
                     <div class="p-2 flex flex-col flex-grow border-t border-yellow-600/20">
-                        <h3 onclick="viewProduct(${item.id})" class="text-[10px] font-semibold truncate text-gray-200 cursor-pointer">${item.name}</h3>
+                        <h3 onclick="viewProduct('${item.id}')" class="text-[10px] font-semibold truncate text-gray-200 cursor-pointer">${item.name}</h3>
                         <span class="font-bold text-yellow-500 text-sm mt-1">₹${item.price}</span>
                     </div>
                 </div>
@@ -533,17 +532,11 @@
 
             appDiv.innerHTML = `
                 <div class="fade-in relative pb-24">
-                    <button onclick="goHome()" class="absolute top-4 left-4 bg-black/70 border border-yellow-500 text-yellow-500 rounded-full w-10 h-10 z-10 flex items-center justify-center backdrop-blur-sm shadow-lg">
-                        <i class="fa-solid fa-arrow-left"></i>
-                    </button>
-                    
+                    <button onclick="goHome()" class="absolute top-4 left-4 bg-black/70 border border-yellow-500 text-yellow-500 rounded-full w-10 h-10 z-10 flex items-center justify-center backdrop-blur-sm shadow-lg"><i class="fa-solid fa-arrow-left"></i></button>
                     <div onclick="openImage('${product.img}')" class="relative cursor-zoom-in">
                         <img src="${product.img}" class="w-full h-[450px] object-cover opacity-90">
-                        <div class="absolute bottom-3 right-3 bg-black/70 rounded-full w-8 h-8 flex items-center justify-center text-yellow-500 border border-yellow-500/50 shadow-lg">
-                            <i class="fa-solid fa-expand"></i>
-                        </div>
+                        <div class="absolute bottom-3 right-3 bg-black/70 rounded-full w-8 h-8 flex items-center justify-center text-yellow-500 border border-yellow-500/50 shadow-lg"><i class="fa-solid fa-expand"></i></div>
                     </div>
-                    
                     <div class="p-5 bg-zinc-900 min-h-[30vh]">
                         <h1 class="text-2xl font-bold text-gray-100">${product.name}</h1>
                         <div class="mt-3 flex items-center gap-3">
@@ -551,20 +544,17 @@
                             <span class="text-lg line-through text-gray-500">₹${product.mrp}</span>
                             <span class="text-sm text-black font-bold bg-yellow-500 px-2 py-1 rounded">${product.discount}</span>
                         </div>
-                        
                         <div class="mt-6 mb-4 bg-zinc-950 p-4 rounded-lg border border-yellow-600/30">
                             ${sizeHTML}
                         </div>
-
                         <h3 class="font-bold text-yellow-500 mt-8 border-t border-yellow-600/30 pt-4 mb-4 uppercase tracking-wide">More Products</h3>
                         <div class="grid grid-cols-2 gap-3 mb-6">
                             ${moreProdHTML}
                         </div>
                     </div>
-                    
                     <div class="fixed bottom-[64px] left-0 w-full bg-zinc-950 border-t border-yellow-600/40 p-3 max-w-md mx-auto flex gap-3 z-40 shadow-[0_-4px_15px_rgba(0,0,0,0.5)]">
-                        <button id="addBtn-${product.id}" onclick="addToCart(${product.id})" class="w-1/2 bg-black border border-yellow-500 text-yellow-500 font-bold py-3 rounded hover:bg-yellow-900/20 transition text-sm">ADD TO CART</button>
-                        <button onclick="handleBuyNow(${product.id})" class="w-1/2 bg-gradient-to-r from-yellow-600 to-yellow-400 text-black font-extrabold py-3 rounded text-center block shadow-[0_0_15px_rgba(212,175,55,0.4)] text-sm">BUY NOW</button>
+                        <button id="addBtn-${product.id}" onclick="addToCart('${product.id}')" class="w-1/2 bg-black border border-yellow-500 text-yellow-500 font-bold py-3 rounded hover:bg-yellow-900/20 transition text-sm">ADD TO CART</button>
+                        <button onclick="handleBuyNow('${product.id}')" class="w-1/2 bg-gradient-to-r from-yellow-600 to-yellow-400 text-black font-extrabold py-3 rounded text-center block shadow-[0_0_15px_rgba(212,175,55,0.4)] text-sm">BUY NOW</button>
                     </div>
                 </div>
             `;
@@ -623,7 +613,6 @@
                             <span>Total</span><span>₹${total}</span>
                         </div>
                     </div>
-                    
                     <div class="fixed bottom-[64px] left-0 w-full bg-zinc-950 border-t border-yellow-600/40 p-3 max-w-md mx-auto z-40">
                         <button onclick="goToAddress('cart')" class="w-full bg-gradient-to-r from-yellow-600 to-yellow-400 text-black font-extrabold py-3 rounded shadow-[0_0_15px_rgba(212,175,55,0.4)] tracking-wide">PROCEED TO BUY</button>
                     </div>
@@ -633,9 +622,18 @@
         }
 
         function getValidatedSize(product) {
-            if (product.category === "Combos") {
+            let hasShirt = !!product.shirtSizes && product.shirtSizes.trim() !== "";
+            let hasJeans = !!product.jeansSizes && product.jeansSizes.trim() !== "";
+            
+            if (hasShirt && hasJeans) {
                 if(!currentComboSize1 || !currentComboSize2) return null;
-                return `Shirt: ${currentComboSize1}, Jeans: ${currentComboSize2}`;
+                return `Top: ${currentComboSize1}, Bottom: ${currentComboSize2}`;
+            } else if (hasShirt) {
+                if(!currentComboSize1) return null;
+                return currentComboSize1;
+            } else if (hasJeans) {
+                if(!currentComboSize2) return null;
+                return currentComboSize2;
             } else {
                 if(!currentSelectedSize) return null;
                 return currentSelectedSize;
@@ -647,7 +645,7 @@
             const finalSize = getValidatedSize(product);
             
             if(!finalSize) {
-                alert(product.category === "Combos" ? "Please select both Shirt and Jeans sizes!" : "Please select a size first!");
+                alert("Please select required sizes first!");
                 return;
             }
 
@@ -674,7 +672,7 @@
             const finalSize = getValidatedSize(product);
 
             if(!finalSize) {
-                alert(product.category === "Combos" ? "Please select both Shirt and Jeans sizes!" : "Please select a size first!");
+                alert("Please select required sizes first!");
                 return;
             }
             currentSelectedSize = finalSize; 
@@ -694,7 +692,7 @@
             else { badge.classList.add('hidden'); }
         }
 
-        // --- AUTOMATIC PINCODE FETCHING LOGIC WITH VILLAGE DROPDOWN ---
+        // --- AUTOMATIC PINCODE FETCHING LOGIC ---
         async function fetchPinCodeDetails(pincode) {
             const statusEl = document.getElementById('pinStatus');
             const districtEl = document.getElementById('custDistrict');
@@ -709,53 +707,37 @@
                     
                     if (data[0].Status === "Success") {
                         let postOffices = data[0].PostOffice;
-                        
-                        // Set State and District
                         districtEl.value = postOffices[0].District;
                         stateEl.value = postOffices[0].State;
                         
-                        // Populate Village/Area Dropdown
                         villageEl.innerHTML = '<option value="" disabled selected>Select Village / Area</option>';
                         postOffices.forEach(po => {
                             villageEl.innerHTML += `<option value="${po.Name}">${po.Name}</option>`;
                         });
-                        
-                        // Change Dropdown styling to indicate success
                         villageEl.classList.remove('bg-zinc-900', 'text-gray-500');
                         villageEl.classList.add('bg-zinc-950', 'text-yellow-500');
-                        
-                        districtEl.classList.remove('text-gray-500');
-                        stateEl.classList.remove('text-gray-500');
-                        districtEl.classList.add('text-gray-200');
-                        stateEl.classList.add('text-gray-200');
-                        
+                        districtEl.classList.remove('text-gray-500'); stateEl.classList.remove('text-gray-500');
+                        districtEl.classList.add('text-gray-200'); stateEl.classList.add('text-gray-200');
                         statusEl.innerHTML = '<i class="fa-solid fa-check text-green-500"></i> Found';
                     } else {
                         statusEl.innerHTML = 'Invalid PIN';
-                        districtEl.value = "";
-                        stateEl.value = "";
+                        districtEl.value = ""; stateEl.value = "";
                         villageEl.innerHTML = '<option value="" disabled selected>Enter valid PIN first</option>';
-                        villageEl.classList.add('bg-zinc-900', 'text-gray-500');
-                        villageEl.classList.remove('bg-zinc-950', 'text-yellow-500');
+                        villageEl.classList.add('bg-zinc-900', 'text-gray-500'); villageEl.classList.remove('bg-zinc-950', 'text-yellow-500');
                     }
                 } catch (e) {
                     statusEl.innerHTML = 'Error fetching data';
                 }
             } else {
-                statusEl.innerHTML = '';
-                districtEl.value = "";
-                stateEl.value = "";
+                statusEl.innerHTML = ''; districtEl.value = ""; stateEl.value = "";
                 villageEl.innerHTML = '<option value="" disabled selected>Enter PIN to select Village</option>';
-                villageEl.classList.add('bg-zinc-900', 'text-gray-500');
-                villageEl.classList.remove('bg-zinc-950', 'text-yellow-500');
+                villageEl.classList.add('bg-zinc-900', 'text-gray-500'); villageEl.classList.remove('bg-zinc-950', 'text-yellow-500');
             }
         }
 
         // --- SPLIT CHECKOUT: STEP 1 (ADDRESS) ---
         function goToAddress(source) {
-            let total = 0;
-            let productNames = "";
-            let primaryImg = "";
+            let total = 0; let productNames = ""; let primaryImg = "";
 
             if (source === 'cart') {
                 total = cart.reduce((sum, item) => sum + item.price, 0);
@@ -773,33 +755,24 @@
             appDiv.innerHTML = `
                 <div class="fade-in p-5 pb-20">
                     <h1 class="text-xl font-bold text-yellow-500 mb-6 border-b border-yellow-600/30 pb-2">Delivery Details</h1>
-                    
                     <form onsubmit="goToPayment(event)" class="flex flex-col gap-4">
                         <div>
                             <input type="text" id="custName" value="${currentUser.name}" required placeholder="Full Name" class="bg-zinc-950 border border-gray-700 focus:border-yellow-500 outline-none text-gray-200 p-3 rounded w-full mb-3 text-sm">
                             <input type="tel" id="custPhone" value="${currentUser.phone}" required placeholder="Phone Number" class="bg-zinc-950 border border-gray-700 focus:border-yellow-500 outline-none text-gray-200 p-3 rounded w-full mb-3 text-sm">
-                            
                             <div class="relative">
                                 <input type="number" id="custPincode" placeholder="6-Digit PIN Code" required pattern="[0-9]{6}" maxlength="6" onkeyup="fetchPinCodeDetails(this.value)" class="bg-zinc-950 border border-gray-700 focus:border-yellow-500 outline-none text-yellow-500 p-3 rounded w-full mb-3 text-sm font-bold tracking-widest">
                                 <p id="pinStatus" class="text-[10px] text-yellow-500 absolute right-3 top-4"></p>
                             </div>
-
                             <div class="flex gap-2 mb-3">
                                 <input type="text" id="custDistrict" placeholder="District" required readonly class="bg-zinc-900 border border-gray-700 text-gray-500 p-3 rounded w-1/2 text-sm focus:outline-none">
                                 <input type="text" id="custState" placeholder="State" required readonly class="bg-zinc-900 border border-gray-700 text-gray-500 p-3 rounded w-1/2 text-sm focus:outline-none">
                             </div>
-
-                            <!-- New Village Dropdown -->
                             <select id="custVillage" required class="bg-zinc-900 border border-gray-700 text-gray-500 p-3 rounded w-full mb-3 text-sm focus:outline-none focus:border-yellow-500 transition-colors">
                                 <option value="" disabled selected>Enter PIN to select Village / Area</option>
                             </select>
-
                             <textarea id="custAddress" placeholder="Complete Address (House No, Street Area)" required class="bg-zinc-950 border border-gray-700 focus:border-yellow-500 outline-none text-gray-200 p-3 rounded w-full text-sm" rows="3"></textarea>
                         </div>
-                        
-                        <button type="submit" class="mt-4 bg-gradient-to-r from-yellow-600 to-yellow-400 text-black font-extrabold py-3.5 rounded shadow-[0_0_15px_rgba(212,175,55,0.4)] w-full tracking-wide">
-                            NEXT: PAYMENT
-                        </button>
+                        <button type="submit" class="mt-4 bg-gradient-to-r from-yellow-600 to-yellow-400 text-black font-extrabold py-3.5 rounded shadow-[0_0_15px_rgba(212,175,55,0.4)] w-full tracking-wide">NEXT: PAYMENT</button>
                     </form>
                 </div>
             `;
@@ -822,35 +795,21 @@
                 alert("Please enter a valid PIN Code and select your Village/Area!");
                 return;
             }
-
-            // Including Village in final address
             tempCheckoutData.address = `${baseAddress}, ${village}, ${district}, ${state} (PIN: ${pincode})`;
             
             appDiv.innerHTML = `
                 <div class="fade-in p-5 pb-20">
                     <h1 class="text-xl font-bold text-yellow-500 mb-6 border-b border-yellow-600/30 pb-2">Select Payment</h1>
-                    
                     <div class="bg-zinc-950 p-4 rounded-lg border border-yellow-600/30 mb-6 flex justify-between font-bold text-lg text-yellow-500 shadow-md">
-                        <span>Total to Pay:</span>
-                        <span>₹${tempCheckoutData.price}</span>
+                        <span>Total to Pay:</span><span>₹${tempCheckoutData.price}</span>
                     </div>
-
                     <form onsubmit="confirmOrder(event)">
                         <div class="mb-6">
-                            <div class="flex items-center gap-3 bg-zinc-950 p-3 rounded border border-gray-700 mb-2 cursor-pointer">
-                                <input type="radio" id="prepaid" name="payment" value="Prepaid" onchange="renderPaymentUI()" class="accent-yellow-500 w-4 h-4 cursor-pointer">
-                                <label for="prepaid" class="text-gray-200 font-medium text-sm cursor-pointer w-full">Prepaid (Full Payment)</label>
-                            </div>
-                            <div class="flex items-center gap-3 bg-zinc-950 p-3 rounded border border-gray-700 mb-2 cursor-pointer">
-                                <input type="radio" id="cod" name="payment" value="COD" onchange="renderPaymentUI()" class="accent-yellow-500 w-4 h-4 cursor-pointer" checked>
-                                <label for="cod" class="text-gray-200 font-medium text-sm cursor-pointer w-full">Cash on Delivery (C.O.D)</label>
-                            </div>
+                            <div class="flex items-center gap-3 bg-zinc-950 p-3 rounded border border-gray-700 mb-2 cursor-pointer"><input type="radio" id="prepaid" name="payment" value="Prepaid" onchange="renderPaymentUI()" class="accent-yellow-500 w-4 h-4 cursor-pointer"><label for="prepaid" class="text-gray-200 font-medium text-sm cursor-pointer w-full">Prepaid (Full Payment)</label></div>
+                            <div class="flex items-center gap-3 bg-zinc-950 p-3 rounded border border-gray-700 mb-2 cursor-pointer"><input type="radio" id="cod" name="payment" value="COD" onchange="renderPaymentUI()" class="accent-yellow-500 w-4 h-4 cursor-pointer" checked><label for="cod" class="text-gray-200 font-medium text-sm cursor-pointer w-full">Cash on Delivery (C.O.D)</label></div>
                             <div id="paymentUI" class="mt-4 p-4 bg-zinc-950 border border-yellow-500 rounded-lg shadow-[0_0_10px_rgba(212,175,55,0.2)]"></div>
                         </div>
-                        
-                        <button type="submit" class="bg-gradient-to-r from-yellow-600 to-yellow-400 text-black font-extrabold py-3.5 rounded shadow-[0_0_15px_rgba(212,175,55,0.4)] w-full tracking-wide">
-                            PLACE ORDER
-                        </button>
+                        <button type="submit" class="bg-gradient-to-r from-yellow-600 to-yellow-400 text-black font-extrabold py-3.5 rounded shadow-[0_0_15px_rgba(212,175,55,0.4)] w-full tracking-wide">PLACE ORDER</button>
                     </form>
                 </div>
             `;
@@ -862,19 +821,17 @@
             const isCOD = document.getElementById('cod').checked;
             const uiDiv = document.getElementById('paymentUI');
             const totalAmount = tempCheckoutData.price;
-            const qrUrl = "https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=upi://pay?pa=dummy@upi&pn=MZFASHION";
+            
+            const qrUrl = paymentSettings.qr_url;
+            const waNum = paymentSettings.whatsapp;
 
             if (!isCOD) {
                 uiDiv.innerHTML = `
                     <p class="text-center text-sm text-gray-400 mb-2">Scan QR to pay Full Amount</p>
                     <p class="text-center font-bold text-xl text-yellow-500 mb-4">₹${totalAmount}</p>
-                    <div class="flex justify-center mb-4">
-                        <img src="${qrUrl}" class="w-32 h-32 border-4 border-yellow-500 rounded p-1 bg-white shadow-lg">
-                    </div>
+                    <div class="flex justify-center mb-4"><img src="${qrUrl}" class="w-32 h-32 border-4 border-yellow-500 rounded p-1 bg-white shadow-lg"></div>
                     <p class="text-xs text-center text-gray-400 mb-3">Pay amount, then send screenshot below.</p>
-                    <a href="https://wa.me/919982437489?text=Hello%20MZ%20Fashion,%20here%20is%20my%20Full%20Payment%20screenshot" target="_blank" class="flex w-full items-center justify-center gap-2 bg-green-500 hover:bg-green-600 text-white font-bold py-3 px-4 rounded-lg shadow-[0_0_15px_rgba(34,197,94,0.6)] animate-pulse transition">
-                        <i class="fa-brands fa-whatsapp text-xl"></i> SEND SCREENSHOT
-                    </a>
+                    <a href="https://wa.me/${waNum}?text=Hello%20MZ%20Fashion,%20here%20is%20my%20Full%20Payment%20screenshot" target="_blank" class="flex w-full items-center justify-center gap-2 bg-green-500 hover:bg-green-600 text-white font-bold py-3 px-4 rounded-lg shadow-[0_0_15px_rgba(34,197,94,0.6)] animate-pulse transition"><i class="fa-brands fa-whatsapp text-xl"></i> SEND SCREENSHOT</a>
                 `;
             } else {
                 const tokenAmount = Math.round(totalAmount * 0.30);
@@ -883,13 +840,9 @@
                         <p class="text-xs text-yellow-200">For C.O.D, 30% advance token is required.</p>
                         <p class="font-bold text-lg text-yellow-500 mt-1">Token Amount: ₹${tokenAmount}</p>
                     </div>
-                    <div class="flex justify-center mb-4">
-                        <img src="${qrUrl}" class="w-32 h-32 border-4 border-yellow-500 rounded p-1 bg-white shadow-lg">
-                    </div>
+                    <div class="flex justify-center mb-4"><img src="${qrUrl}" class="w-32 h-32 border-4 border-yellow-500 rounded p-1 bg-white shadow-lg"></div>
                     <p class="text-xs text-center text-gray-400 mb-3">Scan & Pay Token, then send screenshot below.</p>
-                    <a href="https://wa.me/919982437489?text=Hello%20MZ%20Fashion,%20here%20is%20my%20token%20payment%20screenshot" target="_blank" class="flex w-full items-center justify-center gap-2 bg-green-500 hover:bg-green-600 text-white font-bold py-3 px-4 rounded-lg shadow-[0_0_15px_rgba(34,197,94,0.6)] animate-pulse transition">
-                        <i class="fa-brands fa-whatsapp text-xl"></i> SEND SCREENSHOT
-                    </a>
+                    <a href="https://wa.me/${waNum}?text=Hello%20MZ%20Fashion,%20here%20is%20my%20token%20payment%20screenshot" target="_blank" class="flex w-full items-center justify-center gap-2 bg-green-500 hover:bg-green-600 text-white font-bold py-3 px-4 rounded-lg shadow-[0_0_15px_rgba(34,197,94,0.6)] animate-pulse transition"><i class="fa-brands fa-whatsapp text-xl"></i> SEND SCREENSHOT</a>
                 `;
             }
         }
@@ -897,195 +850,67 @@
         async function confirmOrder(event) {
             event.preventDefault();
             const paymentType = document.getElementById('cod').checked ? "COD" : "Prepaid";
-            
             const newOrder = {
-                id: Date.now().toString(),
-                date: new Date().toLocaleString(),
-                name: tempCheckoutData.name,
-                phone: tempCheckoutData.phone,
-                address: tempCheckoutData.address,
-                payment: paymentType,
-                product_name: tempCheckoutData.names,
-                price: tempCheckoutData.price,
+                id: Date.now().toString(), date: new Date().toLocaleString(),
+                name: tempCheckoutData.name, phone: tempCheckoutData.phone,
+                address: tempCheckoutData.address, payment: paymentType,
+                product_name: tempCheckoutData.names, price: tempCheckoutData.price,
                 img: tempCheckoutData.img 
             };
-            
             appDiv.innerHTML = `<div class="min-h-[70vh] flex flex-col items-center justify-center text-yellow-500"><i class="fa-solid fa-spinner fa-spin text-5xl mb-4"></i><p class="font-bold tracking-widest">PLACING ORDER...</p></div>`;
             window.scrollTo(0,0);
-
             try {
                 await db.ref('orders/' + newOrder.id).set(newOrder);
-                
-                cart = [];
-                localStorage.setItem('mz_cart', JSON.stringify(cart));
-                updateCartBadge();
-
+                cart = []; localStorage.setItem('mz_cart', JSON.stringify(cart)); updateCartBadge();
                 appDiv.innerHTML = `
                     <div class="fade-in flex flex-col items-center justify-center min-h-[70vh] p-4 text-center">
-                        <div class="w-20 h-20 bg-zinc-950 border-2 border-yellow-500 text-yellow-500 rounded-full flex items-center justify-center text-4xl mb-6 shadow-[0_0_20px_rgba(212,175,55,0.3)]">
-                            <i class="fa-solid fa-check"></i>
-                        </div>
+                        <div class="w-20 h-20 bg-zinc-950 border-2 border-yellow-500 text-yellow-500 rounded-full flex items-center justify-center text-4xl mb-6 shadow-[0_0_20px_rgba(212,175,55,0.3)]"><i class="fa-solid fa-check"></i></div>
                         <h1 class="text-2xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-yellow-300 to-yellow-600">Order Placed!</h1>
                         <p class="text-gray-400 mt-4 text-sm">Thank you, <span class="text-gray-200 font-semibold">${tempCheckoutData.name}</span>.</p>
                         <p class="text-gray-400 mt-1 text-sm">Order for <b class="text-yellow-500 text-[10px] break-words block">${tempCheckoutData.names}</b> is processing.</p>
-                        
                         <button onclick="showMyOrders()" class="mt-8 bg-gradient-to-r from-yellow-600 to-yellow-400 text-black px-8 py-3 rounded font-bold shadow-md transition-all w-full max-w-xs">View My Orders</button>
                         <button onclick="goHome()" class="mt-3 border border-yellow-500 text-yellow-500 hover:bg-yellow-500 hover:text-black px-8 py-3 rounded font-bold transition-all w-full max-w-xs">Continue Shopping</button>
                     </div>
                 `;
-            } catch (error) {
-                alert("Database Error! Order not placed. Check Realtime Database permissions.");
-                goHome();
-            }
+            } catch (error) { alert("Database Error!"); goHome(); }
         }
 
         // --- MY ORDERS PAGE ---
         async function showMyOrders() {
             if(!checkAuth()) return;
-            
             appDiv.innerHTML = `<div class="min-h-[70vh] flex flex-col items-center justify-center text-yellow-500"><i class="fa-solid fa-spinner fa-spin text-5xl mb-4"></i><p class="font-bold tracking-widest">LOADING ORDERS...</p></div>`;
             window.scrollTo(0,0);
-
             try {
                 const snapshot = await db.ref('orders').orderByChild('phone').equalTo(currentUser.phone).once('value');
-                let userOrders = [];
-                snapshot.forEach(childSnapshot => { userOrders.push(childSnapshot.val()); });
-                
+                let userOrders = []; snapshot.forEach(child => { userOrders.push(child.val()); });
                 userOrders.sort((a, b) => b.id - a.id);
-
                 let myOrdersHTML = "";
                 if (userOrders.length > 0) {
                     userOrders.forEach(order => {
-                        let paymentStatus = "";
-                        let tokenAmount = 0;
-                        let remainingAmount = 0;
-
+                        let paymentStatus = ""; let tokenAmount = 0; let remainingAmount = 0;
                         if(order.payment === "COD") {
-                            tokenAmount = Math.round(order.price * 0.30);
-                            remainingAmount = order.price - tokenAmount;
-                            paymentStatus = `
-                                <p class="text-xs text-gray-400 mt-1">Total: ₹${order.price}</p>
-                                <p class="text-xs text-green-500 font-semibold">Paid Token: ₹${tokenAmount}</p>
-                                <p class="text-xs text-red-400 font-semibold">To Pay on Delivery: ₹${remainingAmount}</p>
-                            `;
+                            tokenAmount = Math.round(order.price * 0.30); remainingAmount = order.price - tokenAmount;
+                            paymentStatus = `<p class="text-xs text-gray-400 mt-1">Total: ₹${order.price}</p><p class="text-xs text-green-500 font-semibold">Paid Token: ₹${tokenAmount}</p><p class="text-xs text-red-400 font-semibold">To Pay on Delivery: ₹${remainingAmount}</p>`;
                         } else {
-                            paymentStatus = `
-                                <p class="text-xs text-gray-400 mt-1">Total: ₹${order.price}</p>
-                                <p class="text-xs text-green-500 font-semibold">Paid: ₹${order.price} (Full Payment)</p>
-                            `;
+                            paymentStatus = `<p class="text-xs text-gray-400 mt-1">Total: ₹${order.price}</p><p class="text-xs text-green-500 font-semibold">Paid: ₹${order.price} (Full Payment)</p>`;
                         }
-
                         myOrdersHTML += `
                             <div class="bg-zinc-950 border border-yellow-600/30 rounded-lg p-4 shadow-md mb-4">
-                                <div class="flex gap-4 border-b border-gray-800 pb-3 mb-3">
-                                    <img src="${order.img}" class="w-20 h-20 object-cover rounded border border-gray-700">
-                                    <div class="flex-grow w-full overflow-hidden">
-                                        <p class="font-bold text-gray-200 text-xs break-words">${order.product_name}</p>
-                                        <p class="text-[10px] text-gray-500 mt-1">${order.date}</p>
-                                        <span class="inline-block mt-2 px-2 py-0.5 bg-yellow-900/30 text-yellow-500 text-[10px] rounded border border-yellow-600/50 uppercase">${order.payment}</span>
-                                    </div>
-                                </div>
-                                <div class="mb-3">
-                                    <p class="text-sm text-gray-300 font-semibold"><i class="fa-solid fa-location-dot text-yellow-500 mr-1 w-4"></i> Deliver To:</p>
-                                    <p class="text-xs text-gray-400 ml-5">${order.name}</p>
-                                    <p class="text-xs text-gray-400 ml-5">${order.address}</p>
-                                </div>
-                                <div class="bg-zinc-900 p-3 rounded border border-gray-800">
-                                    <p class="text-sm text-gray-300 font-semibold mb-1"><i class="fa-solid fa-wallet text-yellow-500 mr-1 w-4"></i> Payment Info:</p>
-                                    ${paymentStatus}
-                                </div>
+                                <div class="flex gap-4 border-b border-gray-800 pb-3 mb-3"><img src="${order.img}" class="w-20 h-20 object-cover rounded border border-gray-700"><div class="flex-grow w-full overflow-hidden"><p class="font-bold text-gray-200 text-xs break-words">${order.product_name}</p><p class="text-[10px] text-gray-500 mt-1">${order.date}</p><span class="inline-block mt-2 px-2 py-0.5 bg-yellow-900/30 text-yellow-500 text-[10px] rounded border border-yellow-600/50 uppercase">${order.payment}</span></div></div>
+                                <div class="mb-3"><p class="text-sm text-gray-300 font-semibold"><i class="fa-solid fa-location-dot text-yellow-500 mr-1 w-4"></i> Deliver To:</p><p class="text-xs text-gray-400 ml-5">${order.name}</p><p class="text-xs text-gray-400 ml-5">${order.address}</p></div>
+                                <div class="bg-zinc-900 p-3 rounded border border-gray-800"><p class="text-sm text-gray-300 font-semibold mb-1"><i class="fa-solid fa-wallet text-yellow-500 mr-1 w-4"></i> Payment Info:</p>${paymentStatus}</div>
                             </div>
                         `;
                     });
                 } else {
-                    myOrdersHTML = `
-                        <div class="text-center p-10 bg-zinc-950 rounded-lg border border-gray-800 mt-4">
-                            <i class="fa-solid fa-box-open text-5xl text-gray-600 mb-4"></i>
-                            <h2 class="text-gray-400 font-semibold">No Orders Found</h2>
-                            <button onclick="goHome()" class="mt-4 border border-yellow-500 text-yellow-500 px-6 py-2 rounded text-sm font-bold">Start Shopping</button>
-                        </div>
-                    `;
+                    myOrdersHTML = `<div class="text-center p-10 bg-zinc-950 rounded-lg border border-gray-800 mt-4"><i class="fa-solid fa-box-open text-5xl text-gray-600 mb-4"></i><h2 class="text-gray-400 font-semibold">No Orders Found</h2><button onclick="goHome()" class="mt-4 border border-yellow-500 text-yellow-500 px-6 py-2 rounded text-sm font-bold">Start Shopping</button></div>`;
                 }
-
-                appDiv.innerHTML = `
-                    <div class="fade-in p-4 pb-20">
-                        <h1 class="text-xl font-bold text-yellow-500 mb-6 border-b border-yellow-600/30 pb-2"><i class="fa-solid fa-box mr-2"></i> My Orders</h1>
-                        ${myOrdersHTML}
-                    </div>
-                `;
-            } catch (error) {
-                appDiv.innerHTML = `<div class="p-10 text-center text-red-500">Error connecting to database. Please check Realtime Database permissions.</div>`;
-            }
+                appDiv.innerHTML = `<div class="fade-in p-4 pb-20"><h1 class="text-xl font-bold text-yellow-500 mb-6 border-b border-yellow-600/30 pb-2"><i class="fa-solid fa-box mr-2"></i> My Orders</h1>${myOrdersHTML}</div>`;
+            } catch (error) { appDiv.innerHTML = `<div class="p-10 text-center text-red-500">Error connecting to database.</div>`; }
         }
 
-        // --- SECRET ADMIN PANEL ---
-        async function renderAdmin() {
-            appDiv.innerHTML = `<div class="min-h-[70vh] flex flex-col items-center justify-center text-yellow-500"><i class="fa-solid fa-spinner fa-spin text-5xl mb-4"></i><p class="font-bold tracking-widest">LOADING ADMIN...</p></div>`;
-            window.scrollTo(0,0);
-            
-            try {
-                const snapshot = await db.ref('orders').once('value');
-                let allOrders = [];
-                snapshot.forEach(childSnapshot => { allOrders.push(childSnapshot.val()); });
-                
-                allOrders.sort((a, b) => b.id - a.id);
-
-                let ordersHTML = "";
-                if (allOrders.length > 0) {
-                    allOrders.forEach(order => {
-                        ordersHTML += `
-                            <div class="border border-yellow-600/30 rounded-lg p-4 bg-zinc-950 shadow-[0_0_10px_rgba(0,0,0,0.5)]">
-                                <div class="flex justify-between items-start mb-2">
-                                    <p class="font-bold text-yellow-500 text-[11px] break-words w-full">${order.product_name}</p>
-                                </div>
-                                <div class="space-y-1 mt-3">
-                                    <p class="text-[10px] text-gray-500 border-b border-gray-800 pb-1 mb-2">${order.date}</p>
-                                    <p class="text-xs text-gray-300"><i class="fa-solid fa-user w-4 text-gray-500"></i> ${order.name} (${order.phone})</p>
-                                    <p class="text-xs text-gray-300"><i class="fa-solid fa-location-dot w-4 text-gray-500"></i> ${order.address}</p>
-                                    <p class="text-xs text-gray-300"><i class="fa-solid fa-money-bill w-4 text-gray-500"></i> ${order.payment} - <span class="font-bold text-gray-200">₹${order.price}</span></p>
-                                </div>
-                            </div>
-                        `;
-                    });
-                } else {
-                    ordersHTML = `<div class="bg-zinc-950 border border-dashed border-gray-700 p-8 text-center rounded-lg mt-5"><p class="text-gray-500 italic">No orders yet.</p></div>`;
-                }
-
-                appDiv.innerHTML = `
-                    <div class="fade-in p-5 pb-20">
-                        <h1 class="text-2xl font-bold mb-4 text-yellow-500 border-b border-yellow-600/30 pb-3">Admin Panel</h1>
-                        <div class="flex justify-between items-center mb-4">
-                            <h2 class="text-sm font-semibold text-gray-200">Total Orders: ${allOrders.length}</h2>
-                            <button onclick="clearOrders()" class="text-[10px] text-red-500 border border-red-900 px-2 py-1 rounded">Clear All</button>
-                        </div>
-                        <div class="flex flex-col gap-3">${ordersHTML}</div>
-                    </div>
-                `;
-            } catch (error) {
-                appDiv.innerHTML = `<div class="p-10 text-center text-red-500">Error fetching admin data. Check Realtime Database rules.</div>`;
-            }
-        }
-
-        function clearOrders() {
-            if(confirm("Delete all orders?")) {
-                orders = [];
-                localStorage.removeItem('mz_orders');
-                renderAdmin();
-            }
-        }
-
-        let clicks = 0;
-        document.getElementById('secretLogo').addEventListener('click', () => {
-            clicks++;
-            if(clicks >= 5) { clicks = 0; renderAdmin(); }
-            setTimeout(() => { clicks = 0; }, 2000);
-        });
-
-        // Init App (Starts with Auth Check)
-        if(checkAuth()) {
-            goHome();
-            updateCartBadge();
-        }
+        // Init App 
+        initApp();
     </script>
 </body>
 </html>
