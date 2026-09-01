@@ -264,9 +264,8 @@
                 displayProducts = products.filter(p => p.category === activeCategory);
             }
 
-            // Categories updated to Grid (5 columns horizontally), no scrolling
             let catHTML = categories.map(cat => `
-                <div onclick="filterCategory('${cat.name}')" class="flex flex-col items-center gap-1 cursor-pointer w-full">
+                <div onclick="filterCategory('${cat.name}')" class="flex flex-col items-center gap-1 cursor-pointer w-full mt-2">
                     <div class="w-12 h-12 md:w-14 md:h-14 rounded-full overflow-hidden border-2 ${activeCategory === cat.name ? 'border-yellow-400 shadow-[0_0_10px_rgba(212,175,55,0.8)]' : 'border-gray-600'} transition-all mx-auto">
                         <img src="${cat.img}" class="w-full h-full object-cover">
                     </div>
@@ -313,8 +312,7 @@
                         <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
                     </div>
 
-                    <!-- 5 Column Grid for Categories -->
-                    <div class="grid grid-cols-5 gap-y-4 gap-x-2 p-3 bg-zinc-950 border-b border-yellow-600/20 mt-4 justify-items-center">
+                    <div class="grid grid-cols-6 gap-2 p-3 bg-zinc-950 border-b border-yellow-600/20 mt-4 overflow-x-auto no-scrollbar">
                         ${catHTML}
                     </div>
                     
@@ -413,7 +411,7 @@
                         </div>
                     </div>
                     
-                    <!-- Support Accordion -->
+                    <!-- Support Accordion (Instagram Removed) -->
                     <div class="bg-zinc-950 rounded-lg border border-yellow-600/30 overflow-hidden mb-6 shadow-md">
                         <div onclick="document.getElementById('supportPanel').classList.toggle('hidden')" class="p-4 flex justify-between items-center cursor-pointer hover:bg-zinc-900">
                             <span class="font-semibold text-yellow-500"><i class="fa-solid fa-headset mr-2 w-5 text-center"></i> Support & Help</span>
@@ -689,6 +687,44 @@
             else { badge.classList.add('hidden'); }
         }
 
+        // --- AUTOMATIC PINCODE FETCHING LOGIC ---
+        async function fetchPinCodeDetails(pincode) {
+            const statusEl = document.getElementById('pinStatus');
+            const districtEl = document.getElementById('custDistrict');
+            const stateEl = document.getElementById('custState');
+            
+            if (pincode.length === 6) {
+                statusEl.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Checking...';
+                try {
+                    let response = await fetch(`https://api.postalpincode.in/pincode/${pincode}`);
+                    let data = await response.json();
+                    
+                    if (data[0].Status === "Success") {
+                        let postOffice = data[0].PostOffice[0];
+                        districtEl.value = postOffice.District;
+                        stateEl.value = postOffice.State;
+                        statusEl.innerHTML = '<i class="fa-solid fa-check text-green-500"></i> Found';
+                        
+                        districtEl.classList.remove('text-gray-500');
+                        stateEl.classList.remove('text-gray-500');
+                        districtEl.classList.add('text-gray-200');
+                        stateEl.classList.add('text-gray-200');
+
+                    } else {
+                        statusEl.innerHTML = 'Invalid PIN';
+                        districtEl.value = "";
+                        stateEl.value = "";
+                    }
+                } catch (e) {
+                    statusEl.innerHTML = 'Error fetching data';
+                }
+            } else {
+                statusEl.innerHTML = '';
+                districtEl.value = "";
+                stateEl.value = "";
+            }
+        }
+
         // --- SPLIT CHECKOUT: STEP 1 (ADDRESS) ---
         function goToAddress(source) {
             let total = 0;
@@ -714,51 +750,20 @@
                     
                     <form onsubmit="goToPayment(event)" class="flex flex-col gap-4">
                         <div>
-                            <input type="text" id="custName" value="${currentUser.name}" required class="bg-zinc-950 border border-gray-700 focus:border-yellow-500 outline-none text-gray-200 p-3 rounded w-full mb-3 text-sm">
-                            <input type="tel" id="custPhone" value="${currentUser.phone}" required class="bg-zinc-950 border border-gray-700 focus:border-yellow-500 outline-none text-gray-200 p-3 rounded w-full mb-3 text-sm">
+                            <input type="text" id="custName" value="${currentUser.name}" required placeholder="Full Name" class="bg-zinc-950 border border-gray-700 focus:border-yellow-500 outline-none text-gray-200 p-3 rounded w-full mb-3 text-sm">
+                            <input type="tel" id="custPhone" value="${currentUser.phone}" required placeholder="Phone Number" class="bg-zinc-950 border border-gray-700 focus:border-yellow-500 outline-none text-gray-200 p-3 rounded w-full mb-3 text-sm">
                             
-                            <!-- STATE FIELD WITH DATALIST -->
-                            <input list="states" id="custState" placeholder="Select or Type State" required class="bg-zinc-950 border border-gray-700 focus:border-yellow-500 outline-none text-yellow-500 p-3 rounded w-full mb-3 text-sm font-semibold">
-                            <datalist id="states">
-                                <option value="Andaman and Nicobar Islands">
-                                <option value="Andhra Pradesh">
-                                <option value="Arunachal Pradesh">
-                                <option value="Assam">
-                                <option value="Bihar">
-                                <option value="Chandigarh">
-                                <option value="Chhattisgarh">
-                                <option value="Dadra and Nagar Haveli">
-                                <option value="Daman and Diu">
-                                <option value="Delhi">
-                                <option value="Goa">
-                                <option value="Gujarat">
-                                <option value="Haryana">
-                                <option value="Himachal Pradesh">
-                                <option value="Jharkhand">
-                                <option value="Karnataka">
-                                <option value="Kerala">
-                                <option value="Lakshadweep">
-                                <option value="Madhya Pradesh">
-                                <option value="Maharashtra">
-                                <option value="Manipur">
-                                <option value="Meghalaya">
-                                <option value="Mizoram">
-                                <option value="Nagaland">
-                                <option value="Odisha">
-                                <option value="Puducherry">
-                                <option value="Punjab">
-                                <option value="Rajasthan">
-                                <option value="Sikkim">
-                                <option value="Tamil Nadu">
-                                <option value="Telangana">
-                                <option value="Tripura">
-                                <option value="Uttar Pradesh">
-                                <option value="Uttarakhand">
-                                <option value="West Bengal">
-                            </datalist>
+                            <div class="relative">
+                                <input type="number" id="custPincode" placeholder="6-Digit PIN Code" required pattern="[0-9]{6}" maxlength="6" onkeyup="fetchPinCodeDetails(this.value)" class="bg-zinc-950 border border-gray-700 focus:border-yellow-500 outline-none text-yellow-500 p-3 rounded w-full mb-3 text-sm font-bold tracking-widest">
+                                <p id="pinStatus" class="text-[10px] text-yellow-500 absolute right-3 top-4"></p>
+                            </div>
 
-                            <input type="text" id="custPincode" placeholder="6-Digit PIN Code" required pattern="[0-9]{6}" maxlength="6" minlength="6" title="Please enter a valid 6-digit Pincode" class="bg-zinc-950 border border-gray-700 focus:border-yellow-500 outline-none text-yellow-500 p-3 rounded w-full mb-3 text-sm font-bold tracking-widest">
-                            <textarea id="custAddress" placeholder="Complete Address (House No, Street, City)" required class="bg-zinc-950 border border-gray-700 focus:border-yellow-500 outline-none text-gray-200 p-3 rounded w-full text-sm" rows="3"></textarea>
+                            <div class="flex gap-2 mb-3">
+                                <input type="text" id="custDistrict" placeholder="District / City" required readonly class="bg-zinc-900 border border-gray-700 text-gray-500 p-3 rounded w-1/2 text-sm focus:outline-none">
+                                <input type="text" id="custState" placeholder="State" required readonly class="bg-zinc-900 border border-gray-700 text-gray-500 p-3 rounded w-1/2 text-sm focus:outline-none">
+                            </div>
+
+                            <textarea id="custAddress" placeholder="Complete Address (House No, Street Area)" required class="bg-zinc-950 border border-gray-700 focus:border-yellow-500 outline-none text-gray-200 p-3 rounded w-full text-sm" rows="3"></textarea>
                         </div>
                         
                         <button type="submit" class="mt-4 bg-gradient-to-r from-yellow-600 to-yellow-400 text-black font-extrabold py-3.5 rounded shadow-[0_0_15px_rgba(212,175,55,0.4)] w-full tracking-wide">
@@ -776,11 +781,18 @@
             
             tempCheckoutData.name = document.getElementById('custName').value;
             tempCheckoutData.phone = document.getElementById('custPhone').value;
+            const district = document.getElementById('custDistrict').value;
             const state = document.getElementById('custState').value;
             const pincode = document.getElementById('custPincode').value;
             const baseAddress = document.getElementById('custAddress').value;
             
-            tempCheckoutData.address = `${baseAddress}, State: ${state} (PIN: ${pincode})`;
+            // Checking if API filled the details correctly
+            if(!district || !state) {
+                alert("Please enter a valid PIN Code first!");
+                return;
+            }
+
+            tempCheckoutData.address = `${baseAddress}, ${district}, ${state} (PIN: ${pincode})`;
             
             appDiv.innerHTML = `
                 <div class="fade-in p-5 pb-20">
