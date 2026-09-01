@@ -26,6 +26,12 @@
             color: #000;
             border-color: #eab308;
         }
+        
+        /* Dropdown custom dark styling */
+        select option {
+            background-color: #000;
+            color: #d1d5db; /* gray-300 */
+        }
     </style>
 </head>
 <body class="bg-black text-gray-200">
@@ -264,8 +270,9 @@
                 displayProducts = products.filter(p => p.category === activeCategory);
             }
 
+            // Categories updated to Grid (5 columns horizontally), it will wrap naturally
             let catHTML = categories.map(cat => `
-                <div onclick="filterCategory('${cat.name}')" class="flex flex-col items-center gap-1 cursor-pointer w-full mt-2">
+                <div onclick="filterCategory('${cat.name}')" class="flex flex-col items-center gap-1 cursor-pointer w-full">
                     <div class="w-12 h-12 md:w-14 md:h-14 rounded-full overflow-hidden border-2 ${activeCategory === cat.name ? 'border-yellow-400 shadow-[0_0_10px_rgba(212,175,55,0.8)]' : 'border-gray-600'} transition-all mx-auto">
                         <img src="${cat.img}" class="w-full h-full object-cover">
                     </div>
@@ -312,7 +319,8 @@
                         <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
                     </div>
 
-                    <div class="grid grid-cols-6 gap-2 p-3 bg-zinc-950 border-b border-yellow-600/20 mt-4 overflow-x-auto no-scrollbar">
+                    <!-- 5 Column Grid for Categories -->
+                    <div class="grid grid-cols-5 gap-y-4 gap-x-2 p-3 bg-zinc-950 border-b border-yellow-600/20 mt-4 justify-items-center">
                         ${catHTML}
                     </div>
                     
@@ -411,7 +419,6 @@
                         </div>
                     </div>
                     
-                    <!-- Support Accordion (Instagram Removed) -->
                     <div class="bg-zinc-950 rounded-lg border border-yellow-600/30 overflow-hidden mb-6 shadow-md">
                         <div onclick="document.getElementById('supportPanel').classList.toggle('hidden')" class="p-4 flex justify-between items-center cursor-pointer hover:bg-zinc-900">
                             <span class="font-semibold text-yellow-500"><i class="fa-solid fa-headset mr-2 w-5 text-center"></i> Support & Help</span>
@@ -687,11 +694,12 @@
             else { badge.classList.add('hidden'); }
         }
 
-        // --- AUTOMATIC PINCODE FETCHING LOGIC ---
+        // --- AUTOMATIC PINCODE FETCHING LOGIC WITH VILLAGE DROPDOWN ---
         async function fetchPinCodeDetails(pincode) {
             const statusEl = document.getElementById('pinStatus');
             const districtEl = document.getElementById('custDistrict');
             const stateEl = document.getElementById('custState');
+            const villageEl = document.getElementById('custVillage');
             
             if (pincode.length === 6) {
                 statusEl.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Checking...';
@@ -700,20 +708,35 @@
                     let data = await response.json();
                     
                     if (data[0].Status === "Success") {
-                        let postOffice = data[0].PostOffice[0];
-                        districtEl.value = postOffice.District;
-                        stateEl.value = postOffice.State;
-                        statusEl.innerHTML = '<i class="fa-solid fa-check text-green-500"></i> Found';
+                        let postOffices = data[0].PostOffice;
+                        
+                        // Set State and District
+                        districtEl.value = postOffices[0].District;
+                        stateEl.value = postOffices[0].State;
+                        
+                        // Populate Village/Area Dropdown
+                        villageEl.innerHTML = '<option value="" disabled selected>Select Village / Area</option>';
+                        postOffices.forEach(po => {
+                            villageEl.innerHTML += `<option value="${po.Name}">${po.Name}</option>`;
+                        });
+                        
+                        // Change Dropdown styling to indicate success
+                        villageEl.classList.remove('bg-zinc-900', 'text-gray-500');
+                        villageEl.classList.add('bg-zinc-950', 'text-yellow-500');
                         
                         districtEl.classList.remove('text-gray-500');
                         stateEl.classList.remove('text-gray-500');
                         districtEl.classList.add('text-gray-200');
                         stateEl.classList.add('text-gray-200');
-
+                        
+                        statusEl.innerHTML = '<i class="fa-solid fa-check text-green-500"></i> Found';
                     } else {
                         statusEl.innerHTML = 'Invalid PIN';
                         districtEl.value = "";
                         stateEl.value = "";
+                        villageEl.innerHTML = '<option value="" disabled selected>Enter valid PIN first</option>';
+                        villageEl.classList.add('bg-zinc-900', 'text-gray-500');
+                        villageEl.classList.remove('bg-zinc-950', 'text-yellow-500');
                     }
                 } catch (e) {
                     statusEl.innerHTML = 'Error fetching data';
@@ -722,6 +745,9 @@
                 statusEl.innerHTML = '';
                 districtEl.value = "";
                 stateEl.value = "";
+                villageEl.innerHTML = '<option value="" disabled selected>Enter PIN to select Village</option>';
+                villageEl.classList.add('bg-zinc-900', 'text-gray-500');
+                villageEl.classList.remove('bg-zinc-950', 'text-yellow-500');
             }
         }
 
@@ -759,9 +785,14 @@
                             </div>
 
                             <div class="flex gap-2 mb-3">
-                                <input type="text" id="custDistrict" placeholder="District / City" required readonly class="bg-zinc-900 border border-gray-700 text-gray-500 p-3 rounded w-1/2 text-sm focus:outline-none">
+                                <input type="text" id="custDistrict" placeholder="District" required readonly class="bg-zinc-900 border border-gray-700 text-gray-500 p-3 rounded w-1/2 text-sm focus:outline-none">
                                 <input type="text" id="custState" placeholder="State" required readonly class="bg-zinc-900 border border-gray-700 text-gray-500 p-3 rounded w-1/2 text-sm focus:outline-none">
                             </div>
+
+                            <!-- New Village Dropdown -->
+                            <select id="custVillage" required class="bg-zinc-900 border border-gray-700 text-gray-500 p-3 rounded w-full mb-3 text-sm focus:outline-none focus:border-yellow-500 transition-colors">
+                                <option value="" disabled selected>Enter PIN to select Village / Area</option>
+                            </select>
 
                             <textarea id="custAddress" placeholder="Complete Address (House No, Street Area)" required class="bg-zinc-950 border border-gray-700 focus:border-yellow-500 outline-none text-gray-200 p-3 rounded w-full text-sm" rows="3"></textarea>
                         </div>
@@ -783,16 +814,17 @@
             tempCheckoutData.phone = document.getElementById('custPhone').value;
             const district = document.getElementById('custDistrict').value;
             const state = document.getElementById('custState').value;
+            const village = document.getElementById('custVillage').value;
             const pincode = document.getElementById('custPincode').value;
             const baseAddress = document.getElementById('custAddress').value;
             
-            // Checking if API filled the details correctly
-            if(!district || !state) {
-                alert("Please enter a valid PIN Code first!");
+            if(!district || !state || !village) {
+                alert("Please enter a valid PIN Code and select your Village/Area!");
                 return;
             }
 
-            tempCheckoutData.address = `${baseAddress}, ${district}, ${state} (PIN: ${pincode})`;
+            // Including Village in final address
+            tempCheckoutData.address = `${baseAddress}, ${village}, ${district}, ${state} (PIN: ${pincode})`;
             
             appDiv.innerHTML = `
                 <div class="fade-in p-5 pb-20">
