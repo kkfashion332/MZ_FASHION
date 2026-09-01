@@ -6,6 +6,10 @@
     <title>MZ Fashion</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
+    <script src="https://www.gstatic.com/firebasejs/10.4.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.4.0/firebase-firestore-compat.js"></script>
+
     <style>
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .fade-in { animation: fadeIn 0.3s ease-in-out; }
@@ -14,10 +18,8 @@
             to { opacity: 1; }
         }
         .content-padding { padding-bottom: 90px; }
-        
-        /* Size selection radio button hidden logic */
         .size-radio:checked + label {
-            background-color: #eab308; /* yellow-500 */
+            background-color: #eab308;
             color: #000;
             border-color: #eab308;
         }
@@ -25,7 +27,6 @@
 </head>
 <body class="bg-black text-gray-200">
 
-    <!-- Top Navbar -->
     <nav id="topNav" class="hidden bg-zinc-950 p-4 flex justify-between items-center sticky top-0 z-50 border-b border-yellow-600/40 shadow-[0_4px_15px_rgba(212,175,55,0.1)]">
         <div class="flex items-center gap-3 w-full justify-center relative">
             <img id="secretLogo" src="logo.png" onerror="this.src='https://ui-avatars.com/api/?name=MZ&background=000&color=D4AF37'" alt="MZ Fashion" class="absolute left-0 w-10 h-10 rounded-full cursor-pointer border border-yellow-500 object-cover shadow-[0_0_10px_rgba(212,175,55,0.4)]">
@@ -35,12 +36,9 @@
         </div>
     </nav>
 
-    <!-- Main App Container -->
     <div id="app" class="max-w-md mx-auto bg-zinc-900 min-h-screen shadow-2xl content-padding relative">
-        <!-- Views will be injected here -->
-    </div>
+        </div>
 
-    <!-- Bottom Navigation Bar -->
     <div id="bottomNav" class="hidden fixed bottom-0 left-0 w-full bg-zinc-950 border-t border-yellow-600/40 p-2 max-w-md mx-auto z-[60] flex justify-around items-center h-16 shadow-[0_-4px_15px_rgba(0,0,0,0.3)]">
         <div onclick="showLikes()" class="flex flex-col items-center w-1/5 text-gray-500 hover:text-yellow-500 cursor-pointer transition-colors">
             <i class="fa-solid fa-heart text-lg"></i><span class="text-[9px] mt-1 font-semibold">Likes</span>
@@ -65,6 +63,18 @@
     <div id="imageModalContainer"></div>
 
     <script>
+        // --- FIREBASE INITIALIZATION ---
+        const firebaseConfig = {
+            apiKey: "AIzaSyDYbppZ6nR4qs9tTZswSnVwurPI-Z5EqJ8",
+            authDomain: "mzfashion.firebaseapp.com",
+            projectId: "mzfashion",
+            storageBucket: "mzfashion.firebasestorage.app",
+            messagingSenderId: "355960541786",
+            appId: "1:355960541786:web:df4b50d44291d0dd0c3e63"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+
         // --- DATA & STATE ---
         const categories = [
             { name: "All", img: "https://images.unsplash.com/photo-1490481651871-ab68de25d43d?w=150&q=80" },
@@ -72,7 +82,7 @@
             { name: "Shirts", img: "https://images.unsplash.com/photo-1596755094514-f87e32f85ec8?w=150&q=80" },
             { name: "Jeans", img: "https://images.unsplash.com/photo-1541099649105-f69ad21f3246?w=150&q=80" },
             { name: "Shoes", img: "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=150&q=80" },
-            { name: "Combos", img: "https://images.unsplash.com/photo-1516257984-b1b4d707412e?w=150&q=80" } // NEW COMBO CATEGORY
+            { name: "Combos", img: "https://images.unsplash.com/photo-1516257984-b1b4d707412e?w=150&q=80" }
         ];
 
         const products = [
@@ -82,27 +92,24 @@
             { id: 4, name: "Casual Chinos", price: 799, mrp: 1299, discount: "38% OFF", category: "Jeans", img: "https://images.unsplash.com/photo-1473966968600-fa801b869a1a?w=400&q=80" },
             { id: 5, name: "Classic White Shirt", price: 599, mrp: 1199, discount: "50% OFF", category: "Shirts", img: "https://images.unsplash.com/photo-1596755094514-f87e32f85ec8?w=400&q=80" },
             { id: 6, name: "Ripped Blue Jeans", price: 1099, mrp: 1999, discount: "45% OFF", category: "Jeans", img: "https://images.unsplash.com/photo-1541099649105-f69ad21f3246?w=400&q=80" },
-            { id: 7, name: "Combo (White Shirt + Blue Jeans)", price: 1499, mrp: 3198, discount: "53% OFF", category: "Combos", img: "https://images.unsplash.com/photo-1516257984-b1b4d707412e?w=400&q=80" } // NEW COMBO PRODUCT
+            { id: 7, name: "Combo (White Shirt + Blue Jeans)", price: 1499, mrp: 3198, discount: "53% OFF", category: "Combos", img: "https://images.unsplash.com/photo-1516257984-b1b4d707412e?w=400&q=80" }
         ];
         
-        let users = JSON.parse(localStorage.getItem('mz_users')) || [];
         let currentUser = JSON.parse(localStorage.getItem('mz_currentUser')) || null;
-
         let cart = JSON.parse(localStorage.getItem('mz_cart')) || [];
-        let orders = JSON.parse(localStorage.getItem('mz_orders')) || [];
         let likedItems = JSON.parse(localStorage.getItem('mz_likes')) || [];
+        
         let activeCategory = "All";
         let tempCheckoutData = null; 
-        
         let currentSelectedSize = null; 
-        let currentComboSize1 = null; // For Shirt in Combo
-        let currentComboSize2 = null; // For Jeans in Combo
+        let currentComboSize1 = null; 
+        let currentComboSize2 = null; 
         
         const appDiv = document.getElementById('app');
         const topNav = document.getElementById('topNav');
         const bottomNav = document.getElementById('bottomNav');
 
-        // --- AUTHENTICATION LOGIC ---
+        // --- AUTHENTICATION (FIREBASE CONNECTED) ---
         function checkAuth() {
             if (!currentUser) {
                 topNav.classList.add('hidden');
@@ -136,7 +143,7 @@
                             <input type="password" id="loginPassword" placeholder="Password" required class="bg-zinc-950 border border-gray-700 focus:border-yellow-500 outline-none text-white p-3 pl-12 rounded-lg w-full">
                         </div>
                         <p id="loginError" class="text-red-500 text-xs text-center hidden">Invalid phone or password.</p>
-                        <button type="submit" class="mt-4 bg-gradient-to-r from-yellow-600 to-yellow-400 text-black font-extrabold py-3.5 rounded-lg shadow-[0_0_15px_rgba(212,175,55,0.4)] w-full tracking-wide">
+                        <button type="submit" id="loginBtn" class="mt-4 bg-gradient-to-r from-yellow-600 to-yellow-400 text-black font-extrabold py-3.5 rounded-lg shadow-[0_0_15px_rgba(212,175,55,0.4)] w-full tracking-wide transition">
                             LOGIN
                         </button>
                     </form>
@@ -169,7 +176,7 @@
                             <input type="password" id="regPassword" placeholder="Password" required class="bg-zinc-950 border border-gray-700 focus:border-yellow-500 outline-none text-white p-3 pl-12 rounded-lg w-full">
                         </div>
                         <p id="regError" class="text-red-500 text-xs text-center hidden">Phone number already registered.</p>
-                        <button type="submit" class="mt-4 bg-gradient-to-r from-yellow-600 to-yellow-400 text-black font-extrabold py-3.5 rounded-lg shadow-[0_0_15px_rgba(212,175,55,0.4)] w-full tracking-wide">
+                        <button type="submit" id="regBtn" class="mt-4 bg-gradient-to-r from-yellow-600 to-yellow-400 text-black font-extrabold py-3.5 rounded-lg shadow-[0_0_15px_rgba(212,175,55,0.4)] w-full tracking-wide transition">
                             CREATE ACCOUNT
                         </button>
                     </form>
@@ -180,40 +187,58 @@
             window.scrollTo(0,0);
         }
 
-        function handleLogin(e) {
+        async function handleLogin(e) {
             e.preventDefault();
             const phone = document.getElementById('loginPhone').value;
             const pass = document.getElementById('loginPassword').value;
-            
-            const user = users.find(u => u.phone === phone && u.password === pass);
-            if (user) {
-                currentUser = user;
-                localStorage.setItem('mz_currentUser', JSON.stringify(user));
-                updateCartBadge();
-                goHome();
-            } else {
-                document.getElementById('loginError').classList.remove('hidden');
+            const btn = document.getElementById('loginBtn');
+            btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin mr-2"></i> LOGGING IN...`;
+
+            try {
+                const doc = await db.collection('users').doc(phone).get();
+                if (doc.exists && doc.data().password === pass) {
+                    currentUser = doc.data();
+                    localStorage.setItem('mz_currentUser', JSON.stringify(currentUser));
+                    updateCartBadge();
+                    goHome();
+                } else {
+                    document.getElementById('loginError').classList.remove('hidden');
+                    btn.innerHTML = "LOGIN";
+                }
+            } catch (error) {
+                alert("Database Error! Make sure Firestore rules are set to True.");
+                btn.innerHTML = "LOGIN";
             }
         }
 
-        function handleRegister(e) {
+        async function handleRegister(e) {
             e.preventDefault();
             const name = document.getElementById('regName').value;
             const phone = document.getElementById('regPhone').value;
             const pass = document.getElementById('regPassword').value;
+            const btn = document.getElementById('regBtn');
+            btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin mr-2"></i> CREATING ACCOUNT...`;
             
-            if(users.find(u => u.phone === phone)) {
-                document.getElementById('regError').classList.remove('hidden');
-                return;
+            try {
+                const userRef = db.collection('users').doc(phone);
+                const doc = await userRef.get();
+                if (doc.exists) {
+                    document.getElementById('regError').classList.remove('hidden');
+                    btn.innerHTML = "CREATE ACCOUNT";
+                    return;
+                }
+                
+                // Demo email added to database profile exactly as requested
+                const newUser = { name, phone, password: pass, linkedEmail: "mzfashion@gmail.com" };
+                await userRef.set(newUser);
+                
+                currentUser = newUser;
+                localStorage.setItem('mz_currentUser', JSON.stringify(newUser));
+                goHome();
+            } catch (error) {
+                alert("Database Error! Make sure Firestore rules are set to True.");
+                btn.innerHTML = "CREATE ACCOUNT";
             }
-            
-            const newUser = { name, phone, password: pass };
-            users.push(newUser);
-            localStorage.setItem('mz_users', JSON.stringify(users));
-            
-            currentUser = newUser;
-            localStorage.setItem('mz_currentUser', JSON.stringify(newUser));
-            goHome();
         }
 
         function logout() {
@@ -281,7 +306,7 @@
                         <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
                     </div>
 
-                    <div class="grid grid-cols-5 gap-2 p-3 bg-zinc-950 border-b border-yellow-600/20 mt-4">
+                    <div class="grid grid-cols-6 gap-2 p-3 bg-zinc-950 border-b border-yellow-600/20 mt-4 overflow-x-auto no-scrollbar">
                         ${catHTML}
                     </div>
                     
@@ -380,7 +405,6 @@
                         </div>
                     </div>
                     
-                    <!-- Support Accordion (Instagram Removed) -->
                     <div class="bg-zinc-950 rounded-lg border border-yellow-600/30 overflow-hidden mb-6 shadow-md">
                         <div onclick="document.getElementById('supportPanel').classList.toggle('hidden')" class="p-4 flex justify-between items-center cursor-pointer hover:bg-zinc-900">
                             <span class="font-semibold text-yellow-500"><i class="fa-solid fa-headset mr-2 w-5 text-center"></i> Support & Help</span>
@@ -395,7 +419,6 @@
                         </div>
                     </div>
                     
-                    <!-- Logout -->
                     <button onclick="logout()" class="w-full bg-red-600/20 text-red-500 border border-red-600/50 font-bold py-3 rounded-lg mt-4 shadow-sm hover:bg-red-600 hover:text-white transition">
                         <i class="fa-solid fa-right-from-bracket mr-2"></i> LOGOUT
                     </button>
@@ -404,16 +427,16 @@
             window.scrollTo(0,0);
         }
 
-        function editName() {
+        async function editName() {
             let newName = prompt("Enter your new name:", currentUser.name);
             if(newName && newName.trim() !== "") {
                 currentUser.name = newName.trim();
                 localStorage.setItem('mz_currentUser', JSON.stringify(currentUser));
                 
-                let userIndex = users.findIndex(u => u.phone === currentUser.phone);
-                if(userIndex > -1) {
-                    users[userIndex].name = currentUser.name;
-                    localStorage.setItem('mz_users', JSON.stringify(users));
+                try {
+                    await db.collection('users').doc(currentUser.phone).update({ name: currentUser.name });
+                } catch(e) {
+                    console.log("Error updating name in Firebase");
                 }
                 showProfile();
             }
@@ -428,7 +451,6 @@
             if(!checkAuth()) return;
             const product = products.find(p => p.id === id);
             
-            // Reset selections
             currentSelectedSize = null; 
             currentComboSize1 = null;
             currentComboSize2 = null;
@@ -436,7 +458,6 @@
             let sizeHTML = "";
 
             if (product.category === "Combos") {
-                // COMBO SIZE SELECTION (SHIRT + JEANS)
                 sizeHTML = `
                     <p class="font-bold text-gray-300 mb-2 mt-2 text-xs uppercase tracking-wide text-yellow-500 border-l-2 border-yellow-500 pl-2">Select Shirt Size</p>
                     <div class="flex flex-wrap gap-2">
@@ -459,7 +480,6 @@
                     </div>
                 `;
             } else {
-                // NORMAL PRODUCT SIZE SELECTION
                 let sizes = [];
                 if(product.category === "T-Shirts" || product.category === "Shirts") {
                     sizes = ["S", "M", "L", "XL", "XXL"];
@@ -484,7 +504,6 @@
                 `;
             }
 
-            // Random More Products
             let moreProducts = products.filter(p => p.id !== id).sort(() => 0.5 - Math.random()).slice(0, 4);
             let moreProdHTML = moreProducts.map(item => `
                 <div class="bg-zinc-950 border border-yellow-600/30 rounded-lg shadow-lg relative flex flex-col justify-between overflow-hidden">
@@ -519,12 +538,10 @@
                             <span class="text-sm text-black font-bold bg-yellow-500 px-2 py-1 rounded">${product.discount}</span>
                         </div>
                         
-                        <!-- Size Selection Block -->
                         <div class="mt-6 mb-4 bg-zinc-950 p-4 rounded-lg border border-yellow-600/30">
                             ${sizeHTML}
                         </div>
 
-                        <!-- More Products instead of details -->
                         <h3 class="font-bold text-yellow-500 mt-8 border-t border-yellow-600/30 pt-4 mb-4 uppercase tracking-wide">More Products</h3>
                         <div class="grid grid-cols-2 gap-3 mb-6">
                             ${moreProdHTML}
@@ -601,7 +618,6 @@
             window.scrollTo(0,0);
         }
 
-        // Add size validation for Combo vs Normal products
         function getValidatedSize(product) {
             if (product.category === "Combos") {
                 if(!currentComboSize1 || !currentComboSize2) return null;
@@ -647,7 +663,6 @@
                 alert(product.category === "Combos" ? "Please select both Shirt and Jeans sizes!" : "Please select a size first!");
                 return;
             }
-            // Temporarily store size to pass to checkout if direct buy
             currentSelectedSize = finalSize; 
             goToAddress(id);
         }
@@ -665,7 +680,7 @@
             else { badge.classList.add('hidden'); }
         }
 
-        // --- SPLIT CHECKOUT: STEP 1 (ADDRESS & PINCODE) ---
+        // --- SPLIT CHECKOUT: STEP 1 (ADDRESS) ---
         function goToAddress(source) {
             let total = 0;
             let productNames = "";
@@ -692,7 +707,6 @@
                         <div>
                             <input type="text" id="custName" value="${currentUser.name}" required class="bg-zinc-950 border border-gray-700 focus:border-yellow-500 outline-none text-gray-200 p-3 rounded w-full mb-3 text-sm">
                             <input type="tel" id="custPhone" value="${currentUser.phone}" required class="bg-zinc-950 border border-gray-700 focus:border-yellow-500 outline-none text-gray-200 p-3 rounded w-full mb-3 text-sm">
-                            <!-- PINCODE ADDED HERE -->
                             <input type="text" id="custPincode" placeholder="6-Digit PIN Code" required pattern="[0-9]{6}" maxlength="6" minlength="6" title="Please enter a valid 6-digit Pincode" class="bg-zinc-950 border border-gray-700 focus:border-yellow-500 outline-none text-yellow-500 p-3 rounded w-full mb-3 text-sm font-bold tracking-widest">
                             <textarea id="custAddress" placeholder="Complete Address (House No, Street, City)" required class="bg-zinc-950 border border-gray-700 focus:border-yellow-500 outline-none text-gray-200 p-3 rounded w-full text-sm" rows="3"></textarea>
                         </div>
@@ -715,7 +729,6 @@
             const pincode = document.getElementById('custPincode').value;
             const baseAddress = document.getElementById('custAddress').value;
             
-            // Combine address and pincode
             tempCheckoutData.address = `${baseAddress} (PIN: ${pincode})`;
             
             appDiv.innerHTML = `
@@ -757,7 +770,6 @@
             const qrUrl = "https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=upi://pay?pa=dummy@upi&pn=MZFASHION";
 
             if (!isCOD) {
-                // PREPAID
                 uiDiv.innerHTML = `
                     <p class="text-center text-sm text-gray-400 mb-2">Scan QR to pay Full Amount</p>
                     <p class="text-center font-bold text-xl text-yellow-500 mb-4">₹${totalAmount}</p>
@@ -770,7 +782,6 @@
                     </a>
                 `;
             } else {
-                // COD (30% Token)
                 const tokenAmount = Math.round(totalAmount * 0.30);
                 uiDiv.innerHTML = `
                     <div class="bg-yellow-900/30 border border-yellow-600/50 p-2 rounded mb-3 text-center">
@@ -788,12 +799,12 @@
             }
         }
 
-        function confirmOrder(event) {
+        async function confirmOrder(event) {
             event.preventDefault();
             const paymentType = document.getElementById('cod').checked ? "COD" : "Prepaid";
             
             const newOrder = {
-                id: Date.now(),
+                id: Date.now().toString(),
                 date: new Date().toLocaleString(),
                 name: tempCheckoutData.name,
                 phone: tempCheckoutData.phone,
@@ -804,138 +815,161 @@
                 img: tempCheckoutData.img 
             };
             
-            orders.push(newOrder);
-            localStorage.setItem('mz_orders', JSON.stringify(orders));
-            
-            cart = [];
-            localStorage.setItem('mz_cart', JSON.stringify(cart));
-            updateCartBadge();
-
-            appDiv.innerHTML = `
-                <div class="fade-in flex flex-col items-center justify-center min-h-[70vh] p-4 text-center">
-                    <div class="w-20 h-20 bg-zinc-950 border-2 border-yellow-500 text-yellow-500 rounded-full flex items-center justify-center text-4xl mb-6 shadow-[0_0_20px_rgba(212,175,55,0.3)]">
-                        <i class="fa-solid fa-check"></i>
-                    </div>
-                    <h1 class="text-2xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-yellow-300 to-yellow-600">Order Placed!</h1>
-                    <p class="text-gray-400 mt-4 text-sm">Thank you, <span class="text-gray-200 font-semibold">${tempCheckoutData.name}</span>.</p>
-                    <p class="text-gray-400 mt-1 text-sm">Order for <b class="text-yellow-500 text-[10px] break-words block">${tempCheckoutData.names}</b> is processing.</p>
-                    
-                    <button onclick="showMyOrders()" class="mt-8 bg-gradient-to-r from-yellow-600 to-yellow-400 text-black px-8 py-3 rounded font-bold shadow-md transition-all w-full max-w-xs">View My Orders</button>
-                    <button onclick="goHome()" class="mt-3 border border-yellow-500 text-yellow-500 hover:bg-yellow-500 hover:text-black px-8 py-3 rounded font-bold transition-all w-full max-w-xs">Continue Shopping</button>
-                </div>
-            `;
+            appDiv.innerHTML = `<div class="min-h-[70vh] flex flex-col items-center justify-center text-yellow-500"><i class="fa-solid fa-spinner fa-spin text-5xl mb-4"></i><p class="font-bold tracking-widest">PLACING ORDER...</p></div>`;
             window.scrollTo(0,0);
-        }
 
-        // --- MY ORDERS PAGE ---
-        function showMyOrders() {
-            if(!checkAuth()) return;
-            let myOrdersHTML = "";
-            let userOrders = orders.filter(o => o.phone === currentUser.phone);
+            try {
+                // SAVING ORDER DIRECTLY TO FIREBASE
+                await db.collection('orders').doc(newOrder.id).set(newOrder);
+                
+                cart = [];
+                localStorage.setItem('mz_cart', JSON.stringify(cart));
+                updateCartBadge();
 
-            if (userOrders.length > 0) {
-                [...userOrders].reverse().forEach(order => {
-                    let paymentStatus = "";
-                    let tokenAmount = 0;
-                    let remainingAmount = 0;
-
-                    if(order.payment === "COD") {
-                        tokenAmount = Math.round(order.price * 0.30);
-                        remainingAmount = order.price - tokenAmount;
-                        paymentStatus = `
-                            <p class="text-xs text-gray-400 mt-1">Total: ₹${order.price}</p>
-                            <p class="text-xs text-green-500 font-semibold">Paid Token: ₹${tokenAmount}</p>
-                            <p class="text-xs text-red-400 font-semibold">To Pay on Delivery: ₹${remainingAmount}</p>
-                        `;
-                    } else {
-                        paymentStatus = `
-                            <p class="text-xs text-gray-400 mt-1">Total: ₹${order.price}</p>
-                            <p class="text-xs text-green-500 font-semibold">Paid: ₹${order.price} (Full Payment)</p>
-                        `;
-                    }
-
-                    myOrdersHTML += `
-                        <div class="bg-zinc-950 border border-yellow-600/30 rounded-lg p-4 shadow-md mb-4">
-                            <div class="flex gap-4 border-b border-gray-800 pb-3 mb-3">
-                                <img src="${order.img}" class="w-20 h-20 object-cover rounded border border-gray-700">
-                                <div class="flex-grow w-full overflow-hidden">
-                                    <p class="font-bold text-gray-200 text-xs break-words">${order.product_name}</p>
-                                    <p class="text-[10px] text-gray-500 mt-1">${order.date}</p>
-                                    <span class="inline-block mt-2 px-2 py-0.5 bg-yellow-900/30 text-yellow-500 text-[10px] rounded border border-yellow-600/50 uppercase">${order.payment}</span>
-                                </div>
-                            </div>
-                            <div class="mb-3">
-                                <p class="text-sm text-gray-300 font-semibold"><i class="fa-solid fa-location-dot text-yellow-500 mr-1 w-4"></i> Deliver To:</p>
-                                <p class="text-xs text-gray-400 ml-5">${order.name}</p>
-                                <p class="text-xs text-gray-400 ml-5">${order.address}</p>
-                            </div>
-                            <div class="bg-zinc-900 p-3 rounded border border-gray-800">
-                                <p class="text-sm text-gray-300 font-semibold mb-1"><i class="fa-solid fa-wallet text-yellow-500 mr-1 w-4"></i> Payment Info:</p>
-                                ${paymentStatus}
-                            </div>
+                appDiv.innerHTML = `
+                    <div class="fade-in flex flex-col items-center justify-center min-h-[70vh] p-4 text-center">
+                        <div class="w-20 h-20 bg-zinc-950 border-2 border-yellow-500 text-yellow-500 rounded-full flex items-center justify-center text-4xl mb-6 shadow-[0_0_20px_rgba(212,175,55,0.3)]">
+                            <i class="fa-solid fa-check"></i>
                         </div>
-                    `;
-                });
-            } else {
-                myOrdersHTML = `
-                    <div class="text-center p-10 bg-zinc-950 rounded-lg border border-gray-800 mt-4">
-                        <i class="fa-solid fa-box-open text-5xl text-gray-600 mb-4"></i>
-                        <h2 class="text-gray-400 font-semibold">No Orders Found</h2>
-                        <button onclick="goHome()" class="mt-4 border border-yellow-500 text-yellow-500 px-6 py-2 rounded text-sm font-bold">Start Shopping</button>
+                        <h1 class="text-2xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-yellow-300 to-yellow-600">Order Placed!</h1>
+                        <p class="text-gray-400 mt-4 text-sm">Thank you, <span class="text-gray-200 font-semibold">${tempCheckoutData.name}</span>.</p>
+                        <p class="text-gray-400 mt-1 text-sm">Order for <b class="text-yellow-500 text-[10px] break-words block">${tempCheckoutData.names}</b> is processing.</p>
+                        
+                        <button onclick="showMyOrders()" class="mt-8 bg-gradient-to-r from-yellow-600 to-yellow-400 text-black px-8 py-3 rounded font-bold shadow-md transition-all w-full max-w-xs">View My Orders</button>
+                        <button onclick="goHome()" class="mt-3 border border-yellow-500 text-yellow-500 hover:bg-yellow-500 hover:text-black px-8 py-3 rounded font-bold transition-all w-full max-w-xs">Continue Shopping</button>
                     </div>
                 `;
+            } catch (error) {
+                alert("Database Error! Order not placed. Check Firestore permissions.");
+                goHome();
             }
-
-            appDiv.innerHTML = `
-                <div class="fade-in p-4 pb-20">
-                    <h1 class="text-xl font-bold text-yellow-500 mb-6 border-b border-yellow-600/30 pb-2"><i class="fa-solid fa-box mr-2"></i> My Orders</h1>
-                    ${myOrdersHTML}
-                </div>
-            `;
-            window.scrollTo(0,0);
         }
 
-        // --- SECRET ADMIN PANEL ---
-        function renderAdmin() {
-            let ordersHTML = "";
-            if (orders.length > 0) {
-                [...orders].reverse().forEach(order => {
-                    ordersHTML += `
-                        <div class="border border-yellow-600/30 rounded-lg p-4 bg-zinc-950 shadow-[0_0_10px_rgba(0,0,0,0.5)]">
-                            <div class="flex justify-between items-start mb-2">
-                                <p class="font-bold text-yellow-500 text-[11px] break-words w-full">${order.product_name}</p>
+        // --- MY ORDERS PAGE (FIREBASE FETCH) ---
+        async function showMyOrders() {
+            if(!checkAuth()) return;
+            
+            appDiv.innerHTML = `<div class="min-h-[70vh] flex flex-col items-center justify-center text-yellow-500"><i class="fa-solid fa-spinner fa-spin text-5xl mb-4"></i><p class="font-bold tracking-widest">LOADING ORDERS...</p></div>`;
+            window.scrollTo(0,0);
+
+            try {
+                // Fetching orders from Firebase where phone number matches
+                const snapshot = await db.collection('orders').where('phone', '==', currentUser.phone).get();
+                let userOrders = [];
+                snapshot.forEach(doc => userOrders.push(doc.data()));
+                
+                // Sort array to show newest first
+                userOrders.sort((a, b) => b.id - a.id);
+
+                let myOrdersHTML = "";
+                if (userOrders.length > 0) {
+                    userOrders.forEach(order => {
+                        let paymentStatus = "";
+                        let tokenAmount = 0;
+                        let remainingAmount = 0;
+
+                        if(order.payment === "COD") {
+                            tokenAmount = Math.round(order.price * 0.30);
+                            remainingAmount = order.price - tokenAmount;
+                            paymentStatus = `
+                                <p class="text-xs text-gray-400 mt-1">Total: ₹${order.price}</p>
+                                <p class="text-xs text-green-500 font-semibold">Paid Token: ₹${tokenAmount}</p>
+                                <p class="text-xs text-red-400 font-semibold">To Pay on Delivery: ₹${remainingAmount}</p>
+                            `;
+                        } else {
+                            paymentStatus = `
+                                <p class="text-xs text-gray-400 mt-1">Total: ₹${order.price}</p>
+                                <p class="text-xs text-green-500 font-semibold">Paid: ₹${order.price} (Full Payment)</p>
+                            `;
+                        }
+
+                        myOrdersHTML += `
+                            <div class="bg-zinc-950 border border-yellow-600/30 rounded-lg p-4 shadow-md mb-4">
+                                <div class="flex gap-4 border-b border-gray-800 pb-3 mb-3">
+                                    <img src="${order.img}" class="w-20 h-20 object-cover rounded border border-gray-700">
+                                    <div class="flex-grow w-full overflow-hidden">
+                                        <p class="font-bold text-gray-200 text-xs break-words">${order.product_name}</p>
+                                        <p class="text-[10px] text-gray-500 mt-1">${order.date}</p>
+                                        <span class="inline-block mt-2 px-2 py-0.5 bg-yellow-900/30 text-yellow-500 text-[10px] rounded border border-yellow-600/50 uppercase">${order.payment}</span>
+                                    </div>
+                                </div>
+                                <div class="mb-3">
+                                    <p class="text-sm text-gray-300 font-semibold"><i class="fa-solid fa-location-dot text-yellow-500 mr-1 w-4"></i> Deliver To:</p>
+                                    <p class="text-xs text-gray-400 ml-5">${order.name}</p>
+                                    <p class="text-xs text-gray-400 ml-5">${order.address}</p>
+                                </div>
+                                <div class="bg-zinc-900 p-3 rounded border border-gray-800">
+                                    <p class="text-sm text-gray-300 font-semibold mb-1"><i class="fa-solid fa-wallet text-yellow-500 mr-1 w-4"></i> Payment Info:</p>
+                                    ${paymentStatus}
+                                </div>
                             </div>
-                            <div class="space-y-1 mt-3">
-                                <p class="text-[10px] text-gray-500 border-b border-gray-800 pb-1 mb-2">${order.date}</p>
-                                <p class="text-xs text-gray-300"><i class="fa-solid fa-user w-4 text-gray-500"></i> ${order.name} (${order.phone})</p>
-                                <p class="text-xs text-gray-300"><i class="fa-solid fa-location-dot w-4 text-gray-500"></i> ${order.address}</p>
-                                <p class="text-xs text-gray-300"><i class="fa-solid fa-money-bill w-4 text-gray-500"></i> ${order.payment} - <span class="font-bold text-gray-200">₹${order.price}</span></p>
-                            </div>
+                        `;
+                    });
+                } else {
+                    myOrdersHTML = `
+                        <div class="text-center p-10 bg-zinc-950 rounded-lg border border-gray-800 mt-4">
+                            <i class="fa-solid fa-box-open text-5xl text-gray-600 mb-4"></i>
+                            <h2 class="text-gray-400 font-semibold">No Orders Found</h2>
+                            <button onclick="goHome()" class="mt-4 border border-yellow-500 text-yellow-500 px-6 py-2 rounded text-sm font-bold">Start Shopping</button>
                         </div>
                     `;
-                });
-            } else {
-                ordersHTML = `<div class="bg-zinc-950 border border-dashed border-gray-700 p-8 text-center rounded-lg mt-5"><p class="text-gray-500 italic">No orders yet.</p></div>`;
-            }
+                }
 
-            appDiv.innerHTML = `
-                <div class="fade-in p-5 pb-20">
-                    <h1 class="text-2xl font-bold mb-4 text-yellow-500 border-b border-yellow-600/30 pb-3">Admin Panel</h1>
-                    <div class="flex justify-between items-center mb-4">
-                        <h2 class="text-sm font-semibold text-gray-200">Total Orders: ${orders.length}</h2>
-                        <button onclick="clearOrders()" class="text-[10px] text-red-500 border border-red-900 px-2 py-1 rounded">Clear All</button>
+                appDiv.innerHTML = `
+                    <div class="fade-in p-4 pb-20">
+                        <h1 class="text-xl font-bold text-yellow-500 mb-6 border-b border-yellow-600/30 pb-2"><i class="fa-solid fa-box mr-2"></i> My Orders</h1>
+                        ${myOrdersHTML}
                     </div>
-                    <div class="flex flex-col gap-3">${ordersHTML}</div>
-                </div>
-            `;
-            window.scrollTo(0,0);
+                `;
+            } catch (error) {
+                appDiv.innerHTML = `<div class="p-10 text-center text-red-500">Error connecting to database. Please check Firestore permissions.</div>`;
+            }
         }
 
-        function clearOrders() {
-            if(confirm("Delete all orders?")) {
-                orders = [];
-                localStorage.removeItem('mz_orders');
-                renderAdmin();
+        // --- SECRET ADMIN PANEL (FIREBASE FETCH) ---
+        async function renderAdmin() {
+            appDiv.innerHTML = `<div class="min-h-[70vh] flex flex-col items-center justify-center text-yellow-500"><i class="fa-solid fa-spinner fa-spin text-5xl mb-4"></i><p class="font-bold tracking-widest">LOADING ADMIN...</p></div>`;
+            window.scrollTo(0,0);
+            
+            try {
+                const snapshot = await db.collection('orders').get();
+                let allOrders = [];
+                snapshot.forEach(doc => allOrders.push(doc.data()));
+                
+                allOrders.sort((a, b) => b.id - a.id);
+
+                let ordersHTML = "";
+                if (allOrders.length > 0) {
+                    allOrders.forEach(order => {
+                        ordersHTML += `
+                            <div class="border border-yellow-600/30 rounded-lg p-4 bg-zinc-950 shadow-[0_0_10px_rgba(0,0,0,0.5)]">
+                                <div class="flex justify-between items-start mb-2">
+                                    <p class="font-bold text-yellow-500 text-[11px] break-words w-full">${order.product_name}</p>
+                                </div>
+                                <div class="space-y-1 mt-3">
+                                    <p class="text-[10px] text-gray-500 border-b border-gray-800 pb-1 mb-2">${order.date}</p>
+                                    <p class="text-xs text-gray-300"><i class="fa-solid fa-user w-4 text-gray-500"></i> ${order.name} (${order.phone})</p>
+                                    <p class="text-xs text-gray-300"><i class="fa-solid fa-location-dot w-4 text-gray-500"></i> ${order.address}</p>
+                                    <p class="text-xs text-gray-300"><i class="fa-solid fa-money-bill w-4 text-gray-500"></i> ${order.payment} - <span class="font-bold text-gray-200">₹${order.price}</span></p>
+                                </div>
+                            </div>
+                        `;
+                    });
+                } else {
+                    ordersHTML = `<div class="bg-zinc-950 border border-dashed border-gray-700 p-8 text-center rounded-lg mt-5"><p class="text-gray-500 italic">No orders yet.</p></div>`;
+                }
+
+                appDiv.innerHTML = `
+                    <div class="fade-in p-5 pb-20">
+                        <h1 class="text-2xl font-bold mb-4 text-yellow-500 border-b border-yellow-600/30 pb-3">Admin Panel</h1>
+                        <div class="flex justify-between items-center mb-4">
+                            <h2 class="text-sm font-semibold text-gray-200">Total Orders: ${allOrders.length}</h2>
+                        </div>
+                        <div class="flex flex-col gap-3">${ordersHTML}</div>
+                    </div>
+                `;
+            } catch (error) {
+                appDiv.innerHTML = `<div class="p-10 text-center text-red-500">Error fetching admin data. Check Firestore rules.</div>`;
             }
         }
 
