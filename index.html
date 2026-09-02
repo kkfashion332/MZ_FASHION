@@ -75,7 +75,7 @@
         const db = firebase.database();
 
         // --- DYNAMIC DATA STATE ---
-        let categories = [{ id: "all", name: "All", img: "https://images.unsplash.com/photo-1490481651871-ab68de25d43d?w=150&q=80" }];
+        let categories = []; // ALL category removed
         let products = [];
         let banners = [];
         let paymentSettings = { qr_url: "", upi_id: "", whatsapp: "919982437489" };
@@ -83,7 +83,7 @@
         let currentUser = JSON.parse(localStorage.getItem('mz_currentUser')) || null;
         let cart = JSON.parse(localStorage.getItem('mz_cart')) || [];
         let likedItems = JSON.parse(localStorage.getItem('mz_likes')) || [];
-        let activeCategory = "All";
+        let activeCategory = ""; 
         let tempCheckoutData = null; 
         
         let currentSelectedSize = null; 
@@ -96,16 +96,14 @@
 
         // --- REALTIME DATABASE SYNC ---
         async function initApp() {
-            // Seed DB if it's empty so you can test right away
             const prodSnap = await db.ref('products').once('value');
             if (!prodSnap.exists()) {
                 await seedInitialData();
             }
 
-            // Listeners to automatically update Frontend when Admin makes changes
             db.ref('categories').on('value', snap => {
                 if(snap.exists()) {
-                    categories = [{ id: "all", name: "All", img: "https://images.unsplash.com/photo-1490481651871-ab68de25d43d?w=150&q=80" }];
+                    categories = []; 
                     snap.forEach(child => {
                         if(child.val() && typeof child.val() === 'object') {
                             categories.push(child.val());
@@ -143,7 +141,6 @@
                 if(snap.exists()) paymentSettings = snap.val();
             });
 
-            // Delay slighty to wait for data load
             setTimeout(() => {
                 if(checkAuth()) {
                     goHome();
@@ -296,17 +293,17 @@
             if(!checkAuth()) return;
             
             let displayProducts = products;
-            if(activeCategory !== "All") {
+            if(activeCategory !== "") {
                 displayProducts = products.filter(p => p.category === activeCategory);
             }
 
-            // Horizontally Scrollable Categories Map
+            // Categories Grid (5 columns per row, no swipe)
             let catHTML = categories.map(cat => `
-                <div onclick="filterCategory('${cat.name || 'All'}')" class="flex flex-col items-center gap-1.5 cursor-pointer min-w-[70px] snap-center">
-                    <div class="w-14 h-14 md:w-16 md:h-16 rounded-full overflow-hidden border-[2.5px] ${activeCategory === (cat.name || 'All') ? 'border-yellow-400 shadow-[0_0_12px_rgba(212,175,55,0.8)]' : 'border-zinc-700'} transition-all mx-auto flex-shrink-0 bg-zinc-900">
-                        <img src="${cat.img || 'https://images.unsplash.com/photo-1490481651871-ab68de25d43d?w=150&q=80'}" class="w-full h-full object-cover">
+                <div onclick="filterCategory('${cat.name}')" class="flex flex-col items-center gap-1.5 cursor-pointer w-full">
+                    <div class="w-12 h-12 md:w-14 md:h-14 rounded-full overflow-hidden border-[2.5px] ${activeCategory === cat.name ? 'border-yellow-400 shadow-[0_0_12px_rgba(212,175,55,0.8)]' : 'border-zinc-700'} transition-all mx-auto flex-shrink-0 bg-zinc-900">
+                        <img src="${cat.img}" class="w-full h-full object-cover">
                     </div>
-                    <span class="text-[10px] md:text-xs ${activeCategory === (cat.name || 'All') ? 'text-yellow-400 font-extrabold' : 'text-gray-400 font-semibold'} text-center w-full uppercase break-words line-clamp-1">${cat.name || 'All'}</span>
+                    <span class="text-[9px] md:text-[10px] ${activeCategory === cat.name ? 'text-yellow-400 font-extrabold' : 'text-gray-400 font-semibold'} text-center w-full uppercase break-words line-clamp-2 leading-tight">${cat.name}</span>
                 </div>
             `).join('');
             
@@ -340,7 +337,7 @@
                 prodHTML = `<div class="col-span-2 text-center text-gray-500 py-10">No products found.</div>`;
             }
 
-            // Banner Carousel (Increased Size: h-60)
+            // Banner Carousel
             let bannerHTML = banners.map(b => `
                 <a href="${b.target_link || '#'}" class="min-w-full flex-shrink-0 snap-center relative h-60 block">
                     <img src="${b.img}" class="w-full h-full object-cover opacity-90">
@@ -355,13 +352,13 @@
                         ${bannerHTML}
                     </div>
 
-                    <!-- Horizontally Scrollable Categories -->
-                    <div class="flex overflow-x-auto gap-4 p-4 bg-zinc-950 border-b border-yellow-600/20 mt-4 no-scrollbar snap-x snap-mandatory">
+                    <!-- Categories 5 Column Grid -->
+                    <div class="grid grid-cols-5 gap-y-4 gap-x-2 p-3 bg-zinc-950 border-b border-yellow-600/20 mt-4 justify-items-start items-start">
                         ${catHTML}
                     </div>
                     
                     <div class="p-4">
-                        <h2 class="font-bold text-lg mb-4 text-yellow-500 tracking-wide border-l-4 border-yellow-500 pl-2 uppercase">${activeCategory} Collection</h2>
+                        <h2 class="font-bold text-lg mb-4 text-yellow-500 tracking-wide border-l-4 border-yellow-500 pl-2 uppercase">${activeCategory !== "" ? activeCategory : "Latest"} Collection</h2>
                         <div class="grid grid-cols-2 gap-4">
                             ${prodHTML}
                         </div>
@@ -391,7 +388,15 @@
             }
         }
 
-        function filterCategory(catName) { activeCategory = catName; goHome(); }
+        function filterCategory(catName) {
+            // Agar same category par dobara click kiya to wo deselect ho jayegi
+            if(activeCategory === catName) {
+                activeCategory = "";
+            } else {
+                activeCategory = catName;
+            }
+            goHome();
+        }
 
         // 2. LIKES PAGE
         function toggleLike(btn, id) {
