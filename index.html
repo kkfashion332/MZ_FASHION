@@ -106,7 +106,11 @@
             db.ref('categories').on('value', snap => {
                 if(snap.exists()) {
                     categories = [{ id: "all", name: "All", img: "https://images.unsplash.com/photo-1490481651871-ab68de25d43d?w=150&q=80" }];
-                    snap.forEach(child => categories.push(child.val()));
+                    snap.forEach(child => {
+                        if(child.val() && typeof child.val() === 'object') {
+                            categories.push(child.val());
+                        }
+                    });
                     if(currentUser && document.getElementById('homeView')) goHome();
                 }
             });
@@ -114,7 +118,11 @@
             db.ref('products').on('value', snap => {
                 if(snap.exists()) {
                     products = [];
-                    snap.forEach(child => products.push(child.val()));
+                    snap.forEach(child => {
+                        if(child.val() && typeof child.val() === 'object') {
+                            products.push(child.val());
+                        }
+                    });
                     if(currentUser && document.getElementById('homeView')) goHome();
                 }
             });
@@ -122,7 +130,11 @@
             db.ref('banners').on('value', snap => {
                 if(snap.exists()) {
                     banners = [];
-                    snap.forEach(child => banners.push(child.val()));
+                    snap.forEach(child => {
+                        if(child.val() && typeof child.val() === 'object') {
+                            banners.push(child.val());
+                        }
+                    });
                     if(currentUser && document.getElementById('homeView')) goHome();
                 }
             });
@@ -288,12 +300,13 @@
                 displayProducts = products.filter(p => p.category === activeCategory);
             }
 
+            // Horizontally Scrollable Categories Map
             let catHTML = categories.map(cat => `
-                <div onclick="filterCategory('${cat.name}')" class="flex flex-col items-center gap-1 cursor-pointer w-full">
-                    <div class="w-12 h-12 md:w-14 md:h-14 rounded-full overflow-hidden border-2 ${activeCategory === cat.name ? 'border-yellow-400 shadow-[0_0_10px_rgba(212,175,55,0.8)]' : 'border-gray-600'} transition-all mx-auto">
-                        <img src="${cat.img}" class="w-full h-full object-cover">
+                <div onclick="filterCategory('${cat.name || 'All'}')" class="flex flex-col items-center gap-1.5 cursor-pointer min-w-[70px] snap-center">
+                    <div class="w-14 h-14 md:w-16 md:h-16 rounded-full overflow-hidden border-[2.5px] ${activeCategory === (cat.name || 'All') ? 'border-yellow-400 shadow-[0_0_12px_rgba(212,175,55,0.8)]' : 'border-zinc-700'} transition-all mx-auto flex-shrink-0 bg-zinc-900">
+                        <img src="${cat.img || 'https://images.unsplash.com/photo-1490481651871-ab68de25d43d?w=150&q=80'}" class="w-full h-full object-cover">
                     </div>
-                    <span class="text-[9px] md:text-[10px] ${activeCategory === cat.name ? 'text-yellow-400 font-bold' : 'text-gray-400 font-medium'} text-center w-full uppercase break-words">${cat.name}</span>
+                    <span class="text-[10px] md:text-xs ${activeCategory === (cat.name || 'All') ? 'text-yellow-400 font-extrabold' : 'text-gray-400 font-semibold'} text-center w-full uppercase break-words line-clamp-1">${cat.name || 'All'}</span>
                 </div>
             `).join('');
             
@@ -327,9 +340,9 @@
                 prodHTML = `<div class="col-span-2 text-center text-gray-500 py-10">No products found.</div>`;
             }
 
-            // Banner Carousel (Horizontal Swipe)
+            // Banner Carousel (Increased Size: h-60)
             let bannerHTML = banners.map(b => `
-                <a href="${b.target_link || '#'}" class="min-w-full flex-shrink-0 snap-center relative h-44 block">
+                <a href="${b.target_link || '#'}" class="min-w-full flex-shrink-0 snap-center relative h-60 block">
                     <img src="${b.img}" class="w-full h-full object-cover opacity-90">
                     <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
                 </a>
@@ -338,11 +351,12 @@
             appDiv.innerHTML = `
                 <div id="homeView" class="fade-in">
                     <!-- Banner Slider -->
-                    <div class="flex overflow-x-auto snap-x snap-mandatory no-scrollbar mx-4 mt-4 rounded-xl bg-zinc-950 border border-yellow-600/30 shadow-[0_0_10px_rgba(212,175,55,0.1)]">
+                    <div id="bannerSlider" class="flex overflow-x-auto snap-x snap-mandatory no-scrollbar mx-4 mt-4 rounded-xl bg-zinc-950 border border-yellow-600/30 shadow-[0_0_10px_rgba(212,175,55,0.1)] relative" style="scroll-behavior: smooth;">
                         ${bannerHTML}
                     </div>
 
-                    <div class="grid grid-cols-5 gap-y-4 gap-x-2 p-3 bg-zinc-950 border-b border-yellow-600/20 mt-4 justify-items-center">
+                    <!-- Horizontally Scrollable Categories -->
+                    <div class="flex overflow-x-auto gap-4 p-4 bg-zinc-950 border-b border-yellow-600/20 mt-4 no-scrollbar snap-x snap-mandatory">
                         ${catHTML}
                     </div>
                     
@@ -355,6 +369,26 @@
                 </div>
             `;
             window.scrollTo(0,0);
+
+            // Auto-swipe Logic for Banners (Every 3 seconds)
+            if(window.bannerScrollInterval) clearInterval(window.bannerScrollInterval);
+            if(banners.length > 1) {
+                setTimeout(() => {
+                    window.bannerScrollInterval = setInterval(() => {
+                        const slider = document.getElementById('bannerSlider');
+                        if(!slider) {
+                            clearInterval(window.bannerScrollInterval);
+                            return;
+                        }
+                        const maxScrollLeft = slider.scrollWidth - slider.clientWidth;
+                        if(slider.scrollLeft >= maxScrollLeft - 5) {
+                            slider.scrollTo({ left: 0, behavior: 'smooth' });
+                        } else {
+                            slider.scrollBy({ left: slider.clientWidth, behavior: 'smooth' });
+                        }
+                    }, 3000); 
+                }, 500);
+            }
         }
 
         function filterCategory(catName) { activeCategory = catName; goHome(); }
@@ -486,7 +520,6 @@
             currentSelectedSize = null; currentComboSize1 = null; currentComboSize2 = null;
             let sizeHTML = "";
             
-            // Checking dynamic DB properties for sizes
             let hasShirt = !!product.shirtSizes && product.shirtSizes.trim() !== "";
             let hasJeans = !!product.jeansSizes && product.jeansSizes.trim() !== "";
 
