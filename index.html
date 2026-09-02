@@ -75,7 +75,7 @@
         const db = firebase.database();
 
         // --- DYNAMIC DATA STATE ---
-        let categories = []; // ALL category removed
+        let categories = []; 
         let products = [];
         let banners = [];
         let paymentSettings = { qr_url: "", upi_id: "", whatsapp: "919982437489" };
@@ -531,7 +531,6 @@
             if (hasShirt) {
                 let sArr = product.shirtSizes.split(',').map(s => s.trim());
                 sizeHTML += `
-                    <p class="font-bold text-gray-300 mb-2 mt-2 text-xs uppercase text-yellow-500 border-l-2 border-yellow-500 pl-2">Select Top / Shirt Size</p>
                     <div class="flex flex-wrap gap-2 mb-3">
                         ${sArr.map(s => `<div><input type="radio" name="comboShirt" id="cs1-${s}" value="${s}" class="hidden size-radio" onchange="selectComboSize1('${s}')"><label for="cs1-${s}" class="cursor-pointer border border-gray-600 text-gray-300 font-semibold px-3 py-1.5 text-xs rounded-md hover:border-yellow-500 transition">${s}</label></div>`).join('')}
                     </div>
@@ -540,7 +539,6 @@
             if (hasJeans) {
                 let jArr = product.jeansSizes.split(',').map(s => s.trim());
                 sizeHTML += `
-                    <p class="font-bold text-gray-300 mb-2 mt-2 text-xs uppercase text-yellow-500 border-l-2 border-yellow-500 pl-2">Select Bottom / Jeans Size</p>
                     <div class="flex flex-wrap gap-2 mb-3">
                         ${jArr.map(s => `<div><input type="radio" name="comboJeans" id="cs2-${s}" value="${s}" class="hidden size-radio" onchange="selectComboSize2('${s}')"><label for="cs2-${s}" class="cursor-pointer border border-gray-600 text-gray-300 font-semibold px-3 py-1.5 text-xs rounded-md hover:border-yellow-500 transition">${s}</label></div>`).join('')}
                     </div>
@@ -548,7 +546,6 @@
             }
             if (!hasShirt && !hasJeans) {
                 sizeHTML += `
-                    <p class="font-bold text-gray-300 mb-3 uppercase tracking-wide text-sm">Select Size</p>
                     <div class="flex flex-wrap gap-3">
                         <div><input type="radio" name="productSize" id="size-Free" value="Free Size" class="hidden size-radio" onchange="selectSize('Free Size')"><label for="size-Free" class="cursor-pointer border border-gray-600 text-gray-300 font-semibold px-4 py-2 rounded-md hover:border-yellow-500 transition">Free Size</label></div>
                     </div>
