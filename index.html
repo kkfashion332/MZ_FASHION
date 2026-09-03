@@ -94,59 +94,60 @@
         const topNav = document.getElementById('topNav');
         const bottomNav = document.getElementById('bottomNav');
 
-        // --- REALTIME DATABASE SYNC ---
+        // --- REALTIME DATABASE SYNC (UPDATED TO .once() TO SAVE DATA & CONNECTIONS) ---
         async function initApp() {
-            const prodSnap = await db.ref('products').once('value');
-            if (!prodSnap.exists()) {
-                await seedInitialData();
-            }
+            try {
+                const prodSnapCheck = await db.ref('products').once('value');
+                if (!prodSnapCheck.exists()) {
+                    await seedInitialData();
+                }
 
-            db.ref('categories').on('value', snap => {
-                if(snap.exists()) {
+                // Fetch Categories Once
+                const catSnap = await db.ref('categories').once('value');
+                if(catSnap.exists()) {
                     categories = []; 
-                    snap.forEach(child => {
+                    catSnap.forEach(child => {
                         if(child.val() && typeof child.val() === 'object') {
                             categories.push(child.val());
                         }
                     });
-                    if(currentUser && document.getElementById('homeView')) goHome();
                 }
-            });
 
-            db.ref('products').on('value', snap => {
-                if(snap.exists()) {
+                // Fetch Products Once
+                const pSnap = await db.ref('products').once('value');
+                if(pSnap.exists()) {
                     products = [];
-                    snap.forEach(child => {
+                    pSnap.forEach(child => {
                         if(child.val() && typeof child.val() === 'object') {
                             products.push(child.val());
                         }
                     });
-                    if(currentUser && document.getElementById('homeView')) goHome();
                 }
-            });
 
-            db.ref('banners').on('value', snap => {
-                if(snap.exists()) {
+                // Fetch Banners Once
+                const bSnap = await db.ref('banners').once('value');
+                if(bSnap.exists()) {
                     banners = [];
-                    snap.forEach(child => {
+                    bSnap.forEach(child => {
                         if(child.val() && typeof child.val() === 'object') {
                             banners.push(child.val());
                         }
                     });
-                    if(currentUser && document.getElementById('homeView')) goHome();
                 }
-            });
 
-            db.ref('settings/payment').on('value', snap => {
-                if(snap.exists()) paymentSettings = snap.val();
-            });
+                // Fetch Payment Settings Once
+                const paySnap = await db.ref('settings/payment').once('value');
+                if(paySnap.exists()) paymentSettings = paySnap.val();
 
-            setTimeout(() => {
+                // UI Loading after all data is fetched
                 if(checkAuth()) {
                     goHome();
                     updateCartBadge();
                 }
-            }, 1000);
+            } catch (error) {
+                console.error("Database connection error: ", error);
+                appDiv.innerHTML = `<div class="text-center mt-20 text-red-500 font-bold">Network Error. Please refresh.</div>`;
+            }
         }
 
         async function seedInitialData() {
@@ -389,7 +390,6 @@
         }
 
         function filterCategory(catName) {
-            // Agar same category par dobara click kiya to wo deselect ho jayegi
             if(activeCategory === catName) {
                 activeCategory = "";
             } else {
@@ -513,7 +513,7 @@
             }
         }
 
-        // --- PRODUCT PAGE (Sizes & More Products) ---
+        // --- PRODUCT PAGE ---
         function selectSize(size) { currentSelectedSize = size; }
         function selectComboSize1(size) { currentComboSize1 = size; }
         function selectComboSize2(size) { currentComboSize2 = size; }
@@ -770,7 +770,7 @@
             }
         }
 
-        // --- SPLIT CHECKOUT: STEP 1 (ADDRESS) ---
+        // --- SPLIT CHECKOUT ---
         function goToAddress(source) {
             let total = 0; let productNames = ""; let primaryImg = "";
 
@@ -814,7 +814,6 @@
             window.scrollTo(0,0);
         }
 
-        // --- SPLIT CHECKOUT: STEP 2 (PAYMENT) ---
         function goToPayment(event) {
             event.preventDefault();
             
@@ -895,6 +894,7 @@
             appDiv.innerHTML = `<div class="min-h-[70vh] flex flex-col items-center justify-center text-yellow-500"><i class="fa-solid fa-spinner fa-spin text-5xl mb-4"></i><p class="font-bold tracking-widest">PLACING ORDER...</p></div>`;
             window.scrollTo(0,0);
             try {
+                // Fetch user directly using .once()
                 await db.ref('orders/' + newOrder.id).set(newOrder);
                 cart = []; localStorage.setItem('mz_cart', JSON.stringify(cart)); updateCartBadge();
                 appDiv.innerHTML = `
@@ -916,6 +916,7 @@
             appDiv.innerHTML = `<div class="min-h-[70vh] flex flex-col items-center justify-center text-yellow-500"><i class="fa-solid fa-spinner fa-spin text-5xl mb-4"></i><p class="font-bold tracking-widest">LOADING ORDERS...</p></div>`;
             window.scrollTo(0,0);
             try {
+                // Fetch orders directly using .once()
                 const snapshot = await db.ref('orders').orderByChild('phone').equalTo(currentUser.phone).once('value');
                 let userOrders = []; snapshot.forEach(child => { userOrders.push(child.val()); });
                 userOrders.sort((a, b) => b.id - a.id);
