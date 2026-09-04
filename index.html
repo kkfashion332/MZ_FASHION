@@ -428,7 +428,7 @@
                             <img src="${item.img}" class="w-full h-44 object-cover opacity-90 hover:opacity-100 transition duration-300">
                         </div>
                         <div class="p-3 flex flex-col flex-grow border-t border-yellow-600/20">
-                            <h3 class="text-sm font-semibold truncate text-gray-200">${item.name}</h3>
+                            <h3 class="text-sm font-semibold text-gray-200">${item.name}</h3>
                             <div class="mt-1 flex items-center gap-2">
                                 <span class="font-bold text-yellow-500">₹${item.price}</span>
                             </div>
@@ -764,20 +764,26 @@
 
         // --- SPLIT CHECKOUT ---
         function goToAddress(source) {
-            let total = 0; let productNames = ""; let primaryImg = "";
+            let total = 0; let productNames = ""; let orderItems = []; let primaryImg = "";
 
             if (source === 'cart') {
                 total = cart.reduce((sum, item) => sum + item.price, 0);
                 productNames = cart.map(i => `${i.name} (Size: ${i.size})`).join(", ");
                 primaryImg = cart[0].img;
+                
+                // MULTI-ITEM ARRAY CREATION
+                orderItems = cart.map(i => ({ name: i.name, size: i.size, price: i.price, img: i.img }));
             } else {
                 const product = products.find(p => p.id === source);
                 total = product.price;
                 productNames = `${product.name} (Size: ${currentSelectedSize})`;
                 primaryImg = product.img;
+                
+                // SINGLE-ITEM ARRAY CREATION
+                orderItems = [{ name: product.name, size: currentSelectedSize, price: product.price, img: product.img }];
             }
 
-            tempCheckoutData = { names: productNames, price: total, img: primaryImg };
+            tempCheckoutData = { names: productNames, price: total, img: primaryImg, items: orderItems };
 
             appDiv.innerHTML = `
                 <div class="fade-in p-5 pb-20">
@@ -879,8 +885,9 @@
                 name: tempCheckoutData.name, phone: tempCheckoutData.phone,
                 address: tempCheckoutData.address, payment: paymentType,
                 product_name: tempCheckoutData.names, price: tempCheckoutData.price,
-                img: tempCheckoutData.img,
-                status: "Pending Verification" // <-- Default Status Added
+                img: tempCheckoutData.img, 
+                items: tempCheckoutData.items, // <-- ADDED ITEMS ARRAY FOR MULTIPLE PRODUCTS
+                status: "Pending Verification" 
             };
             appDiv.innerHTML = `<div class="min-h-[70vh] flex flex-col items-center justify-center text-yellow-500"><i class="fa-solid fa-spinner fa-spin text-5xl mb-4"></i><p class="font-bold tracking-widest">PLACING ORDER...</p></div>`;
             window.scrollTo(0,0);
@@ -932,26 +939,54 @@
                             paymentStatus = `<p class="text-xs text-gray-400 mt-1">Total: ₹${order.price}</p><p class="text-xs text-green-500 font-semibold">Paid: ₹${order.price} (Full Payment)</p>`;
                         }
                         
-                        // Status Check Logic Added
                         let statusBadge = "";
                         let currentStatus = order.status || "Pending Verification";
                         if(currentStatus === "Confirmed") {
-                            statusBadge = `<span class="inline-block mt-2 px-2 py-0.5 bg-green-900/30 text-green-500 text-[10px] rounded border border-green-600/50 uppercase font-bold"><i class="fa-solid fa-check"></i> Confirmed</span>`;
+                            statusBadge = `<span class="inline-block px-2 py-0.5 bg-green-900/30 text-green-500 text-[10px] rounded border border-green-600/50 uppercase font-bold"><i class="fa-solid fa-check"></i> Confirmed</span>`;
                         } else if(currentStatus === "Rejected") {
-                            statusBadge = `<span class="inline-block mt-2 px-2 py-0.5 bg-red-900/30 text-red-500 text-[10px] rounded border border-red-600/50 uppercase font-bold"><i class="fa-solid fa-xmark"></i> Rejected</span>`;
+                            statusBadge = `<span class="inline-block px-2 py-0.5 bg-red-900/30 text-red-500 text-[10px] rounded border border-red-600/50 uppercase font-bold"><i class="fa-solid fa-xmark"></i> Rejected</span>`;
                         } else {
-                            statusBadge = `<span class="inline-block mt-2 px-2 py-0.5 bg-yellow-900/30 text-yellow-500 text-[10px] rounded border border-yellow-600/50 uppercase font-bold"><i class="fa-solid fa-clock"></i> ${currentStatus}</span>`;
+                            statusBadge = `<span class="inline-block px-2 py-0.5 bg-yellow-900/30 text-yellow-500 text-[10px] rounded border border-yellow-600/50 uppercase font-bold"><i class="fa-solid fa-clock"></i> ${currentStatus}</span>`;
+                        }
+
+                        // MULTIPLE ITEMS RENDERING LOGIC
+                        let itemsHTML = "";
+                        if (order.items && order.items.length > 0) {
+                            itemsHTML = `<div class="mt-2 flex flex-col gap-2">` + order.items.map(item => `
+                                <div class="flex items-center gap-3 bg-zinc-900 p-2 rounded border border-gray-800">
+                                    <img src="${item.img}" class="w-12 h-12 object-cover rounded border border-gray-700">
+                                    <div class="flex-grow overflow-hidden">
+                                        <p class="font-bold text-gray-200 text-[11px] break-words">${item.name}</p>
+                                        <p class="text-[10px] text-yellow-500 mt-0.5">Size: ${item.size} | ₹${item.price}</p>
+                                    </div>
+                                </div>
+                            `).join('') + `</div>`;
+                        } else {
+                            // Fallback for older single items
+                            itemsHTML = `
+                                <div class="flex items-center gap-3 bg-zinc-900 p-2 rounded border border-gray-800 mt-2">
+                                    <img src="${order.img}" class="w-12 h-12 object-cover rounded border border-gray-700">
+                                    <div class="flex-grow overflow-hidden">
+                                        <p class="font-bold text-gray-200 text-[11px] break-words">${order.product_name}</p>
+                                    </div>
+                                </div>
+                            `;
                         }
 
                         myOrdersHTML += `
                             <div class="bg-zinc-950 border border-yellow-600/30 rounded-lg p-4 shadow-md mb-4">
-                                <div class="flex gap-4 border-b border-gray-800 pb-3 mb-3">
-                                    <img src="${order.img}" class="w-20 h-20 object-cover rounded border border-gray-700">
-                                    <div class="flex-grow w-full overflow-hidden">
-                                        <p class="font-bold text-gray-200 text-xs break-words">${order.product_name}</p>
-                                        <p class="text-[10px] text-gray-500 mt-1">ID: ${order.id} | ${order.date}</p>
-                                        ${statusBadge} <span class="inline-block mt-2 ml-1 px-2 py-0.5 bg-gray-900/30 text-gray-400 text-[10px] rounded border border-gray-600/50 uppercase">${order.payment}</span>
+                                <div class="border-b border-gray-800 pb-3 mb-3">
+                                    <div class="flex justify-between items-start mb-2">
+                                        <div>
+                                            <p class="text-[10px] text-gray-400">Order ID: ${order.id}</p>
+                                            <p class="text-[9px] text-gray-500">${order.date}</p>
+                                        </div>
+                                        <div class="text-right flex flex-col items-end">
+                                            ${statusBadge}
+                                            <span class="inline-block mt-1.5 px-2 py-0.5 bg-gray-900/30 text-gray-400 text-[9px] rounded border border-gray-600/50 uppercase w-max">${order.payment}</span>
+                                        </div>
                                     </div>
+                                    ${itemsHTML}
                                 </div>
                                 <div class="mb-3"><p class="text-sm text-gray-300 font-semibold"><i class="fa-solid fa-location-dot text-yellow-500 mr-1 w-4"></i> Deliver To:</p><p class="text-xs text-gray-400 ml-5">${order.name}</p><p class="text-xs text-gray-400 ml-5">${order.address}</p></div>
                                 <div class="bg-zinc-900 p-3 rounded border border-gray-800"><p class="text-sm text-gray-300 font-semibold mb-1"><i class="fa-solid fa-wallet text-yellow-500 mr-1 w-4"></i> Payment Info:</p>${paymentStatus}</div>
