@@ -94,7 +94,7 @@
         const topNav = document.getElementById('topNav');
         const bottomNav = document.getElementById('bottomNav');
 
-        // --- REALTIME DATABASE SYNC (UPDATED TO .once() TO SAVE DATA & CONNECTIONS) ---
+        // --- REALTIME DATABASE SYNC ---
         async function initApp() {
             try {
                 const prodSnapCheck = await db.ref('products').once('value');
@@ -102,7 +102,6 @@
                     await seedInitialData();
                 }
 
-                // Fetch Categories Once
                 const catSnap = await db.ref('categories').once('value');
                 if(catSnap.exists()) {
                     categories = []; 
@@ -113,7 +112,6 @@
                     });
                 }
 
-                // Fetch Products Once
                 const pSnap = await db.ref('products').once('value');
                 if(pSnap.exists()) {
                     products = [];
@@ -124,7 +122,6 @@
                     });
                 }
 
-                // Fetch Banners Once
                 const bSnap = await db.ref('banners').once('value');
                 if(bSnap.exists()) {
                     banners = [];
@@ -135,11 +132,9 @@
                     });
                 }
 
-                // Fetch Payment Settings Once
                 const paySnap = await db.ref('settings/payment').once('value');
                 if(paySnap.exists()) paymentSettings = paySnap.val();
 
-                // UI Loading after all data is fetched
                 if(checkAuth()) {
                     goHome();
                     updateCartBadge();
@@ -298,7 +293,6 @@
                 displayProducts = products.filter(p => p.category === activeCategory);
             }
 
-            // Categories Grid (5 columns per row, no swipe)
             let catHTML = categories.map(cat => `
                 <div onclick="filterCategory('${cat.name}')" class="flex flex-col items-center gap-1.5 cursor-pointer w-full">
                     <div class="w-12 h-12 md:w-14 md:h-14 rounded-full overflow-hidden border-[2.5px] ${activeCategory === cat.name ? 'border-yellow-400 shadow-[0_0_12px_rgba(212,175,55,0.8)]' : 'border-zinc-700'} transition-all mx-auto flex-shrink-0 bg-zinc-900">
@@ -338,7 +332,6 @@
                 prodHTML = `<div class="col-span-2 text-center text-gray-500 py-10">No products found.</div>`;
             }
 
-            // Banner Carousel
             let bannerHTML = banners.map(b => `
                 <a href="${b.target_link || '#'}" class="min-w-full flex-shrink-0 snap-center relative h-60 block">
                     <img src="${b.img}" class="w-full h-full object-cover opacity-90">
@@ -368,7 +361,6 @@
             `;
             window.scrollTo(0,0);
 
-            // Auto-swipe Logic for Banners (Every 3 seconds)
             if(window.bannerScrollInterval) clearInterval(window.bannerScrollInterval);
             if(banners.length > 1) {
                 setTimeout(() => {
@@ -855,17 +847,15 @@
             const isCOD = document.getElementById('cod').checked;
             const uiDiv = document.getElementById('paymentUI');
             const totalAmount = tempCheckoutData.price;
-            
             const qrUrl = paymentSettings.qr_url;
-            const waNum = paymentSettings.whatsapp;
 
             if (!isCOD) {
                 uiDiv.innerHTML = `
                     <p class="text-center text-sm text-gray-400 mb-2">Scan QR to pay Full Amount</p>
                     <p class="text-center font-bold text-xl text-yellow-500 mb-4">₹${totalAmount}</p>
                     <div class="flex justify-center mb-4"><img src="${qrUrl}" class="w-32 h-32 border-4 border-yellow-500 rounded p-1 bg-white shadow-lg"></div>
-                    <p class="text-xs text-center text-gray-400 mb-3">Pay amount, then send screenshot below.</p>
-                    <a href="https://wa.me/${waNum}?text=Hello%20MZ%20Fashion,%20here%20is%20my%20Full%20Payment%20screenshot" target="_blank" class="flex w-full items-center justify-center gap-2 bg-green-500 hover:bg-green-600 text-white font-bold py-3 px-4 rounded-lg shadow-[0_0_15px_rgba(34,197,94,0.6)] animate-pulse transition"><i class="fa-brands fa-whatsapp text-xl"></i> SEND SCREENSHOT</a>
+                    <p class="text-xs text-center text-red-400 font-bold mb-1">⚠️ Please complete the payment now.</p>
+                    <p class="text-[10px] text-center text-gray-400 mb-2">You will need to send the payment screenshot on the next screen to confirm your order.</p>
                 `;
             } else {
                 const tokenAmount = Math.round(totalAmount * 0.30);
@@ -875,8 +865,8 @@
                         <p class="font-bold text-lg text-yellow-500 mt-1">Token Amount: ₹${tokenAmount}</p>
                     </div>
                     <div class="flex justify-center mb-4"><img src="${qrUrl}" class="w-32 h-32 border-4 border-yellow-500 rounded p-1 bg-white shadow-lg"></div>
-                    <p class="text-xs text-center text-gray-400 mb-3">Scan & Pay Token, then send screenshot below.</p>
-                    <a href="https://wa.me/${waNum}?text=Hello%20MZ%20Fashion,%20here%20is%20my%20token%20payment%20screenshot" target="_blank" class="flex w-full items-center justify-center gap-2 bg-green-500 hover:bg-green-600 text-white font-bold py-3 px-4 rounded-lg shadow-[0_0_15px_rgba(34,197,94,0.6)] animate-pulse transition"><i class="fa-brands fa-whatsapp text-xl"></i> SEND SCREENSHOT</a>
+                    <p class="text-xs text-center text-red-400 font-bold mb-1">⚠️ Please complete the token payment now.</p>
+                    <p class="text-[10px] text-center text-gray-400 mb-2">You will need to send the payment screenshot on the next screen to confirm your order.</p>
                 `;
             }
         }
@@ -889,21 +879,33 @@
                 name: tempCheckoutData.name, phone: tempCheckoutData.phone,
                 address: tempCheckoutData.address, payment: paymentType,
                 product_name: tempCheckoutData.names, price: tempCheckoutData.price,
-                img: tempCheckoutData.img 
+                img: tempCheckoutData.img,
+                status: "Pending Verification" // <-- Default Status Added
             };
             appDiv.innerHTML = `<div class="min-h-[70vh] flex flex-col items-center justify-center text-yellow-500"><i class="fa-solid fa-spinner fa-spin text-5xl mb-4"></i><p class="font-bold tracking-widest">PLACING ORDER...</p></div>`;
             window.scrollTo(0,0);
             try {
-                // Fetch user directly using .once()
                 await db.ref('orders/' + newOrder.id).set(newOrder);
                 cart = []; localStorage.setItem('mz_cart', JSON.stringify(cart)); updateCartBadge();
+                
+                const waNum = paymentSettings.whatsapp;
+                const waText = encodeURIComponent(`Hello MZ Fashion, here is my payment screenshot for Order ID: ${newOrder.id}`);
+
                 appDiv.innerHTML = `
                     <div class="fade-in flex flex-col items-center justify-center min-h-[70vh] p-4 text-center">
-                        <div class="w-20 h-20 bg-zinc-950 border-2 border-yellow-500 text-yellow-500 rounded-full flex items-center justify-center text-4xl mb-6 shadow-[0_0_20px_rgba(212,175,55,0.3)]"><i class="fa-solid fa-check"></i></div>
-                        <h1 class="text-2xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-yellow-300 to-yellow-600">Order Placed!</h1>
-                        <p class="text-gray-400 mt-4 text-sm">Thank you, <span class="text-gray-200 font-semibold">${tempCheckoutData.name}</span>.</p>
-                        <p class="text-gray-400 mt-1 text-sm">Order for <b class="text-yellow-500 text-[10px] break-words block">${tempCheckoutData.names}</b> is processing.</p>
-                        <button onclick="showMyOrders()" class="mt-8 bg-gradient-to-r from-yellow-600 to-yellow-400 text-black px-8 py-3 rounded font-bold shadow-md transition-all w-full max-w-xs">View My Orders</button>
+                        <div class="w-20 h-20 bg-zinc-950 border-2 border-yellow-500 text-yellow-500 rounded-full flex items-center justify-center text-4xl mb-4 shadow-[0_0_20px_rgba(212,175,55,0.3)]"><i class="fa-solid fa-clock"></i></div>
+                        <h1 class="text-2xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-yellow-300 to-yellow-600">Verification Pending!</h1>
+                        <p class="text-gray-400 mt-2 text-sm">Thank you, <span class="text-gray-200 font-semibold">${tempCheckoutData.name}</span>.</p>
+                        <p class="text-gray-400 mt-1 text-sm">Order ID: <b class="text-yellow-500 text-xs">${newOrder.id}</b></p>
+                        
+                        <div class="bg-red-900/20 border border-red-500/50 p-4 rounded-lg mt-5 mb-5 w-full max-w-sm">
+                            <p class="text-sm text-red-400 font-bold mb-3">⚠️ Order will NOT be dispatched until payment screenshot is received.</p>
+                            <a href="https://wa.me/${waNum}?text=${waText}" target="_blank" class="flex w-full items-center justify-center gap-2 bg-green-500 hover:bg-green-600 text-white font-bold py-3 px-4 rounded-lg shadow-[0_0_15px_rgba(34,197,94,0.4)] animate-pulse transition">
+                                <i class="fa-brands fa-whatsapp text-2xl"></i> SEND SCREENSHOT NOW
+                            </a>
+                        </div>
+
+                        <button onclick="showMyOrders()" class="mt-2 bg-gradient-to-r from-yellow-600 to-yellow-400 text-black px-8 py-3 rounded font-bold shadow-md transition-all w-full max-w-xs">View My Orders</button>
                         <button onclick="goHome()" class="mt-3 border border-yellow-500 text-yellow-500 hover:bg-yellow-500 hover:text-black px-8 py-3 rounded font-bold transition-all w-full max-w-xs">Continue Shopping</button>
                     </div>
                 `;
@@ -916,7 +918,6 @@
             appDiv.innerHTML = `<div class="min-h-[70vh] flex flex-col items-center justify-center text-yellow-500"><i class="fa-solid fa-spinner fa-spin text-5xl mb-4"></i><p class="font-bold tracking-widest">LOADING ORDERS...</p></div>`;
             window.scrollTo(0,0);
             try {
-                // Fetch orders directly using .once()
                 const snapshot = await db.ref('orders').orderByChild('phone').equalTo(currentUser.phone).once('value');
                 let userOrders = []; snapshot.forEach(child => { userOrders.push(child.val()); });
                 userOrders.sort((a, b) => b.id - a.id);
@@ -930,9 +931,28 @@
                         } else {
                             paymentStatus = `<p class="text-xs text-gray-400 mt-1">Total: ₹${order.price}</p><p class="text-xs text-green-500 font-semibold">Paid: ₹${order.price} (Full Payment)</p>`;
                         }
+                        
+                        // Status Check Logic Added
+                        let statusBadge = "";
+                        let currentStatus = order.status || "Pending Verification";
+                        if(currentStatus === "Confirmed") {
+                            statusBadge = `<span class="inline-block mt-2 px-2 py-0.5 bg-green-900/30 text-green-500 text-[10px] rounded border border-green-600/50 uppercase font-bold"><i class="fa-solid fa-check"></i> Confirmed</span>`;
+                        } else if(currentStatus === "Rejected") {
+                            statusBadge = `<span class="inline-block mt-2 px-2 py-0.5 bg-red-900/30 text-red-500 text-[10px] rounded border border-red-600/50 uppercase font-bold"><i class="fa-solid fa-xmark"></i> Rejected</span>`;
+                        } else {
+                            statusBadge = `<span class="inline-block mt-2 px-2 py-0.5 bg-yellow-900/30 text-yellow-500 text-[10px] rounded border border-yellow-600/50 uppercase font-bold"><i class="fa-solid fa-clock"></i> ${currentStatus}</span>`;
+                        }
+
                         myOrdersHTML += `
                             <div class="bg-zinc-950 border border-yellow-600/30 rounded-lg p-4 shadow-md mb-4">
-                                <div class="flex gap-4 border-b border-gray-800 pb-3 mb-3"><img src="${order.img}" class="w-20 h-20 object-cover rounded border border-gray-700"><div class="flex-grow w-full overflow-hidden"><p class="font-bold text-gray-200 text-xs break-words">${order.product_name}</p><p class="text-[10px] text-gray-500 mt-1">${order.date}</p><span class="inline-block mt-2 px-2 py-0.5 bg-yellow-900/30 text-yellow-500 text-[10px] rounded border border-yellow-600/50 uppercase">${order.payment}</span></div></div>
+                                <div class="flex gap-4 border-b border-gray-800 pb-3 mb-3">
+                                    <img src="${order.img}" class="w-20 h-20 object-cover rounded border border-gray-700">
+                                    <div class="flex-grow w-full overflow-hidden">
+                                        <p class="font-bold text-gray-200 text-xs break-words">${order.product_name}</p>
+                                        <p class="text-[10px] text-gray-500 mt-1">ID: ${order.id} | ${order.date}</p>
+                                        ${statusBadge} <span class="inline-block mt-2 ml-1 px-2 py-0.5 bg-gray-900/30 text-gray-400 text-[10px] rounded border border-gray-600/50 uppercase">${order.payment}</span>
+                                    </div>
+                                </div>
                                 <div class="mb-3"><p class="text-sm text-gray-300 font-semibold"><i class="fa-solid fa-location-dot text-yellow-500 mr-1 w-4"></i> Deliver To:</p><p class="text-xs text-gray-400 ml-5">${order.name}</p><p class="text-xs text-gray-400 ml-5">${order.address}</p></div>
                                 <div class="bg-zinc-900 p-3 rounded border border-gray-800"><p class="text-sm text-gray-300 font-semibold mb-1"><i class="fa-solid fa-wallet text-yellow-500 mr-1 w-4"></i> Payment Info:</p>${paymentStatus}</div>
                             </div>
