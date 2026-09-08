@@ -21,6 +21,7 @@
             color: #fff;
             border-color: #eab308;
         }
+        /* Make inputs autofill look clean in light theme */
         input:-webkit-autofill,
         input:-webkit-autofill:hover, 
         input:-webkit-autofill:focus, 
@@ -200,25 +201,32 @@
         // --- REALTIME DATABASE SYNC ---
         async function initApp() {
             try {
-                const prodSnapCheck = await db.ref('products').once('value');
-                if (!prodSnapCheck.exists()) await seedInitialData();
+                // FIXED BUG: Checking settings instead of products to prevent accidental DB wipe
+                const setupCheck = await db.ref('settings/payment').once('value');
+                if (!setupCheck.exists()) await seedInitialData();
 
                 const catSnap = await db.ref('categories').once('value');
                 if(catSnap.exists()) {
                     categories = []; 
-                    catSnap.forEach(child => categories.push(child.val()));
+                    catSnap.forEach(child => {
+                        if(child.val() && typeof child.val() === 'object') categories.push(child.val());
+                    });
                 }
 
                 const pSnap = await db.ref('products').once('value');
                 if(pSnap.exists()) {
                     products = [];
-                    pSnap.forEach(child => products.push(child.val()));
+                    pSnap.forEach(child => {
+                        if(child.val() && typeof child.val() === 'object') products.push(child.val());
+                    });
                 }
 
                 const bSnap = await db.ref('banners').once('value');
                 if(bSnap.exists()) {
                     banners = [];
-                    bSnap.forEach(child => banners.push(child.val()));
+                    bSnap.forEach(child => {
+                        if(child.val() && typeof child.val() === 'object') banners.push(child.val());
+                    });
                 }
 
                 const paySnap = await db.ref('settings/payment').once('value');
@@ -401,7 +409,8 @@
             // --- SINGLE COLUMN PRODUCT CARDS WITH FLIPKART STYLE PRICE ---
             let prodHTML = displayProducts.map(item => {
                 const isLiked = likedItems.includes(item.id);
-                const discountVal = item.discount ? item.discount.replace(' OFF', '').replace('OFF', '').trim() : '';
+                // FIXED BUG: Safe string parsing for discount text to prevent crashes
+                const discountVal = item.discount ? String(item.discount).replace(/OFF/gi, '').trim() : '';
                 
                 return `
                 <div class="bg-white border border-gray-200 rounded-[20px] shadow-[0_6px_20px_rgba(0,0,0,0.06)] relative flex flex-col justify-between overflow-hidden group">
@@ -511,7 +520,7 @@
                 html = `<div class="text-center p-10 mt-10"><i class="fa-solid fa-heart-crack text-5xl text-gray-300 mb-4"></i><h2 class="text-gray-600 font-bold text-lg">No Liked Items</h2><button onclick="history.back()" class="mt-6 bg-white border border-yellow-500 text-yellow-600 px-6 py-2 rounded-lg font-bold shadow-sm hover:bg-yellow-50">Explore Collection</button></div>`;
             } else {
                 html = `<div class="grid grid-cols-2 gap-4">` + likedProducts.map(item => {
-                    const discountVal = item.discount ? item.discount.replace(' OFF', '').replace('OFF', '').trim() : '';
+                    const discountVal = item.discount ? String(item.discount).replace(/OFF/gi, '').trim() : '';
                     return `
                     <div class="bg-white border border-gray-200 rounded-xl shadow-[0_4px_10px_rgba(0,0,0,0.04)] relative flex flex-col justify-between overflow-hidden group">
                         <button onclick="event.stopPropagation(); toggleLike(this, '${item.id}'); setTimeout(_showLikes, 300);" class="absolute top-2 right-2 text-red-500 z-10 text-xl bg-white/80 rounded-full w-8 h-8 flex items-center justify-center backdrop-blur-sm shadow-sm transition-colors hover:scale-110"><i class="fa-solid fa-heart"></i></button>
@@ -639,7 +648,7 @@
                 </div>
             `).join('');
 
-            const discountVal = product.discount ? product.discount.replace(' OFF', '').replace('OFF', '').trim() : '';
+            const discountVal = product.discount ? String(product.discount).replace(/OFF/gi, '').trim() : '';
 
             appDiv.innerHTML = `
                 <div class="fade-in relative pb-24 bg-gray-50 min-h-screen">
@@ -715,7 +724,7 @@
             let total = 0;
             let cartHTML = cart.map((item, index) => {
                 total += item.price;
-                const discountVal = item.discount ? item.discount.replace(' OFF', '').replace('OFF', '').trim() : '';
+                const discountVal = item.discount ? String(item.discount).replace(/OFF/gi, '').trim() : '';
                 return `
                     <div class="flex gap-4 items-center bg-white p-3 rounded-xl border border-gray-200 mb-3 shadow-sm relative">
                         <img src="${item.img}" class="w-20 h-20 object-cover rounded-lg border border-gray-100">
@@ -1114,6 +1123,7 @@
                             statusBadge = `<span class="inline-flex items-center gap-1 px-2 py-1 bg-yellow-50 text-yellow-600 text-[9px] rounded border border-yellow-200 uppercase font-extrabold"><i class="fa-solid fa-clock"></i> ${currentStatus}</span>`;
                         }
 
+                        // MULTIPLE ITEMS RENDERING LOGIC
                         let itemsHTML = "";
                         if (order.items && order.items.length > 0) {
                             itemsHTML = `<div class="mt-3 flex flex-col gap-2">` + order.items.map(item => `
