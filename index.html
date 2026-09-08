@@ -32,30 +32,30 @@
 </head>
 <body class="bg-gray-50 text-gray-900 font-sans">
 
-    <!-- Top Navbar (Curved Design Matching Reference) -->
-    <nav id="topNav" class="hidden bg-[#0a0a0a] pt-4 pb-6 px-4 flex justify-between items-center sticky top-0 z-[100] shadow-[0_8px_20px_rgba(0,0,0,0.25)] border-b-[2.5px] border-yellow-500 rounded-b-[2.5rem]">
-        <div class="flex items-center w-full justify-between relative px-2">
+    <!-- Top Navbar (Curved, Slimmer, and Not Sticky) -->
+    <nav id="topNav" class="hidden bg-[#0a0a0a] py-2.5 px-3 flex justify-between items-center relative z-50 shadow-md border-b-[1.5px] border-yellow-500 rounded-b-[1.5rem]">
+        <div class="flex items-center w-full justify-between relative px-1">
             <!-- Left: Logo -->
             <div class="flex-shrink-0">
-                <img id="secretLogo" src="logo.png" onerror="this.src='https://ui-avatars.com/api/?name=MZ&background=000&color=D4AF37'" alt="MZ Fashion" class="w-12 h-12 rounded-full cursor-pointer border-2 border-yellow-500 object-cover shadow-[0_0_10px_rgba(212,175,55,0.5)]">
+                <img id="secretLogo" src="logo.png" onerror="this.src='https://ui-avatars.com/api/?name=MZ&background=000&color=D4AF37'" alt="MZ Fashion" class="w-10 h-10 rounded-full cursor-pointer border-[1.5px] border-yellow-500 object-cover shadow-[0_0_8px_rgba(212,175,55,0.4)]">
             </div>
             
             <!-- Center: Title & Subtitle -->
-            <div class="flex flex-col items-center justify-center cursor-pointer absolute left-1/2 transform -translate-x-1/2 mt-1" onclick="goHome()">
-                <span class="font-black text-[24px] tracking-[0.1em] text-white leading-none">MZ FASHION</span>
-                <div class="flex items-center gap-2 mt-1 w-full justify-center opacity-90">
-                    <div class="w-6 h-[1px] bg-yellow-500"></div>
-                    <span class="text-[7px] tracking-[0.25em] text-yellow-500 uppercase whitespace-nowrap font-bold">Style Your Story</span>
-                    <div class="w-6 h-[1px] bg-yellow-500"></div>
+            <div class="flex flex-col items-center justify-center cursor-pointer absolute left-1/2 transform -translate-x-1/2" onclick="goHome()">
+                <span class="font-black text-[20px] tracking-[0.08em] text-white leading-none mt-0.5">MZ FASHION</span>
+                <div class="flex items-center gap-1.5 mt-1 w-full justify-center opacity-90">
+                    <div class="w-5 h-[1px] bg-yellow-500"></div>
+                    <span class="text-[6.5px] tracking-[0.2em] text-yellow-500 uppercase whitespace-nowrap font-bold">Style Your Story</span>
+                    <div class="w-5 h-[1px] bg-yellow-500"></div>
                 </div>
             </div>
 
             <!-- Right: Search & Cart Icons -->
-            <div class="flex items-center gap-5 text-white text-[20px] flex-shrink-0 mt-1">
+            <div class="flex items-center gap-4 text-white text-[18px] flex-shrink-0">
                 <i class="fa-solid fa-magnifying-glass cursor-pointer hover:text-yellow-500 transition drop-shadow-md"></i>
                 <div class="relative cursor-pointer hover:text-yellow-500 transition drop-shadow-md" onclick="showCart()">
                     <i class="fa-solid fa-cart-shopping"></i>
-                    <span id="topCartBadge" class="absolute -top-2 -right-2.5 bg-red-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full hidden border border-black shadow-sm">0</span>
+                    <span id="topCartBadge" class="absolute -top-1.5 -right-2 bg-red-500 text-white text-[9px] font-bold px-1.5 py-0.5 rounded-full hidden border border-black shadow-sm">0</span>
                 </div>
             </div>
         </div>
