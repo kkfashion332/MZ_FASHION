@@ -80,7 +80,7 @@
             </div>
 
             <div class="flex items-center gap-4 text-white text-[18px] flex-shrink-0">
-                <i class="fa-solid fa-magnifying-glass cursor-pointer hover:text-yellow-500 transition drop-shadow-md"></i>
+                <!-- Search icon removed from here -->
                 <div class="relative cursor-pointer hover:text-yellow-500 transition drop-shadow-md" onclick="showCart()">
                     <i class="fa-solid fa-cart-shopping"></i>
                     <span id="topCartBadge" class="absolute -top-1.5 -right-2 bg-red-500 text-white text-[9px] font-bold px-1.5 py-0.5 rounded-full hidden border border-black shadow-sm">0</span>
@@ -198,39 +198,63 @@
             bottomNav.classList.add('hidden');
         }
 
-        // --- REALTIME DATABASE SYNC ---
+        // --- REALTIME DATABASE SYNC WITH 24-HOUR LOCAL STORAGE CACHE ---
         async function initApp() {
             try {
-                // FIXED BUG: Checking settings instead of products to prevent accidental DB wipe
-                const setupCheck = await db.ref('settings/payment').once('value');
-                if (!setupCheck.exists()) await seedInitialData();
+                const CACHE_KEY = 'mz_data_cache';
+                const CACHE_EXPIRY_KEY = 'mz_data_cache_expiry';
+                const CACHE_TIME = 24 * 60 * 60 * 1000; // 24 hours in milliseconds
+                const now = Date.now();
+                
+                const expiry = localStorage.getItem(CACHE_EXPIRY_KEY);
+                const cachedData = localStorage.getItem(CACHE_KEY);
 
-                const catSnap = await db.ref('categories').once('value');
-                if(catSnap.exists()) {
-                    categories = []; 
-                    catSnap.forEach(child => {
-                        if(child.val() && typeof child.val() === 'object') categories.push(child.val());
-                    });
+                if (cachedData && expiry && now < parseInt(expiry)) {
+                    // Load data from Local Storage (Cache)
+                    console.log("Loading data from Local Storage...");
+                    const parsedData = JSON.parse(cachedData);
+                    categories = parsedData.categories || [];
+                    products = parsedData.products || [];
+                    banners = parsedData.banners || [];
+                    if(parsedData.paymentSettings) paymentSettings = parsedData.paymentSettings;
+                } else {
+                    // Fetch fresh data from Firebase
+                    console.log("Fetching fresh data from Firebase...");
+                    const setupCheck = await db.ref('settings/payment').once('value');
+                    if (!setupCheck.exists()) await seedInitialData();
+
+                    const catSnap = await db.ref('categories').once('value');
+                    if(catSnap.exists()) {
+                        categories = []; 
+                        catSnap.forEach(child => {
+                            if(child.val() && typeof child.val() === 'object') categories.push(child.val());
+                        });
+                    }
+
+                    const pSnap = await db.ref('products').once('value');
+                    if(pSnap.exists()) {
+                        products = [];
+                        pSnap.forEach(child => {
+                            if(child.val() && typeof child.val() === 'object') products.push(child.val());
+                        });
+                    }
+
+                    const bSnap = await db.ref('banners').once('value');
+                    if(bSnap.exists()) {
+                        banners = [];
+                        bSnap.forEach(child => {
+                            if(child.val() && typeof child.val() === 'object') banners.push(child.val());
+                        });
+                    }
+
+                    const paySnap = await db.ref('settings/payment').once('value');
+                    if(paySnap.exists()) paymentSettings = paySnap.val();
+
+                    // Save data to Local Storage for next 24 hours
+                    const dataToCache = { categories, products, banners, paymentSettings };
+                    localStorage.setItem(CACHE_KEY, JSON.stringify(dataToCache));
+                    localStorage.setItem(CACHE_EXPIRY_KEY, (now + CACHE_TIME).toString());
                 }
-
-                const pSnap = await db.ref('products').once('value');
-                if(pSnap.exists()) {
-                    products = [];
-                    pSnap.forEach(child => {
-                        if(child.val() && typeof child.val() === 'object') products.push(child.val());
-                    });
-                }
-
-                const bSnap = await db.ref('banners').once('value');
-                if(bSnap.exists()) {
-                    banners = [];
-                    bSnap.forEach(child => {
-                        if(child.val() && typeof child.val() === 'object') banners.push(child.val());
-                    });
-                }
-
-                const paySnap = await db.ref('settings/payment').once('value');
-                if(paySnap.exists()) paymentSettings = paySnap.val();
 
                 if (!history.state) {
                     history.replaceState({ page: 'home', param: null }, '', '#home');
