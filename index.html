@@ -32,7 +32,7 @@
         .strike-anim {
             position: relative;
             display: inline-block;
-            color: #878787; /* Flipkart Gray */
+            color: #878787; /* Gray color for old price */
         }
         .strike-anim::after {
             content: '';
@@ -50,14 +50,13 @@
             100% { transform: scaleX(1); }
         }
 
-        .discount-badge {
-            background-color: #388e3c; /* Flipkart Green */
-            color: white;
-            animation: pulseBadge 1.2s infinite alternate ease-in-out;
+        .discount-text {
+            color: #16a34a; /* Flipkart Green */
+            animation: pulseText 1.2s infinite alternate ease-in-out;
         }
-        @keyframes pulseBadge {
-            0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(56, 142, 60, 0.4); }
-            100% { transform: scale(1.03); box-shadow: 0 0 6px rgba(56, 142, 60, 0.6); }
+        @keyframes pulseText {
+            0% { transform: scale(1); text-shadow: 0 0 0 rgba(22, 163, 74, 0); }
+            100% { transform: scale(1.02); text-shadow: 0 0 4px rgba(22, 163, 74, 0.3); }
         }
     </style>
 </head>
@@ -99,13 +98,13 @@
 
     <!-- Bottom Navigation Bar -->
     <div id="bottomNav" class="hidden fixed bottom-0 left-0 w-full bg-white border-t border-gray-200 p-2 max-w-md mx-auto z-[60] flex justify-around items-center h-16 shadow-[0_-4px_15px_rgba(0,0,0,0.05)]">
-        <div onclick="showLikes()" class="flex flex-col items-center w-1/5 text-gray-400 hover:text-yellow-500 cursor-pointer transition-colors"><i class="fa-solid fa-heart text-[20px]"></i><span class="text-[9px] mt-1 font-bold">Likes</span></div>
-        <div onclick="showMyOrders()" class="flex flex-col items-center w-1/5 text-gray-400 hover:text-yellow-500 cursor-pointer transition-colors"><i class="fa-solid fa-box text-[20px]"></i><span class="text-[9px] mt-1 font-bold">Orders</span></div>
+        <div onclick="requireAuth(() => showLikes())" class="flex flex-col items-center w-1/5 text-gray-400 hover:text-yellow-500 cursor-pointer transition-colors"><i class="fa-solid fa-heart text-[20px]"></i><span class="text-[9px] mt-1 font-bold">Likes</span></div>
+        <div onclick="requireAuth(() => showMyOrders())" class="flex flex-col items-center w-1/5 text-gray-400 hover:text-yellow-500 cursor-pointer transition-colors"><i class="fa-solid fa-box text-[20px]"></i><span class="text-[9px] mt-1 font-bold">Orders</span></div>
         <div class="w-1/5 flex justify-center relative">
             <div onclick="goHome()" class="absolute -top-10 w-14 h-14 bg-gradient-to-r from-yellow-500 to-yellow-400 rounded-full flex items-center justify-center text-white text-2xl shadow-[0_0_15px_rgba(212,175,55,0.4)] border-[3px] border-white cursor-pointer z-50 transition-transform active:scale-95"><i class="fa-solid fa-house drop-shadow-md"></i></div>
         </div>
         <div onclick="showCart()" class="flex flex-col items-center w-1/5 text-gray-400 hover:text-yellow-500 cursor-pointer relative transition-colors"><i class="fa-solid fa-cart-shopping text-[20px]"></i><span class="text-[9px] mt-1 font-bold">Cart</span><span id="bottomCartCount" class="absolute -top-1 right-2 bg-red-500 text-white text-[9px] font-bold px-1.5 py-0.5 rounded-full hidden border border-white">0</span></div>
-        <div onclick="showProfile()" class="flex flex-col items-center w-1/5 text-gray-400 hover:text-yellow-500 cursor-pointer transition-colors"><i class="fa-solid fa-user text-[20px]"></i><span class="text-[9px] mt-1 font-bold">Profile</span></div>
+        <div onclick="requireAuth(() => showProfile())" class="flex flex-col items-center w-1/5 text-gray-400 hover:text-yellow-500 cursor-pointer transition-colors"><i class="fa-solid fa-user text-[20px]"></i><span class="text-[9px] mt-1 font-bold">Profile</span></div>
     </div>
 
     <div id="imageModalContainer"></div>
@@ -151,10 +150,7 @@
             if (isNavigatingBack) return;
             const stateObj = { page, param };
             const hashUrl = `#${page}${param ? '-' + param : ''}`;
-            
-            // Prevent duplicate history pushes
             if (history.state && history.state.page === page && history.state.param === param) return;
-            
             history.pushState(stateObj, '', hashUrl);
         }
 
@@ -228,7 +224,6 @@
                 const paySnap = await db.ref('settings/payment').once('value');
                 if(paySnap.exists()) paymentSettings = paySnap.val();
 
-                // Setup initial history state
                 if (!history.state) {
                     history.replaceState({ page: 'home', param: null }, '', '#home');
                 }
@@ -243,8 +238,12 @@
         async function seedInitialData() {
             await db.ref('settings/payment').set({ qr_url: "https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=upi://pay?pa=dummy@upi&pn=MZFASHION", upi_id: "dummy@upi", whatsapp: "919982437489" });
             await db.ref('banners').set({ b1: { id: "b1", img: "256328.jpg", target_link: "#" } });
-            await db.ref('categories').set({ c1: { id: "c1", name: "T-Shirts", img: "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=150&q=80" }});
-            await db.ref('products').set({ p1: { id: "p1", name: "Premium Black T-Shirt", price: 499, mrp: 999, discount: "50% OFF", category: "T-Shirts", img: "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=400&q=80", shirtSizes: "S, M, L, XL, XXL", jeansSizes: "" } });
+            await db.ref('categories').set({ c1: { id: "c1", name: "T-Shirts", img: "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=150&q=80" }, c2: { id: "c2", name: "Jeans", img: "https://images.unsplash.com/photo-1541099649105-f69ad21f3246?w=150&q=80" }, c3: { id: "c3", name: "Combos", img: "https://images.unsplash.com/photo-1516257984-b1b4d707412e?w=150&q=80" }});
+            await db.ref('products').set({ 
+                p1: { id: "p1", name: "Premium Black T-Shirt", price: 499, mrp: 999, discount: "50% OFF", category: "T-Shirts", img: "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=400&q=80", shirtSizes: "S, M, L, XL, XXL", jeansSizes: "" },
+                p2: { id: "p2", name: "Ripped Blue Jeans", price: 1099, mrp: 1999, discount: "45% OFF", category: "Jeans", img: "https://images.unsplash.com/photo-1541099649105-f69ad21f3246?w=400&q=80", shirtSizes: "", jeansSizes: "28, 30, 32, 34, 36" },
+                p3: { id: "p3", name: "Combo (Shirt + Jeans)", price: 1499, mrp: 3198, discount: "53% OFF", category: "Combos", img: "https://images.unsplash.com/photo-1516257984-b1b4d707412e?w=400&q=80", shirtSizes: "S, M, L, XL, XXL", jeansSizes: "28, 30, 32, 34, 36" }
+            });
         }
 
         // --- ROUTE WRAPPERS ---
@@ -326,7 +325,7 @@
                     
                     if(pendingCallback) {
                         const cb = pendingCallback; pendingCallback = null;
-                        history.back(); // Go back from login screen in history
+                        history.back(); 
                         setTimeout(() => cb(), 100); 
                     } else {
                         history.back();
@@ -374,6 +373,10 @@
             goHome(); 
         }
 
+        function handleLikeClick(btn, id) {
+            requireAuth(() => toggleLike(btn, id));
+        }
+
         // --- VIEWS ---
 
         // 1. HOME PAGE
@@ -395,12 +398,14 @@
                 </div>
             `).join('');
             
-            // --- SINGLE COLUMN PRODUCT CARDS WITH ANIMATIONS ---
+            // --- SINGLE COLUMN PRODUCT CARDS WITH FLIPKART STYLE PRICE ---
             let prodHTML = displayProducts.map(item => {
                 const isLiked = likedItems.includes(item.id);
+                const discountVal = item.discount ? item.discount.replace(' OFF', '').replace('OFF', '').trim() : '';
+                
                 return `
                 <div class="bg-white border border-gray-200 rounded-[20px] shadow-[0_6px_20px_rgba(0,0,0,0.06)] relative flex flex-col justify-between overflow-hidden group">
-                    <button onclick="event.stopPropagation(); requireAuth(() => toggleLike(this, '${item.id}'))" class="absolute top-4 right-4 ${isLiked ? 'text-red-500' : 'text-gray-300'} z-10 text-2xl bg-white/90 rounded-full w-12 h-12 flex items-center justify-center backdrop-blur-sm shadow-md transition-colors hover:scale-110">
+                    <button onclick="event.stopPropagation(); handleLikeClick(this, '${item.id}')" class="absolute top-4 right-4 ${isLiked ? 'text-red-500' : 'text-gray-300'} z-10 text-2xl bg-white/90 rounded-full w-12 h-12 flex items-center justify-center backdrop-blur-sm shadow-md transition-colors hover:scale-110">
                         <i class="fa-solid fa-heart"></i>
                     </button>
                     <div onclick="viewProduct('${item.id}')" class="cursor-pointer relative overflow-hidden">
@@ -409,13 +414,11 @@
                     <div class="p-5 flex flex-col flex-grow border-t border-gray-100">
                         <h3 onclick="viewProduct('${item.id}')" class="text-xl font-extrabold truncate text-gray-900 cursor-pointer hover:text-yellow-600 transition tracking-tight">${item.name}</h3>
                         
-                        <!-- NEW PRICE ORDER & ANIMATION -->
-                        <div class="mt-3 flex items-center gap-3">
-                            <span class="text-sm font-bold strike-anim">₹${item.mrp}</span>
-                            <span class="font-black text-gray-900 text-2xl">₹${item.price}</span>
-                        </div>
-                        <div class="mt-1">
-                            <span class="discount-badge text-[11px] font-extrabold px-3 py-1 w-max rounded shadow-sm uppercase tracking-wider inline-block">${item.discount}</span>
+                        <!-- NEW PRICE ORDER & ANIMATION (Flipkart Style) -->
+                        <div class="mt-3 flex items-center gap-2">
+                            <span class="discount-text text-[15px] font-extrabold flex items-center tracking-tight"><i class="fa-solid fa-arrow-down text-[11px] mr-0.5"></i>${discountVal}</span>
+                            <span class="text-gray-400 font-bold text-[15px] strike-anim tracking-tight">₹${item.mrp}</span>
+                            <span class="font-black text-gray-900 text-[26px] ml-1 tracking-tight">₹${item.price}</span>
                         </div>
                         
                         <div class="flex justify-between gap-3 mt-5">
@@ -459,6 +462,25 @@
                 </div>
             `;
             window.scrollTo(0,0);
+
+            if(window.bannerScrollInterval) clearInterval(window.bannerScrollInterval);
+            if(banners.length > 1) {
+                setTimeout(() => {
+                    window.bannerScrollInterval = setInterval(() => {
+                        const slider = document.getElementById('bannerSlider');
+                        if(!slider) {
+                            clearInterval(window.bannerScrollInterval);
+                            return;
+                        }
+                        const maxScrollLeft = slider.scrollWidth - slider.clientWidth;
+                        if(slider.scrollLeft >= maxScrollLeft - 5) {
+                            slider.scrollTo({ left: 0, behavior: 'smooth' });
+                        } else {
+                            slider.scrollBy({ left: slider.clientWidth, behavior: 'smooth' });
+                        }
+                    }, 3000); 
+                }, 500);
+            }
         }
 
         function filterCategory(catName) {
@@ -488,20 +510,26 @@
             if (likedProducts.length === 0) {
                 html = `<div class="text-center p-10 mt-10"><i class="fa-solid fa-heart-crack text-5xl text-gray-300 mb-4"></i><h2 class="text-gray-600 font-bold text-lg">No Liked Items</h2><button onclick="history.back()" class="mt-6 bg-white border border-yellow-500 text-yellow-600 px-6 py-2 rounded-lg font-bold shadow-sm hover:bg-yellow-50">Explore Collection</button></div>`;
             } else {
-                html = `<div class="grid grid-cols-2 gap-4">` + likedProducts.map(item => `
+                html = `<div class="grid grid-cols-2 gap-4">` + likedProducts.map(item => {
+                    const discountVal = item.discount ? item.discount.replace(' OFF', '').replace('OFF', '').trim() : '';
+                    return `
                     <div class="bg-white border border-gray-200 rounded-xl shadow-[0_4px_10px_rgba(0,0,0,0.04)] relative flex flex-col justify-between overflow-hidden group">
                         <button onclick="event.stopPropagation(); toggleLike(this, '${item.id}'); setTimeout(_showLikes, 300);" class="absolute top-2 right-2 text-red-500 z-10 text-xl bg-white/80 rounded-full w-8 h-8 flex items-center justify-center backdrop-blur-sm shadow-sm transition-colors hover:scale-110"><i class="fa-solid fa-heart"></i></button>
                         <div onclick="viewProduct('${item.id}')" class="cursor-pointer relative overflow-hidden"><img src="${item.img}" class="w-full h-44 object-cover transform group-hover:scale-105 transition duration-500"></div>
                         <div class="p-3 flex flex-col flex-grow border-t border-gray-100">
                             <h3 class="text-sm font-bold truncate text-gray-800">${item.name}</h3>
-                            <div class="mt-1 flex items-center gap-2"><span class="font-extrabold text-gray-900 text-[15px]">₹${item.price}</span></div>
+                            <div class="mt-2 flex items-center gap-1.5">
+                                <span class="discount-text text-[10px] font-extrabold flex items-center tracking-tight"><i class="fa-solid fa-arrow-down text-[8px] mr-0.5"></i>${discountVal}</span>
+                                <span class="text-gray-400 font-bold text-[10px] strike-anim tracking-tight">₹${item.mrp}</span>
+                                <span class="font-black text-gray-900 text-[16px] tracking-tight">₹${item.price}</span>
+                            </div>
                             <div class="flex justify-between gap-1.5 mt-3">
                                 <button onclick="event.stopPropagation(); viewProduct('${item.id}')" class="flex-1 bg-white border border-yellow-500 text-yellow-600 font-bold py-1.5 rounded-[6px] text-[9px] shadow-sm flex items-center justify-center gap-1"><i class="fa-solid fa-cart-plus"></i> CART</button>
                                 <button onclick="event.stopPropagation(); viewProduct('${item.id}')" class="flex-1 bg-gradient-to-r from-yellow-500 to-yellow-400 text-white font-extrabold py-1.5 rounded-[6px] shadow-sm text-[9px]">BUY NOW</button>
                             </div>
                         </div>
                     </div>
-                `).join('') + `</div>`;
+                `}).join('') + `</div>`;
             }
 
             appDiv.innerHTML = `
@@ -522,6 +550,7 @@
             showNavs();
             appDiv.innerHTML = `
                 <div class="fade-in p-5 pb-24 bg-gray-50 min-h-screen">
+                    <button onclick="history.back()" class="mb-4 text-gray-600 text-xl"><i class="fa-solid fa-arrow-left"></i></button>
                     <div class="flex items-center gap-2 mb-6 border-b border-gray-200 pb-3">
                         <div class="w-1.5 h-6 bg-yellow-500 rounded"></div>
                         <h1 class="text-xl font-extrabold text-gray-800 uppercase tracking-wide">My Profile</h1>
@@ -610,6 +639,8 @@
                 </div>
             `).join('');
 
+            const discountVal = product.discount ? product.discount.replace(' OFF', '').replace('OFF', '').trim() : '';
+
             appDiv.innerHTML = `
                 <div class="fade-in relative pb-24 bg-gray-50 min-h-screen">
                     <button onclick="history.back()" class="absolute top-4 left-4 bg-white/90 border border-gray-200 text-gray-800 rounded-full w-10 h-10 z-10 flex items-center justify-center backdrop-blur-sm shadow-md hover:text-yellow-600 transition"><i class="fa-solid fa-arrow-left"></i></button>
@@ -622,13 +653,11 @@
                         <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-100 mb-5 relative">
                             <h1 class="text-xl font-extrabold text-gray-900 leading-tight pr-10">${product.name}</h1>
                             
-                            <!-- NEW PRICE ORDER & ANIMATION -->
-                            <div class="mt-4 flex items-center gap-3">
-                                <span class="text-base font-bold strike-anim">₹${product.mrp}</span>
-                                <span class="text-3xl font-black text-gray-900">₹${product.price}</span>
-                            </div>
-                            <div class="mt-2">
-                                <span class="discount-badge text-xs font-extrabold px-3 py-1.5 w-max rounded-md shadow-sm uppercase tracking-wider inline-block">${product.discount}</span>
+                            <!-- NEW PRICE ORDER & ANIMATION (Flipkart Style) -->
+                            <div class="mt-4 flex items-center gap-2.5">
+                                <span class="discount-text text-lg font-extrabold flex items-center tracking-tight"><i class="fa-solid fa-arrow-down text-[13px] mr-1"></i>${discountVal}</span>
+                                <span class="text-gray-400 font-bold text-lg strike-anim tracking-tight">₹${product.mrp}</span>
+                                <span class="font-black text-gray-900 text-3xl ml-1 tracking-tight">₹${product.price}</span>
                             </div>
                         </div>
 
@@ -686,13 +715,19 @@
             let total = 0;
             let cartHTML = cart.map((item, index) => {
                 total += item.price;
+                const discountVal = item.discount ? item.discount.replace(' OFF', '').replace('OFF', '').trim() : '';
                 return `
                     <div class="flex gap-4 items-center bg-white p-3 rounded-xl border border-gray-200 mb-3 shadow-sm relative">
                         <img src="${item.img}" class="w-20 h-20 object-cover rounded-lg border border-gray-100">
                         <div class="flex-grow pr-8">
                             <p class="font-bold text-gray-800 text-sm leading-tight mb-1">${item.name}</p>
-                            <p class="text-[11px] text-gray-500 font-medium">Size: <span class="text-yellow-600 font-bold bg-yellow-50 px-1 rounded">${item.size}</span></p>
-                            <p class="text-gray-900 font-extrabold mt-1 text-base">₹${item.price}</p>
+                            <p class="text-[11px] text-gray-500 font-medium mb-1.5">Size: <span class="text-yellow-600 font-bold bg-yellow-50 px-1 rounded">${item.size}</span></p>
+                            
+                            <div class="flex items-center gap-1.5">
+                                <span class="discount-text text-[10px] font-extrabold flex items-center tracking-tight"><i class="fa-solid fa-arrow-down text-[8px] mr-0.5"></i>${discountVal}</span>
+                                <span class="text-gray-400 font-bold text-[11px] strike-anim tracking-tight">₹${item.mrp}</span>
+                                <span class="font-black text-gray-900 text-base tracking-tight ml-0.5">₹${item.price}</span>
+                            </div>
                         </div>
                         <button onclick="removeFromCart(${index})" class="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-300 hover:text-red-500 p-2 transition bg-gray-50 rounded-full"><i class="fa-solid fa-trash"></i></button>
                     </div>
@@ -767,6 +802,7 @@
             }
         }
 
+        // --- GUEST CHECKOUT (BUY NOW DIRECTLY) ---
         function handleBuyNow(id) {
             const product = products.find(p => p.id === id);
             const finalSize = getValidatedSize(product);
@@ -774,7 +810,7 @@
             if(!finalSize) { alert("Please select required sizes first!"); return; }
             currentSelectedSize = finalSize; 
             
-            // Go Directly to address (No Login Required)
+            // Go Directly to address (NO LOGIN REQUIRED)
             goToAddress(id);
         }
 
@@ -896,7 +932,7 @@
             window.scrollTo(0,0);
         }
 
-        // SILENT AUTO REGISTER/LOGIN ON CHECKOUT
+        // --- SILENT AUTO REGISTER/LOGIN ON CHECKOUT ---
         function processAddressAndGoToPayment(event) {
             event.preventDefault();
             
@@ -914,7 +950,7 @@
             }
             tempCheckoutData.address = `${baseAddress}, ${village}, ${district}, ${state} (PIN: ${pincode})`;
             
-            // Auto Login / Register
+            // Background Auto Login/Registration
             if (!currentUser || currentUser.phone !== tempCheckoutData.phone) {
                 const phoneStr = tempCheckoutData.phone;
                 db.ref('users/' + phoneStr).once('value').then(snap => {
@@ -1042,7 +1078,7 @@
                             </a>
                         </div>
 
-                        <button onclick="showMyOrders()" class="mt-2 bg-gradient-to-r from-yellow-500 to-yellow-400 text-white px-8 py-3.5 rounded-xl font-extrabold shadow-md transition-all w-full max-w-xs uppercase text-sm">View My Orders</button>
+                        <button onclick="requireAuth(() => showMyOrders())" class="mt-2 bg-gradient-to-r from-yellow-500 to-yellow-400 text-white px-8 py-3.5 rounded-xl font-extrabold shadow-md transition-all w-full max-w-xs uppercase text-sm">View My Orders</button>
                         <button onclick="goHome()" class="mt-4 bg-white border border-gray-300 text-gray-700 hover:bg-gray-100 px-8 py-3.5 rounded-xl font-extrabold shadow-sm transition-all w-full max-w-xs uppercase text-sm">Continue Shopping</button>
                     </div>
                 `;
