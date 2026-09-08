@@ -32,30 +32,30 @@
 </head>
 <body class="bg-gray-50 text-gray-900 font-sans">
 
-    <!-- Top Navbar (Matching your reference image) -->
-    <nav id="topNav" class="hidden bg-[#0a0a0a] p-3 flex justify-between items-center sticky top-0 z-50 shadow-[0_4px_15px_rgba(0,0,0,0.15)] border-b-[1.5px] border-yellow-500/50">
-        <div class="flex items-center w-full justify-between relative px-1">
+    <!-- Top Navbar (Curved Design Matching Reference) -->
+    <nav id="topNav" class="hidden bg-[#0a0a0a] pt-4 pb-6 px-4 flex justify-between items-center sticky top-0 z-[100] shadow-[0_8px_20px_rgba(0,0,0,0.25)] border-b-[2.5px] border-yellow-500 rounded-b-[2.5rem]">
+        <div class="flex items-center w-full justify-between relative px-2">
             <!-- Left: Logo -->
             <div class="flex-shrink-0">
-                <img id="secretLogo" src="logo.png" onerror="this.src='https://ui-avatars.com/api/?name=MZ&background=000&color=D4AF37'" alt="MZ Fashion" class="w-11 h-11 rounded-full cursor-pointer border border-yellow-500 object-cover shadow-[0_0_8px_rgba(212,175,55,0.4)]">
+                <img id="secretLogo" src="logo.png" onerror="this.src='https://ui-avatars.com/api/?name=MZ&background=000&color=D4AF37'" alt="MZ Fashion" class="w-12 h-12 rounded-full cursor-pointer border-2 border-yellow-500 object-cover shadow-[0_0_10px_rgba(212,175,55,0.5)]">
             </div>
             
             <!-- Center: Title & Subtitle -->
-            <div class="flex flex-col items-center justify-center cursor-pointer absolute left-1/2 transform -translate-x-1/2" onclick="goHome()">
-                <span class="font-extrabold text-[22px] tracking-[0.1em] text-white leading-none mt-1">MZ FASHION</span>
+            <div class="flex flex-col items-center justify-center cursor-pointer absolute left-1/2 transform -translate-x-1/2 mt-1" onclick="goHome()">
+                <span class="font-black text-[24px] tracking-[0.1em] text-white leading-none">MZ FASHION</span>
                 <div class="flex items-center gap-2 mt-1 w-full justify-center opacity-90">
                     <div class="w-6 h-[1px] bg-yellow-500"></div>
-                    <span class="text-[7px] tracking-[0.25em] text-yellow-500 uppercase whitespace-nowrap">Style Your Story</span>
+                    <span class="text-[7px] tracking-[0.25em] text-yellow-500 uppercase whitespace-nowrap font-bold">Style Your Story</span>
                     <div class="w-6 h-[1px] bg-yellow-500"></div>
                 </div>
             </div>
 
             <!-- Right: Search & Cart Icons -->
-            <div class="flex items-center gap-4 text-white text-[19px] flex-shrink-0">
-                <i class="fa-solid fa-magnifying-glass cursor-pointer hover:text-yellow-500 transition"></i>
-                <div class="relative cursor-pointer hover:text-yellow-500 transition" onclick="showCart()">
+            <div class="flex items-center gap-5 text-white text-[20px] flex-shrink-0 mt-1">
+                <i class="fa-solid fa-magnifying-glass cursor-pointer hover:text-yellow-500 transition drop-shadow-md"></i>
+                <div class="relative cursor-pointer hover:text-yellow-500 transition drop-shadow-md" onclick="showCart()">
                     <i class="fa-solid fa-cart-shopping"></i>
-                    <span id="topCartBadge" class="absolute -top-1.5 -right-2 bg-yellow-500 text-black text-[9px] font-bold px-1.5 py-0.5 rounded-full hidden border border-black">0</span>
+                    <span id="topCartBadge" class="absolute -top-2 -right-2.5 bg-red-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full hidden border border-black shadow-sm">0</span>
                 </div>
             </div>
         </div>
@@ -71,13 +71,13 @@
 
     <!-- Bottom Navigation Bar -->
     <div id="bottomNav" class="hidden fixed bottom-0 left-0 w-full bg-white border-t border-gray-200 p-2 max-w-md mx-auto z-[60] flex justify-around items-center h-16 shadow-[0_-4px_15px_rgba(0,0,0,0.05)]">
-        <div onclick="showLikes()" class="flex flex-col items-center w-1/5 text-gray-400 hover:text-yellow-500 cursor-pointer transition-colors"><i class="fa-solid fa-heart text-[20px]"></i><span class="text-[9px] mt-1 font-bold">Likes</span></div>
-        <div onclick="showMyOrders()" class="flex flex-col items-center w-1/5 text-gray-400 hover:text-yellow-500 cursor-pointer transition-colors"><i class="fa-solid fa-box text-[20px]"></i><span class="text-[9px] mt-1 font-bold">Orders</span></div>
+        <div onclick="requireAuth(() => showLikes())" class="flex flex-col items-center w-1/5 text-gray-400 hover:text-yellow-500 cursor-pointer transition-colors"><i class="fa-solid fa-heart text-[20px]"></i><span class="text-[9px] mt-1 font-bold">Likes</span></div>
+        <div onclick="requireAuth(() => showMyOrders())" class="flex flex-col items-center w-1/5 text-gray-400 hover:text-yellow-500 cursor-pointer transition-colors"><i class="fa-solid fa-box text-[20px]"></i><span class="text-[9px] mt-1 font-bold">Orders</span></div>
         <div class="w-1/5 flex justify-center relative">
             <div onclick="goHome()" class="absolute -top-10 w-14 h-14 bg-gradient-to-r from-yellow-500 to-yellow-400 rounded-full flex items-center justify-center text-white text-2xl shadow-[0_0_15px_rgba(212,175,55,0.4)] border-[3px] border-white cursor-pointer z-50 transition-transform active:scale-95"><i class="fa-solid fa-house drop-shadow-md"></i></div>
         </div>
         <div onclick="showCart()" class="flex flex-col items-center w-1/5 text-gray-400 hover:text-yellow-500 cursor-pointer relative transition-colors"><i class="fa-solid fa-cart-shopping text-[20px]"></i><span class="text-[9px] mt-1 font-bold">Cart</span><span id="bottomCartCount" class="absolute -top-1 right-2 bg-red-500 text-white text-[9px] font-bold px-1.5 py-0.5 rounded-full hidden border border-white">0</span></div>
-        <div onclick="showProfile()" class="flex flex-col items-center w-1/5 text-gray-400 hover:text-yellow-500 cursor-pointer transition-colors"><i class="fa-solid fa-user text-[20px]"></i><span class="text-[9px] mt-1 font-bold">Profile</span></div>
+        <div onclick="requireAuth(() => showProfile())" class="flex flex-col items-center w-1/5 text-gray-400 hover:text-yellow-500 cursor-pointer transition-colors"><i class="fa-solid fa-user text-[20px]"></i><span class="text-[9px] mt-1 font-bold">Profile</span></div>
     </div>
 
     <div id="imageModalContainer"></div>
@@ -115,6 +115,28 @@
         const appDiv = document.getElementById('app');
         const topNav = document.getElementById('topNav');
         const bottomNav = document.getElementById('bottomNav');
+
+        // --- AUTH & LOGIN SMART FLOW ---
+        let pendingCallback = null;
+
+        function requireAuth(callback) {
+            if (currentUser) {
+                if (callback) callback();
+            } else {
+                pendingCallback = callback;
+                showLogin();
+            }
+        }
+
+        function showNavs() {
+            topNav.classList.remove('hidden');
+            bottomNav.classList.remove('hidden');
+        }
+
+        function hideNavs() {
+            topNav.classList.add('hidden');
+            bottomNav.classList.add('hidden');
+        }
 
         // --- REALTIME DATABASE SYNC ---
         async function initApp() {
@@ -157,10 +179,9 @@
                 const paySnap = await db.ref('settings/payment').once('value');
                 if(paySnap.exists()) paymentSettings = paySnap.val();
 
-                if(checkAuth()) {
-                    goHome();
-                    updateCartBadge();
-                }
+                // Load Home freely without forcing login
+                goHome();
+                updateCartBadge();
             } catch (error) {
                 console.error("Database connection error: ", error);
                 appDiv.innerHTML = `<div class="text-center mt-20 text-red-500 font-bold">Network Error. Please refresh.</div>`;
@@ -189,60 +210,58 @@
             });
         }
 
-        // --- AUTHENTICATION ---
-        function checkAuth() {
-            if (!currentUser) {
-                topNav.classList.add('hidden');
-                bottomNav.classList.add('hidden');
-                showLogin();
-                return false;
-            }
-            topNav.classList.remove('hidden');
-            bottomNav.classList.remove('hidden');
-            return true;
-        }
-
+        // --- AUTHENTICATION VIEWS ---
         function showLogin() {
+            hideNavs();
             appDiv.innerHTML = `
                 <div class="fade-in p-6 flex flex-col justify-center min-h-screen bg-white">
                     <div class="text-center mb-10">
-                        <div class="w-24 h-24 mx-auto border-2 border-yellow-500 rounded-full overflow-hidden mb-4 shadow-[0_0_15px_rgba(212,175,55,0.3)]">
+                        <div class="w-24 h-24 mx-auto border-[3px] border-yellow-500 rounded-full overflow-hidden mb-4 shadow-[0_0_20px_rgba(212,175,55,0.4)]">
                             <img src="logo.png" onerror="this.src='https://ui-avatars.com/api/?name=MZ&background=000&color=D4AF37'" class="w-full h-full object-cover">
                         </div>
-                        <h1 class="text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-yellow-500 to-yellow-600 tracking-widest">MZ FASHION</h1>
-                        <p class="text-gray-500 mt-2 text-sm font-semibold">Welcome Back! Login to continue.</p>
+                        <h1 class="text-3xl font-black text-gray-900 tracking-widest uppercase">Welcome Back</h1>
+                        <p class="text-gray-500 mt-2 text-sm font-bold">Login to continue your checkout.</p>
                     </div>
                     
                     <form onsubmit="handleLogin(event)" class="flex flex-col gap-4">
-                        <div class="relative"><i class="fa-solid fa-phone absolute left-4 top-4 text-gray-400"></i><input type="tel" id="loginPhone" placeholder="Phone Number" required class="bg-gray-50 border border-gray-300 focus:border-yellow-500 focus:bg-white outline-none text-gray-900 p-3 pl-12 rounded-lg w-full transition-colors"></div>
-                        <div class="relative"><i class="fa-solid fa-lock absolute left-4 top-4 text-gray-400"></i><input type="password" id="loginPassword" placeholder="Password" required class="bg-gray-50 border border-gray-300 focus:border-yellow-500 focus:bg-white outline-none text-gray-900 p-3 pl-12 rounded-lg w-full transition-colors"></div>
-                        <p id="loginError" class="text-red-500 text-xs text-center hidden font-semibold">Invalid phone or password.</p>
-                        <button type="submit" id="loginBtn" class="mt-4 bg-gradient-to-r from-yellow-500 to-yellow-400 text-white font-extrabold py-3.5 rounded-lg shadow-md w-full tracking-wide transition transform active:scale-95">LOGIN</button>
+                        <div class="relative"><i class="fa-solid fa-phone absolute left-4 top-4 text-gray-400"></i><input type="tel" id="loginPhone" placeholder="Phone Number" required class="bg-gray-50 border border-gray-300 focus:border-yellow-500 focus:bg-white outline-none text-gray-900 p-3.5 pl-12 rounded-xl w-full font-semibold transition-colors shadow-sm"></div>
+                        <div class="relative"><i class="fa-solid fa-lock absolute left-4 top-4 text-gray-400"></i><input type="password" id="loginPassword" placeholder="Password" required class="bg-gray-50 border border-gray-300 focus:border-yellow-500 focus:bg-white outline-none text-gray-900 p-3.5 pl-12 rounded-xl w-full font-semibold transition-colors shadow-sm"></div>
+                        <p id="loginError" class="text-red-500 text-xs text-center hidden font-bold">Invalid phone or password.</p>
+                        <button type="submit" id="loginBtn" class="mt-4 bg-gradient-to-r from-yellow-500 to-yellow-400 text-white font-black py-4 rounded-xl shadow-md w-full tracking-wide transition transform active:scale-95 text-lg">LOGIN SECURELY</button>
                     </form>
                     
-                    <p class="text-center text-gray-500 mt-6 text-sm font-medium">Don't have an account? <span onclick="showRegister()" class="text-yellow-600 font-bold cursor-pointer hover:underline">Register Now</span></p>
+                    <p class="text-center text-gray-500 mt-6 text-sm font-bold">Don't have an account? <span onclick="showRegister()" class="text-yellow-600 font-black cursor-pointer hover:underline">Register Now</span></p>
+                    
+                    <div class="mt-8 text-center border-t border-gray-100 pt-6">
+                        <button onclick="goHome()" class="text-gray-400 hover:text-gray-800 font-extrabold text-sm transition flex items-center justify-center gap-2 w-full"><i class="fa-solid fa-arrow-left"></i> Skip & Back to Store</button>
+                    </div>
                 </div>
             `;
             window.scrollTo(0,0);
         }
 
         function showRegister() {
+            hideNavs();
             appDiv.innerHTML = `
                 <div class="fade-in p-6 flex flex-col justify-center min-h-screen bg-white">
                     <div class="text-center mb-8">
-                        <h1 class="text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-yellow-500 to-yellow-600 tracking-widest">REGISTER</h1>
-                        <p class="text-gray-500 mt-2 text-sm font-semibold">Create an account to start shopping.</p>
+                        <h1 class="text-3xl font-black text-gray-900 tracking-widest uppercase">CREATE ACCOUNT</h1>
+                        <p class="text-gray-500 mt-2 text-sm font-bold">Register to start shopping.</p>
                     </div>
                     
                     <form onsubmit="handleRegister(event)" class="flex flex-col gap-4">
-                        <div class="relative"><i class="fa-solid fa-user absolute left-4 top-4 text-gray-400"></i><input type="text" id="regName" placeholder="Full Name" required class="bg-gray-50 border border-gray-300 focus:border-yellow-500 focus:bg-white outline-none text-gray-900 p-3 pl-12 rounded-lg w-full transition-colors"></div>
-                        <div class="relative"><i class="fa-solid fa-phone absolute left-4 top-4 text-gray-400"></i><input type="tel" id="regPhone" placeholder="Phone Number" required class="bg-gray-50 border border-gray-300 focus:border-yellow-500 focus:bg-white outline-none text-gray-900 p-3 pl-12 rounded-lg w-full transition-colors"></div>
-                        <div class="relative"><i class="fa-solid fa-lock absolute left-4 top-4 text-gray-400"></i><input type="password" id="regPassword" placeholder="Password" required class="bg-gray-50 border border-gray-300 focus:border-yellow-500 focus:bg-white outline-none text-gray-900 p-3 pl-12 rounded-lg w-full transition-colors"></div>
-                        <p id="regError" class="text-red-500 text-xs text-center hidden font-semibold">Phone number already registered.</p>
-                        <button type="submit" id="regBtn" class="mt-4 bg-gradient-to-r from-yellow-500 to-yellow-400 text-white font-extrabold py-3.5 rounded-lg shadow-md w-full tracking-wide transition transform active:scale-95">CREATE ACCOUNT</button>
+                        <div class="relative"><i class="fa-solid fa-user absolute left-4 top-4 text-gray-400"></i><input type="text" id="regName" placeholder="Full Name" required class="bg-gray-50 border border-gray-300 focus:border-yellow-500 focus:bg-white outline-none text-gray-900 p-3.5 pl-12 rounded-xl w-full font-semibold transition-colors shadow-sm"></div>
+                        <div class="relative"><i class="fa-solid fa-phone absolute left-4 top-4 text-gray-400"></i><input type="tel" id="regPhone" placeholder="Phone Number" required class="bg-gray-50 border border-gray-300 focus:border-yellow-500 focus:bg-white outline-none text-gray-900 p-3.5 pl-12 rounded-xl w-full font-semibold transition-colors shadow-sm"></div>
+                        <div class="relative"><i class="fa-solid fa-lock absolute left-4 top-4 text-gray-400"></i><input type="password" id="regPassword" placeholder="Password" required class="bg-gray-50 border border-gray-300 focus:border-yellow-500 focus:bg-white outline-none text-gray-900 p-3.5 pl-12 rounded-xl w-full font-semibold transition-colors shadow-sm"></div>
+                        <p id="regError" class="text-red-500 text-xs text-center hidden font-bold">Phone number already registered.</p>
+                        <button type="submit" id="regBtn" class="mt-4 bg-gradient-to-r from-yellow-500 to-yellow-400 text-white font-black py-4 rounded-xl shadow-md w-full tracking-wide transition transform active:scale-95 text-lg">CREATE ACCOUNT</button>
                     </form>
                     
-                    <p class="text-center text-gray-500 mt-6 text-sm font-medium">Already have an account? <span onclick="showLogin()" class="text-yellow-600 font-bold cursor-pointer hover:underline">Login Here</span></p>
+                    <p class="text-center text-gray-500 mt-6 text-sm font-bold">Already have an account? <span onclick="showLogin()" class="text-yellow-600 font-black cursor-pointer hover:underline">Login Here</span></p>
+
+                    <div class="mt-8 text-center border-t border-gray-100 pt-6">
+                        <button onclick="goHome()" class="text-gray-400 hover:text-gray-800 font-extrabold text-sm transition flex items-center justify-center gap-2 w-full"><i class="fa-solid fa-arrow-left"></i> Skip & Back to Store</button>
+                    </div>
                 </div>
             `;
             window.scrollTo(0,0);
@@ -261,14 +280,23 @@
                     currentUser = snapshot.val();
                     localStorage.setItem('mz_currentUser', JSON.stringify(currentUser));
                     updateCartBadge();
-                    goHome();
+                    
+                    // Route user back to checkout if they came from there
+                    if(pendingCallback) {
+                        const cb = pendingCallback;
+                        pendingCallback = null;
+                        showNavs();
+                        cb();
+                    } else {
+                        goHome();
+                    }
                 } else {
                     document.getElementById('loginError').classList.remove('hidden');
-                    btn.innerHTML = "LOGIN";
+                    btn.innerHTML = "LOGIN SECURELY";
                 }
             } catch (error) {
                 alert("Database Error!");
-                btn.innerHTML = "LOGIN";
+                btn.innerHTML = "LOGIN SECURELY";
             }
         }
 
@@ -291,7 +319,16 @@
                 await db.ref('users/' + phone).set(newUser);
                 currentUser = newUser;
                 localStorage.setItem('mz_currentUser', JSON.stringify(newUser));
-                goHome();
+                
+                // Route user back to checkout if they came from there
+                if(pendingCallback) {
+                    const cb = pendingCallback;
+                    pendingCallback = null;
+                    showNavs();
+                    cb();
+                } else {
+                    goHome();
+                }
             } catch (error) {
                 alert("Database Error!");
                 btn.innerHTML = "CREATE ACCOUNT";
@@ -301,14 +338,19 @@
         function logout() {
             currentUser = null;
             localStorage.removeItem('mz_currentUser');
-            checkAuth();
+            goHome(); // Refresh back to open store
+        }
+
+        function handleLikeClick(btn, id) {
+            requireAuth(() => toggleLike(btn, id));
         }
 
         // --- VIEWS ---
 
         // 1. HOME PAGE
         function goHome() {
-            if(!checkAuth()) return;
+            showNavs();
+            pendingCallback = null; // Clear pending intent
             
             let displayProducts = products;
             if(activeCategory !== "") {
@@ -317,37 +359,40 @@
 
             let catHTML = categories.map(cat => `
                 <div onclick="filterCategory('${cat.name}')" class="flex flex-col items-center gap-1.5 cursor-pointer w-full">
-                    <div class="w-12 h-12 md:w-14 md:h-14 rounded-full overflow-hidden border-[2.5px] ${activeCategory === cat.name ? 'border-yellow-500 shadow-md scale-105' : 'border-gray-200'} transition-all mx-auto flex-shrink-0 bg-white">
+                    <div class="w-14 h-14 rounded-full overflow-hidden border-[2.5px] ${activeCategory === cat.name ? 'border-yellow-500 shadow-md scale-105' : 'border-gray-200'} transition-all mx-auto flex-shrink-0 bg-white">
                         <img src="${cat.img}" class="w-full h-full object-cover">
                     </div>
                     <span class="text-[9px] md:text-[10px] ${activeCategory === cat.name ? 'text-yellow-600 font-extrabold' : 'text-gray-600 font-bold'} text-center w-full uppercase break-words line-clamp-2 leading-tight">${cat.name}</span>
                 </div>
             `).join('');
             
+            // --- SINGLE COLUMN PRODUCT CARDS (LARGE DISPLAY) ---
             let prodHTML = displayProducts.map(item => {
                 const isLiked = likedItems.includes(item.id);
                 return `
-                <div class="bg-white border border-gray-200 rounded-xl shadow-[0_4px_10px_rgba(0,0,0,0.04)] relative flex flex-col justify-between overflow-hidden group">
-                    <button onclick="event.stopPropagation(); toggleLike(this, '${item.id}')" class="absolute top-2 right-2 ${isLiked ? 'text-red-500' : 'text-gray-300'} z-10 text-xl bg-white/80 rounded-full w-8 h-8 flex items-center justify-center backdrop-blur-sm shadow-sm transition-colors hover:scale-110">
+                <div class="bg-white border border-gray-200 rounded-[20px] shadow-[0_6px_20px_rgba(0,0,0,0.06)] relative flex flex-col justify-between overflow-hidden group">
+                    <button onclick="event.stopPropagation(); handleLikeClick(this, '${item.id}')" class="absolute top-4 right-4 ${isLiked ? 'text-red-500' : 'text-gray-300'} z-10 text-2xl bg-white/90 rounded-full w-12 h-12 flex items-center justify-center backdrop-blur-sm shadow-md transition-colors hover:scale-110">
                         <i class="fa-solid fa-heart"></i>
                     </button>
                     <div onclick="viewProduct('${item.id}')" class="cursor-pointer relative overflow-hidden">
-                        <img src="${item.img}" class="w-full h-44 object-cover transform group-hover:scale-105 transition duration-500">
+                        <img src="${item.img}" class="w-full h-[400px] object-cover transform group-hover:scale-105 transition duration-500">
                     </div>
-                    <div class="p-3 flex flex-col flex-grow border-t border-gray-100">
-                        <h3 onclick="viewProduct('${item.id}')" class="text-sm font-bold truncate text-gray-800 cursor-pointer hover:text-yellow-600 transition">${item.name}</h3>
-                        <div class="mt-1 flex items-center gap-2">
-                            <span class="font-extrabold text-gray-900 text-[15px]">₹${item.price}</span>
-                            <span class="text-xs line-through text-gray-400 font-medium">₹${item.mrp}</span>
+                    <div class="p-5 flex flex-col flex-grow border-t border-gray-100">
+                        <h3 onclick="viewProduct('${item.id}')" class="text-xl font-extrabold truncate text-gray-900 cursor-pointer hover:text-yellow-600 transition tracking-tight">${item.name}</h3>
+                        <div class="mt-2 flex items-center gap-3">
+                            <span class="font-black text-gray-900 text-2xl">₹${item.price}</span>
+                            <span class="text-sm line-through text-gray-400 font-bold mt-1">₹${item.mrp}</span>
                         </div>
-                        <span class="text-[9px] text-yellow-700 font-bold mt-1 bg-yellow-100 px-1.5 py-0.5 w-max rounded">${item.discount}</span>
                         
-                        <div class="flex justify-between gap-1.5 mt-3">
-                            <button onclick="event.stopPropagation(); viewProduct('${item.id}')" class="flex-1 bg-white border border-yellow-500 text-yellow-600 font-bold py-1.5 rounded-[6px] text-[9px] shadow-sm hover:bg-yellow-50 hover:shadow transition flex items-center justify-center gap-1">
-                                <i class="fa-solid fa-cart-plus text-[10px]"></i> ADD TO CART
+                        <!-- GREEN DISCOUNT BADGE -->
+                        <span class="text-[11px] text-white font-extrabold mt-3 bg-green-600 px-3 py-1 w-max rounded-md shadow-sm uppercase tracking-wider">${item.discount}</span>
+                        
+                        <div class="flex justify-between gap-3 mt-5">
+                            <button onclick="event.stopPropagation(); viewProduct('${item.id}')" class="flex-1 bg-white border-2 border-yellow-500 text-yellow-600 font-extrabold py-3.5 rounded-xl text-xs shadow-sm hover:bg-yellow-50 hover:shadow transition flex items-center justify-center gap-2">
+                                <i class="fa-solid fa-cart-plus text-base"></i> ADD TO CART
                             </button>
-                            <button onclick="event.stopPropagation(); viewProduct('${item.id}')" class="flex-1 bg-gradient-to-r from-yellow-500 to-yellow-400 text-white font-extrabold py-1.5 rounded-[6px] shadow-sm hover:shadow-md transition text-[9px] flex items-center justify-center gap-1">
-                                BUY NOW <i class="fa-solid fa-arrow-right text-[8px]"></i>
+                            <button onclick="event.stopPropagation(); viewProduct('${item.id}')" class="flex-1 bg-gradient-to-r from-yellow-500 to-yellow-400 text-white font-extrabold py-3.5 rounded-xl shadow-md hover:shadow-lg transition text-xs flex items-center justify-center gap-2">
+                                BUY NOW <i class="fa-solid fa-arrow-right text-xs"></i>
                             </button>
                         </div>
                     </div>
@@ -355,7 +400,7 @@
             `}).join('');
 
             if(displayProducts.length === 0) {
-                prodHTML = `<div class="col-span-2 text-center text-gray-500 py-10 font-semibold">No products found.</div>`;
+                prodHTML = `<div class="text-center text-gray-500 py-10 font-semibold w-full">No products found.</div>`;
             }
 
             let bannerHTML = banners.map(b => `
@@ -365,23 +410,25 @@
             `).join('');
 
             appDiv.innerHTML = `
-                <div id="homeView" class="fade-in bg-white min-h-screen pb-4">
+                <div id="homeView" class="fade-in bg-gray-50 min-h-screen pb-6">
                     <!-- Banner Slider -->
                     <div id="bannerSlider" class="flex overflow-x-auto snap-x snap-mandatory no-scrollbar relative shadow-sm" style="scroll-behavior: smooth;">
                         ${bannerHTML}
                     </div>
 
                     <!-- Categories 5 Column Grid -->
-                    <div class="grid grid-cols-5 gap-y-4 gap-x-2 p-4 bg-white border-b border-gray-100 justify-items-center items-start shadow-sm">
+                    <div class="grid grid-cols-5 gap-y-4 gap-x-2 py-5 px-3 bg-white border-b border-gray-200 justify-items-center items-start shadow-sm mb-2 rounded-b-2xl">
                         ${catHTML}
                     </div>
                     
-                    <div class="p-4 bg-gray-50 mt-2 rounded-t-2xl">
-                        <div class="flex items-center gap-2 mb-4">
-                            <div class="w-1.5 h-5 bg-yellow-500 rounded"></div>
-                            <h2 class="font-extrabold text-[16px] text-gray-800 tracking-wide uppercase">${activeCategory !== "" ? activeCategory : "LATEST COLLECTION"}</h2>
+                    <div class="p-4 bg-gray-50 rounded-t-2xl">
+                        <div class="flex items-center gap-3 mb-6 mt-2 ml-1">
+                            <div class="w-1.5 h-6 bg-yellow-500 rounded"></div>
+                            <h2 class="font-extrabold text-lg text-gray-900 tracking-wider uppercase">${activeCategory !== "" ? activeCategory : "LATEST COLLECTION"}</h2>
                         </div>
-                        <div class="grid grid-cols-2 gap-4">
+                        
+                        <!-- SINGLE COLUMN GRID HERE -->
+                        <div class="grid grid-cols-1 gap-8">
                             ${prodHTML}
                         </div>
                     </div>
@@ -434,7 +481,7 @@
         }
 
         function showLikes() {
-            if(!checkAuth()) return;
+            showNavs();
             let likedProducts = products.filter(p => likedItems.includes(p.id));
             let html = "";
 
@@ -444,7 +491,7 @@
                         <i class="fa-solid fa-heart-crack text-5xl text-gray-300 mb-4"></i>
                         <h2 class="text-gray-600 font-bold text-lg">No Liked Items</h2>
                         <p class="text-xs text-gray-500 mt-2">Heart your favorite products to see them here.</p>
-                        <button onclick="goHome()" class="mt-6 bg-white border border-yellow-500 text-yellow-600 px-6 py-2 rounded-lg font-bold shadow-sm">Explore Collection</button>
+                        <button onclick="goHome()" class="mt-6 bg-white border border-yellow-500 text-yellow-600 px-6 py-2 rounded-lg font-bold shadow-sm hover:bg-yellow-50">Explore Collection</button>
                     </div>
                 `;
             } else {
@@ -486,8 +533,7 @@
 
         // 3. PROFILE PAGE
         function showProfile() {
-            if(!checkAuth()) return;
-            
+            showNavs();
             appDiv.innerHTML = `
                 <div class="fade-in p-5 pb-24 bg-gray-50 min-h-screen">
                     <div class="flex items-center gap-2 mb-6 border-b border-gray-200 pb-3">
@@ -548,7 +594,7 @@
         function selectComboSize2(size) { currentComboSize2 = size; }
 
         function viewProduct(id) {
-            if(!checkAuth()) return;
+            showNavs();
             const product = products.find(p => p.id === id);
             
             currentSelectedSize = null; currentComboSize1 = null; currentComboSize2 = null;
@@ -584,16 +630,16 @@
             let moreProducts = products.filter(p => p.id !== id).sort(() => 0.5 - Math.random()).slice(0, 4);
             let moreProdHTML = moreProducts.map(item => `
                 <div class="bg-white border border-gray-200 rounded-lg shadow-sm relative flex flex-col justify-between overflow-hidden cursor-pointer" onclick="viewProduct('${item.id}')">
-                    <img src="${item.img}" class="w-full h-32 object-cover hover:scale-105 transition duration-300">
-                    <div class="p-2 flex flex-col flex-grow border-t border-gray-100 bg-gray-50">
-                        <h3 class="text-[10px] font-bold truncate text-gray-800">${item.name}</h3>
+                    <img src="${item.img}" class="w-full h-40 object-cover hover:scale-105 transition duration-300">
+                    <div class="p-3 flex flex-col flex-grow border-t border-gray-100 bg-gray-50">
+                        <h3 class="text-[11px] font-bold truncate text-gray-800">${item.name}</h3>
                         <span class="font-extrabold text-gray-900 text-sm mt-1">₹${item.price}</span>
                     </div>
                 </div>
             `).join('');
 
             appDiv.innerHTML = `
-                <div class="fade-in relative pb-24 bg-gray-50">
+                <div class="fade-in relative pb-24 bg-gray-50 min-h-screen">
                     <button onclick="goHome()" class="absolute top-4 left-4 bg-white/90 border border-gray-200 text-gray-800 rounded-full w-10 h-10 z-10 flex items-center justify-center backdrop-blur-sm shadow-md hover:text-yellow-600 transition"><i class="fa-solid fa-arrow-left"></i></button>
                     <div onclick="openImage('${product.img}')" class="relative cursor-zoom-in bg-white border-b border-gray-200 shadow-sm">
                         <img src="${product.img}" class="w-full h-[450px] object-cover">
@@ -601,13 +647,13 @@
                     </div>
                     
                     <div class="p-5">
-                        <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-100 mb-5">
-                            <h1 class="text-xl font-extrabold text-gray-900 leading-tight">${product.name}</h1>
+                        <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-100 mb-5 relative">
+                            <h1 class="text-xl font-extrabold text-gray-900 leading-tight pr-10">${product.name}</h1>
                             <div class="mt-3 flex items-center gap-3">
                                 <span class="text-3xl font-black text-gray-900">₹${product.price}</span>
                                 <span class="text-base line-through text-gray-400 font-medium">₹${product.mrp}</span>
-                                <span class="text-[10px] text-yellow-700 font-extrabold bg-yellow-100 px-2 py-1 rounded tracking-wide">${product.discount}</span>
                             </div>
+                            <span class="text-[11px] text-white font-extrabold mt-3 bg-green-600 px-3 py-1 w-max rounded-md shadow-sm uppercase inline-block">${product.discount}</span>
                         </div>
 
                         <div class="bg-white p-5 rounded-xl shadow-sm border border-gray-100 mb-6">
@@ -625,8 +671,8 @@
                     </div>
                     
                     <div class="fixed bottom-[64px] left-0 w-full bg-white border-t border-gray-200 p-3 max-w-md mx-auto flex gap-3 z-40 shadow-[0_-4px_15px_rgba(0,0,0,0.05)]">
-                        <button id="addBtn-${product.id}" onclick="addToCart('${product.id}')" class="w-1/2 bg-white border-2 border-yellow-500 text-yellow-600 font-extrabold py-3 rounded-lg hover:bg-yellow-50 transition text-sm shadow-sm"><i class="fa-solid fa-cart-plus mr-1"></i> ADD TO CART</button>
-                        <button onclick="handleBuyNow('${product.id}')" class="w-1/2 bg-gradient-to-r from-yellow-500 to-yellow-400 text-white font-extrabold py-3 rounded-lg text-center block shadow-md text-sm hover:shadow-lg transition">BUY NOW <i class="fa-solid fa-bolt ml-1"></i></button>
+                        <button id="addBtn-${product.id}" onclick="addToCart('${product.id}')" class="w-1/2 bg-white border-2 border-yellow-500 text-yellow-600 font-extrabold py-3.5 rounded-lg hover:bg-yellow-50 transition text-[11px] shadow-sm"><i class="fa-solid fa-cart-plus mr-1"></i> ADD TO CART</button>
+                        <button onclick="handleBuyNow('${product.id}')" class="w-1/2 bg-gradient-to-r from-yellow-500 to-yellow-400 text-white font-extrabold py-3.5 rounded-lg text-center block shadow-md text-[11px] hover:shadow-lg transition">BUY NOW <i class="fa-solid fa-bolt ml-1"></i></button>
                     </div>
                 </div>
             `;
@@ -648,7 +694,7 @@
 
         // --- CART SYSTEM ---
         function showCart() {
-            if(!checkAuth()) return;
+            showNavs();
             if (cart.length === 0) {
                 appDiv.innerHTML = `
                     <div class="fade-in p-5 text-center flex flex-col items-center justify-center min-h-[70vh] bg-gray-50">
@@ -696,7 +742,7 @@
                     </div>
                     
                     <div class="fixed bottom-[64px] left-0 w-full bg-white border-t border-gray-200 p-3 max-w-md mx-auto z-40 shadow-[0_-4px_15px_rgba(0,0,0,0.05)]">
-                        <button onclick="goToAddress('cart')" class="w-full bg-gradient-to-r from-yellow-500 to-yellow-400 text-white font-extrabold py-3.5 rounded-xl shadow-md tracking-wide hover:shadow-lg transition transform active:scale-95 text-sm">PROCEED TO CHECKOUT <i class="fa-solid fa-arrow-right ml-1"></i></button>
+                        <button onclick="requireAuth(() => goToAddress('cart'))" class="w-full bg-gradient-to-r from-yellow-500 to-yellow-400 text-white font-extrabold py-3.5 rounded-xl shadow-md tracking-wide hover:shadow-lg transition transform active:scale-95 text-sm">PROCEED TO CHECKOUT <i class="fa-solid fa-arrow-right ml-1"></i></button>
                     </div>
                 </div>
             `;
@@ -749,6 +795,7 @@
             }
         }
 
+        // REQUIRES LOGIN FOR BUY NOW
         function handleBuyNow(id) {
             const product = products.find(p => p.id === id);
             const finalSize = getValidatedSize(product);
@@ -758,7 +805,9 @@
                 return;
             }
             currentSelectedSize = finalSize; 
-            goToAddress(id);
+            
+            // Smart Auth Check
+            requireAuth(() => goToAddress(id));
         }
 
         function removeFromCart(index) { 
@@ -1003,7 +1052,7 @@
                             </a>
                         </div>
 
-                        <button onclick="showMyOrders()" class="mt-2 bg-gradient-to-r from-yellow-500 to-yellow-400 text-white px-8 py-3.5 rounded-xl font-extrabold shadow-md transition-all w-full max-w-xs uppercase text-sm">View My Orders</button>
+                        <button onclick="requireAuth(() => showMyOrders())" class="mt-2 bg-gradient-to-r from-yellow-500 to-yellow-400 text-white px-8 py-3.5 rounded-xl font-extrabold shadow-md transition-all w-full max-w-xs uppercase text-sm">View My Orders</button>
                         <button onclick="goHome()" class="mt-4 bg-white border border-gray-300 text-gray-700 hover:bg-gray-100 px-8 py-3.5 rounded-xl font-extrabold shadow-sm transition-all w-full max-w-xs uppercase text-sm">Continue Shopping</button>
                     </div>
                 `;
@@ -1012,7 +1061,7 @@
 
         // --- MY ORDERS PAGE ---
         async function showMyOrders() {
-            if(!checkAuth()) return;
+            showNavs();
             appDiv.innerHTML = `<div class="min-h-[70vh] flex flex-col items-center justify-center text-yellow-500 bg-gray-50"><i class="fa-solid fa-spinner fa-spin text-5xl mb-4"></i><p class="font-bold tracking-widest text-gray-800">LOADING ORDERS...</p></div>`;
             window.scrollTo(0,0);
             try {
