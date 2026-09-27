@@ -139,6 +139,8 @@
         let currentSelectedSize = null; 
         let currentComboSize1 = null; 
         let currentComboSize2 = null; 
+        let currentSelectedColor = null; 
+        let currentColorSizesArr = [];
         
         const appDiv = document.getElementById('app');
         const topNav = document.getElementById('topNav');
@@ -433,7 +435,6 @@
             // --- SINGLE COLUMN PRODUCT CARDS WITH FLIPKART STYLE PRICE ---
             let prodHTML = displayProducts.map(item => {
                 const isLiked = likedItems.includes(item.id);
-                // FIXED BUG: Safe string parsing for discount text to prevent crashes
                 const discountVal = item.discount ? String(item.discount).replace(/OFF/gi, '').trim() : '';
                 
                 return `
@@ -634,31 +635,106 @@
             }
         }
 
-        // --- PRODUCT PAGE ---
+        // --- PRODUCT PAGE & COLOR SELECTOR ---
         function selectSize(size) { currentSelectedSize = size; }
         function selectComboSize1(size) { currentComboSize1 = size; }
         function selectComboSize2(size) { currentComboSize2 = size; }
+        
+        function selectColor(index, name, imgUrl) {
+            currentSelectedColor = { name: name, img: imgUrl };
+            document.getElementById('mainProductImage').src = imgUrl;
+            document.getElementById('selectedColorText').innerText = name;
+            document.getElementById('mainImageWrapper').setAttribute('onclick', `openImage('${imgUrl}')`);
+            
+            const thumbs = document.querySelectorAll('[id^="colorThumb-"]');
+            thumbs.forEach(t => {
+                t.classList.remove('border-gray-800', 'shadow-md');
+                t.classList.add('border-gray-200', 'opacity-70');
+            });
+            
+            let activeThumb = document.getElementById(`colorThumb-${index}`);
+            if (activeThumb) {
+                activeThumb.classList.remove('border-gray-200', 'opacity-70');
+                activeThumb.classList.add('border-gray-800', 'shadow-md');
+            }
+
+            if (currentColorSizesArr.length > index && currentColorSizesArr[index]) {
+                let szs = currentColorSizesArr[index].split(',').map(s=>s.trim()).filter(s=>s);
+                if (szs.length > 0) {
+                    currentSelectedSize = null; 
+                    let dHtml = `<div class="flex flex-wrap gap-2 mb-3">` + szs.map(s => {
+                        let safeId = s.replace(/\s+/g, '-');
+                        return `<div><input type="radio" name="productSize" id="size-${safeId}" value="${s}" class="hidden size-radio" onchange="selectSize('${s}')"><label for="size-${safeId}" class="cursor-pointer border border-gray-300 text-gray-700 bg-white font-bold px-3 py-1.5 text-xs rounded-md shadow-sm hover:border-yellow-500 transition block text-center min-w-[40px]">${s}</label></div>`;
+                    }).join('') + `</div>`;
+                    let container = document.getElementById('dynamicSizeContainer');
+                    if (container) container.innerHTML = dHtml;
+                }
+            }
+        }
 
         function _viewProduct(id) {
             showNavs();
             const product = products.find(p => p.id === id);
             if(!product) { goHome(); return; }
             
-            currentSelectedSize = null; currentComboSize1 = null; currentComboSize2 = null;
-            let sizeHTML = "";
-            let hasShirt = !!product.shirtSizes && product.shirtSizes.trim() !== "";
-            let hasJeans = !!product.jeansSizes && product.jeansSizes.trim() !== "";
+            currentSelectedSize = null; currentComboSize1 = null; currentComboSize2 = null; currentSelectedColor = null;
+            currentColorSizesArr = [];
+            
+            let colorHTML = "";
+            let hasColors = !!product.colorNames && !!product.colorImages && product.colorNames.trim() !== "";
+            
+            if (hasColors && product.colorSizes && product.colorSizes.trim() !== "") {
+                currentColorSizesArr = product.colorSizes.split('|').map(s => s.trim());
+            }
+            
+            if (hasColors) {
+                let names = product.colorNames.split(',').map(n => n.trim());
+                let images = product.colorImages.split(',').map(i => i.trim());
+                
+                if (names.length > 0 && images.length > 0 && names.length === images.length) {
+                    currentSelectedColor = { name: names[0], img: images[0] };
+                    
+                    colorHTML = `
+                    <div class="bg-white p-5 rounded-xl shadow-sm border border-gray-100 mb-6">
+                        <p class="font-bold text-gray-800 text-sm mb-3">Selected Color: <span id="selectedColorText" class="font-medium text-gray-600">${names[0]}</span></p>
+                        <div class="flex gap-3 overflow-x-auto no-scrollbar pb-2">
+                            ${names.map((n, idx) => {
+                                let safeName = n.replace(/'/g, "\\'");
+                                return `<div onclick="selectColor(${idx}, '${safeName}', '${images[idx]}')" id="colorThumb-${idx}" class="w-16 h-20 flex-shrink-0 border-2 ${idx === 0 ? 'border-gray-800 shadow-md' : 'border-gray-200 opacity-70'} rounded-lg overflow-hidden cursor-pointer transition hover:border-gray-800 hover:opacity-100">
+                                    <img src="${images[idx]}" class="w-full h-full object-cover">
+                                </div>`;
+                            }).join('')}
+                        </div>
+                    </div>
+                    `;
+                }
+            }
 
-            if (hasShirt) {
-                let sArr = product.shirtSizes.split(',').map(s => s.trim());
-                sizeHTML += `<div class="flex flex-wrap gap-2 mb-3">${sArr.map(s => `<div><input type="radio" name="comboShirt" id="cs1-${s}" value="${s}" class="hidden size-radio" onchange="selectComboSize1('${s}')"><label for="cs1-${s}" class="cursor-pointer border border-gray-300 text-gray-700 bg-white font-bold px-3 py-1.5 text-xs rounded-md shadow-sm hover:border-yellow-500 transition block text-center min-w-[40px]">${s}</label></div>`).join('')}</div>`;
-            }
-            if (hasJeans) {
-                let jArr = product.jeansSizes.split(',').map(s => s.trim());
-                sizeHTML += `<div class="flex flex-wrap gap-2 mb-3">${jArr.map(s => `<div><input type="radio" name="comboJeans" id="cs2-${s}" value="${s}" class="hidden size-radio" onchange="selectComboSize2('${s}')"><label for="cs2-${s}" class="cursor-pointer border border-gray-300 text-gray-700 bg-white font-bold px-3 py-1.5 text-xs rounded-md shadow-sm hover:border-yellow-500 transition block text-center min-w-[40px]">${s}</label></div>`).join('')}</div>`;
-            }
-            if (!hasShirt && !hasJeans) {
-                sizeHTML += `<div class="flex flex-wrap gap-3"><div><input type="radio" name="productSize" id="size-Free" value="Free Size" class="hidden size-radio" onchange="selectSize('Free Size')"><label for="size-Free" class="cursor-pointer border border-gray-300 text-gray-700 bg-white font-bold px-4 py-2 rounded-md shadow-sm hover:border-yellow-500 transition block">Free Size</label></div></div>`;
+            let sizeHTML = "";
+            
+            if (hasColors && currentColorSizesArr.length > 0 && currentColorSizesArr[0]) {
+                let szs = currentColorSizesArr[0].split(',').map(s=>s.trim()).filter(s=>s);
+                if(szs.length > 0) {
+                    sizeHTML += `<div class="flex flex-wrap gap-2 mb-3">` + szs.map(s => {
+                        let safeId = s.replace(/\s+/g, '-');
+                        return `<div><input type="radio" name="productSize" id="size-${safeId}" value="${s}" class="hidden size-radio" onchange="selectSize('${s}')"><label for="size-${safeId}" class="cursor-pointer border border-gray-300 text-gray-700 bg-white font-bold px-3 py-1.5 text-xs rounded-md shadow-sm hover:border-yellow-500 transition block text-center min-w-[40px]">${s}</label></div>`;
+                    }).join('') + `</div>`;
+                }
+            } else {
+                let hasShirt = !!product.shirtSizes && product.shirtSizes.trim() !== "";
+                let hasJeans = !!product.jeansSizes && product.jeansSizes.trim() !== "";
+
+                if (hasShirt) {
+                    let sArr = product.shirtSizes.split(',').map(s => s.trim());
+                    sizeHTML += `<div class="flex flex-wrap gap-2 mb-3">${sArr.map(s => `<div><input type="radio" name="comboShirt" id="cs1-${s}" value="${s}" class="hidden size-radio" onchange="selectComboSize1('${s}')"><label for="cs1-${s}" class="cursor-pointer border border-gray-300 text-gray-700 bg-white font-bold px-3 py-1.5 text-xs rounded-md shadow-sm hover:border-yellow-500 transition block text-center min-w-[40px]">${s}</label></div>`).join('')}</div>`;
+                }
+                if (hasJeans) {
+                    let jArr = product.jeansSizes.split(',').map(s => s.trim());
+                    sizeHTML += `<div class="flex flex-wrap gap-2 mb-3">${jArr.map(s => `<div><input type="radio" name="comboJeans" id="cs2-${s}" value="${s}" class="hidden size-radio" onchange="selectComboSize2('${s}')"><label for="cs2-${s}" class="cursor-pointer border border-gray-300 text-gray-700 bg-white font-bold px-3 py-1.5 text-xs rounded-md shadow-sm hover:border-yellow-500 transition block text-center min-w-[40px]">${s}</label></div>`).join('')}</div>`;
+                }
+                if (!hasShirt && !hasJeans) {
+                    sizeHTML += `<div class="flex flex-wrap gap-3"><div><input type="radio" name="productSize" id="size-Free" value="Free Size" class="hidden size-radio" onchange="selectSize('Free Size')"><label for="size-Free" class="cursor-pointer border border-gray-300 text-gray-700 bg-white font-bold px-4 py-2 rounded-md shadow-sm hover:border-yellow-500 transition block">Free Size</label></div></div>`;
+                }
             }
 
             let moreProducts = products.filter(p => p.id !== id).sort(() => 0.5 - Math.random()).slice(0, 4);
@@ -673,12 +749,13 @@
             `).join('');
 
             const discountVal = product.discount ? String(product.discount).replace(/OFF/gi, '').trim() : '';
+            const initialMainImage = currentSelectedColor ? currentSelectedColor.img : product.img;
 
             appDiv.innerHTML = `
                 <div class="fade-in relative pb-24 bg-gray-50 min-h-screen">
                     <button onclick="history.back()" class="absolute top-4 left-4 bg-white/90 border border-gray-200 text-gray-800 rounded-full w-10 h-10 z-10 flex items-center justify-center backdrop-blur-sm shadow-md hover:text-yellow-600 transition"><i class="fa-solid fa-arrow-left"></i></button>
-                    <div onclick="openImage('${product.img}')" class="relative cursor-zoom-in bg-white border-b border-gray-200 shadow-sm">
-                        <img src="${product.img}" class="w-full h-[450px] object-cover">
+                    <div onclick="openImage('${initialMainImage}')" class="relative cursor-zoom-in bg-white border-b border-gray-200 shadow-sm">
+                        <img id="mainProductImage" src="${initialMainImage}" class="w-full h-[450px] object-cover">
                         <div class="absolute bottom-3 right-3 bg-white/90 rounded-full w-8 h-8 flex items-center justify-center text-gray-800 border border-gray-200 shadow-md"><i class="fa-solid fa-expand"></i></div>
                     </div>
                     
@@ -694,9 +771,11 @@
                             </div>
                         </div>
 
+                        ${colorHTML}
+
                         <div class="bg-white p-5 rounded-xl shadow-sm border border-gray-100 mb-6">
                             <h3 class="font-extrabold text-gray-800 mb-3 text-sm flex items-center gap-2"><i class="fa-solid fa-ruler-combined text-yellow-500"></i> SELECT SIZE</h3>
-                            ${sizeHTML}
+                            <div id="dynamicSizeContainer">${sizeHTML}</div>
                         </div>
 
                         <div class="flex items-center gap-2 mb-4 mt-8">
@@ -754,7 +833,7 @@
                         <img src="${item.img}" class="w-20 h-20 object-cover rounded-lg border border-gray-100">
                         <div class="flex-grow pr-8">
                             <p class="font-bold text-gray-800 text-sm leading-tight mb-1">${item.name}</p>
-                            <p class="text-[11px] text-gray-500 font-medium mb-1.5">Size: <span class="text-yellow-600 font-bold bg-yellow-50 px-1 rounded">${item.size}</span></p>
+                            <p class="text-[11px] text-gray-500 font-medium mb-1.5">Size: <span class="text-yellow-600 font-bold bg-yellow-50 px-1 rounded">${item.size}</span> ${item.color ? `| Color: <span class="text-gray-800 font-bold">${item.color}</span>` : ''}</p>
                             
                             <div class="flex items-center gap-1.5">
                                 <span class="discount-text text-[10px] font-extrabold flex items-center tracking-tight"><i class="fa-solid fa-arrow-down text-[8px] mr-0.5"></i>${discountVal}</span>
@@ -793,6 +872,11 @@
         }
 
         function getValidatedSize(product) {
+            if(product.colorSizes && product.colorSizes.trim() !== "") {
+                if(!currentSelectedSize) return null;
+                return currentSelectedSize;
+            }
+
             let hasShirt = !!product.shirtSizes && product.shirtSizes.trim() !== "";
             let hasJeans = !!product.jeansSizes && product.jeansSizes.trim() !== "";
             
@@ -817,7 +901,10 @@
             
             if(!finalSize) { alert("Please select required sizes first!"); return; }
 
-            cart.push({ ...product, size: finalSize, cartId: Date.now() });
+            const finalColor = currentSelectedColor ? currentSelectedColor.name : null;
+            const finalImg = currentSelectedColor ? currentSelectedColor.img : product.img;
+
+            cart.push({ ...product, size: finalSize, color: finalColor, img: finalImg, cartId: Date.now() });
             localStorage.setItem('mz_cart', JSON.stringify(cart));
             updateCartBadge();
             
@@ -912,15 +999,16 @@
 
             if (source === 'cart') {
                 total = cart.reduce((sum, item) => sum + item.price, 0);
-                productNames = cart.map(i => `${i.name} (Size: ${i.size})`).join(", ");
+                productNames = cart.map(i => `${i.name} (Size: ${i.size}${i.color ? `, Color: ${i.color}` : ''})`).join(", ");
                 primaryImg = cart[0].img;
-                orderItems = cart.map(i => ({ name: i.name, size: i.size, price: i.price, img: i.img }));
+                orderItems = cart.map(i => ({ name: i.name, size: i.size, color: i.color || '', price: i.price, img: i.img }));
             } else {
                 const product = products.find(p => p.id === source);
                 total = product.price;
-                productNames = `${product.name} (Size: ${currentSelectedSize})`;
-                primaryImg = product.img;
-                orderItems = [{ name: product.name, size: currentSelectedSize, price: product.price, img: product.img }];
+                const finalColorName = currentSelectedColor ? currentSelectedColor.name : '';
+                productNames = `${product.name} (Size: ${currentSelectedSize}${finalColorName ? `, Color: ${finalColorName}` : ''})`;
+                primaryImg = currentSelectedColor ? currentSelectedColor.img : product.img;
+                orderItems = [{ name: product.name, size: currentSelectedSize, color: finalColorName, price: product.price, img: primaryImg }];
             }
 
             tempCheckoutData = { names: productNames, price: total, img: primaryImg, items: orderItems };
@@ -1180,7 +1268,7 @@
                 } else {
                     myOrdersHTML = `<div class="text-center p-10 bg-white rounded-xl border border-gray-200 mt-4 shadow-sm"><div class="w-20 h-20 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-4 border border-gray-100"><i class="fa-solid fa-box-open text-4xl text-gray-300"></i></div><h2 class="text-gray-800 font-extrabold text-lg">No Orders Found</h2><p class="text-gray-500 text-xs mt-1 mb-6">You haven't placed any orders yet.</p><button onclick="goHome()" class="bg-white border border-yellow-500 text-yellow-600 px-8 py-2.5 rounded-lg text-sm font-extrabold shadow-sm hover:bg-yellow-50 transition">Start Shopping</button></div>`;
                 }
-                appDiv.innerHTML = `<div class="fade-in p-5 pb-24 bg-gray-50 min-h-screen"><button onclick="history.back()" class="mb-4 text-gray-600 text-xl"><i class="fa-solid fa-arrow-left"></i></button><div class="flex items-center gap-2 mb-6 border-b border-gray-200 pb-3"><div class="w-1.5 h-6 bg-yellow-500 rounded"></div><h1 class="text-xl font-extrabold text-gray-800 uppercase tracking-wide">My Orders</h1></div>${myOrdersHTML}</div>`;
+                appDiv.innerHTML = `<div class="fade-in p-5 pb-24 bg-gray-50 min-h-screen"><button onclick="history.back()" class="mb-4 text-gray-600 text-xl"><i class="fa-solid fa-arrow-left"></i></button><div class="flex items-center gap-2 mb-6 border-b border-gray-200 pb-3"><div class="w-1.5 h-6 bg-red-500 rounded"></div><h1 class="text-xl font-extrabold text-gray-800 uppercase tracking-wide">My Orders</h1></div>${myOrdersHTML}</div>`;
             }).catch(() => { appDiv.innerHTML = `<div class="p-10 text-center text-red-500 font-bold">Error connecting to database.</div>`; });
         }
 
