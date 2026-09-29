@@ -135,10 +135,14 @@
         let activeCategory = ""; 
         let tempCheckoutData = null; 
         
+        // --- SELECTION STATES ---
         let currentSelectedSize = null; 
         let currentComboSize1 = null; 
         let currentComboSize2 = null; 
         let currentSelectedColor = null; 
+        let currentSelectedPrice = null; // NEW: Track selected color price
+        let currentSelectedMrp = null; // NEW: Track selected color MRP
+        let currentSelectedDiscount = null; // NEW: Track selected color discount
         
         const appDiv = document.getElementById('app');
         const topNav = document.getElementById('topNav');
@@ -707,6 +711,61 @@
                 activeThumb.classList.add('border-gray-800', 'shadow-md');
             }
 
+            // --- DYNAMIC PRICE UPDATE ---
+            let currentPrice = product.price;
+            let currentMrp = product.mrp;
+
+            if (product.colorPrices && product.colorPrices.trim() !== "") {
+                let cPrices = product.colorPrices.split(',').map(p => p.trim());
+                if (cPrices.length > index && cPrices[index] !== "") {
+                    currentPrice = Number(cPrices[index]);
+                }
+            }
+
+            if (product.colorMRPs && product.colorMRPs.trim() !== "") {
+                let cMrps = product.colorMRPs.split(',').map(p => p.trim());
+                if (cMrps.length > index && cMrps[index] !== "") {
+                    currentMrp = Number(cMrps[index]);
+                }
+            }
+
+            let currentDiscount = "";
+            if (currentMrp > currentPrice && currentPrice > 0) {
+                currentDiscount = Math.round(((currentMrp - currentPrice) * 100) / currentMrp) + "% OFF";
+            } else if (product.discount && currentPrice === Number(product.price)) {
+                currentDiscount = product.discount;
+            }
+
+            currentSelectedPrice = currentPrice;
+            currentSelectedMrp = currentMrp;
+            currentSelectedDiscount = currentDiscount;
+
+            let priceEl = document.getElementById('productPrice');
+            let mrpEl = document.getElementById('productMrp');
+            let discountContainerEl = document.getElementById('productDiscount');
+            let discountTextEl = document.getElementById('discountValText');
+
+            if (priceEl) priceEl.innerText = "₹" + currentPrice;
+            if (mrpEl) {
+                if (currentMrp && currentMrp > 0) {
+                    mrpEl.innerText = "₹" + currentMrp;
+                    mrpEl.style.display = "inline-block";
+                } else {
+                    mrpEl.style.display = "none";
+                }
+            }
+
+            if (discountContainerEl && discountTextEl) {
+                let cleanDiscount = currentDiscount ? String(currentDiscount).replace(/OFF/gi, '').trim() : '';
+                if (cleanDiscount !== "") {
+                    discountTextEl.innerText = cleanDiscount;
+                    discountContainerEl.style.display = "flex";
+                } else {
+                    discountContainerEl.style.display = "none";
+                }
+            }
+            // --- END DYNAMIC PRICE UPDATE ---
+
             // RE-RENDER SPECIFIC SIZES FOR THIS COLOR
             document.getElementById('dynamicSizeContainer').innerHTML = generateSizeHTML(index, product);
             currentSelectedSize = null;
@@ -720,10 +779,15 @@
             if(!product) { goHome(); return; }
             
             currentSelectedSize = null; currentComboSize1 = null; currentComboSize2 = null; currentSelectedColor = null;
+            currentSelectedPrice = null; currentSelectedMrp = null; currentSelectedDiscount = null;
             
             let colorHTML = "";
             let hasColors = !!product.colorNames && !!product.colorImages && product.colorNames.trim() !== "";
             
+            let displayPrice = product.price;
+            let displayMrp = product.mrp;
+            let displayDiscount = product.discount ? String(product.discount).replace(/OFF/gi, '').trim() : '';
+
             if (hasColors) {
                 let names = product.colorNames.split(',').map(n => n.trim());
                 let images = product.colorImages.split(',').map(i => i.trim());
@@ -731,6 +795,23 @@
                 if (names.length > 0 && images.length > 0 && names.length === images.length) {
                     currentSelectedColor = { name: names[0], img: images[0] };
                     
+                    if (product.colorPrices && product.colorPrices.trim() !== "") {
+                        let cP = product.colorPrices.split(',').map(p=>p.trim());
+                        if (cP[0]) { displayPrice = cP[0]; currentSelectedPrice = cP[0]; }
+                    }
+                    if (product.colorMRPs && product.colorMRPs.trim() !== "") {
+                        let cM = product.colorMRPs.split(',').map(p=>p.trim());
+                        if (cM[0]) { displayMrp = cM[0]; currentSelectedMrp = cM[0]; }
+                    }
+                    
+                    if (Number(displayMrp) > Number(displayPrice) && Number(displayPrice) > 0) {
+                        displayDiscount = Math.round(((Number(displayMrp) - Number(displayPrice)) * 100) / Number(displayMrp));
+                        currentSelectedDiscount = displayDiscount + "% OFF";
+                    } else if (Number(displayPrice) !== Number(product.price)) {
+                        displayDiscount = "";
+                        currentSelectedDiscount = "";
+                    }
+
                     colorHTML = `
                     <div class="bg-white p-5 rounded-xl shadow-sm border border-gray-100 mb-6">
                         <p class="font-bold text-gray-800 text-sm mb-3">Selected Color: <span id="selectedColorText" class="font-medium text-gray-600">${names[0]}</span></p>
@@ -760,7 +841,6 @@
                 </div>
             `).join('');
 
-            const discountVal = product.discount ? String(product.discount).replace(/OFF/gi, '').trim() : '';
             const initialMainImage = currentSelectedColor ? currentSelectedColor.img : product.img;
 
             appDiv.innerHTML = `
@@ -777,9 +857,9 @@
                             <h1 class="text-xl font-extrabold text-gray-900 leading-tight pr-10">${product.name}</h1>
                             
                             <div class="mt-4 flex items-center gap-2.5">
-                                <span class="discount-text text-lg font-extrabold flex items-center tracking-tight"><i class="fa-solid fa-arrow-down text-[13px] mr-1"></i>${discountVal}</span>
-                                <span class="text-gray-400 font-bold text-lg strike-anim tracking-tight">₹${product.mrp}</span>
-                                <span class="font-black text-gray-900 text-3xl ml-1 tracking-tight">₹${product.price}</span>
+                                <span id="productDiscount" class="discount-text text-lg font-extrabold flex items-center tracking-tight" style="${displayDiscount ? '' : 'display:none;'}"><i class="fa-solid fa-arrow-down text-[13px] mr-1"></i><span id="discountValText">${displayDiscount}</span></span>
+                                <span id="productMrp" class="text-gray-400 font-bold text-lg strike-anim tracking-tight" style="${displayMrp ? '' : 'display:none;'}">₹${displayMrp}</span>
+                                <span id="productPrice" class="font-black text-gray-900 text-3xl ml-1 tracking-tight">₹${displayPrice}</span>
                             </div>
                         </div>
 
@@ -838,7 +918,7 @@
 
             let total = 0;
             let cartHTML = cart.map((item, index) => {
-                total += item.price;
+                total += Number(item.price);
                 const discountVal = item.discount ? String(item.discount).replace(/OFF/gi, '').trim() : '';
                 return `
                     <div class="flex gap-4 items-center bg-white p-3 rounded-xl border border-gray-200 mb-3 shadow-sm relative">
@@ -848,8 +928,8 @@
                             <p class="text-[11px] text-gray-500 font-medium mb-1.5">Size: <span class="text-yellow-600 font-bold bg-yellow-50 px-1 rounded">${item.size}</span> ${item.color ? `| Color: <span class="text-gray-800 font-bold">${item.color}</span>` : ''}</p>
                             
                             <div class="flex items-center gap-1.5">
-                                <span class="discount-text text-[10px] font-extrabold flex items-center tracking-tight"><i class="fa-solid fa-arrow-down text-[8px] mr-0.5"></i>${discountVal}</span>
-                                <span class="text-gray-400 font-bold text-[11px] strike-anim tracking-tight">₹${item.mrp}</span>
+                                <span class="discount-text text-[10px] font-extrabold flex items-center tracking-tight" style="${discountVal ? '' : 'display:none;'}"><i class="fa-solid fa-arrow-down text-[8px] mr-0.5"></i>${discountVal}</span>
+                                <span class="text-gray-400 font-bold text-[11px] strike-anim tracking-tight" style="${item.mrp ? '' : 'display:none;'}">₹${item.mrp}</span>
                                 <span class="font-black text-gray-900 text-base tracking-tight ml-0.5">₹${item.price}</span>
                             </div>
                         </div>
@@ -908,8 +988,12 @@
 
             const finalColor = currentSelectedColor ? currentSelectedColor.name : null;
             const finalImg = currentSelectedColor ? currentSelectedColor.img : product.img;
+            
+            const finalPrice = currentSelectedPrice !== null ? Number(currentSelectedPrice) : Number(product.price);
+            const finalMrp = currentSelectedMrp !== null ? Number(currentSelectedMrp) : Number(product.mrp);
+            const finalDiscount = currentSelectedDiscount !== null ? currentSelectedDiscount : product.discount;
 
-            cart.push({ ...product, size: finalSize, color: finalColor || '', img: finalImg || '', cartId: Date.now(), isFlipkart: product.isFlipkart || 'false' });
+            cart.push({ ...product, size: finalSize, color: finalColor || '', img: finalImg || '', price: finalPrice, mrp: finalMrp, discount: finalDiscount, cartId: Date.now(), isFlipkart: product.isFlipkart || 'false' });
             localStorage.setItem('mz_cart', JSON.stringify(cart));
             updateCartBadge();
             
@@ -1000,17 +1084,18 @@
             let total = 0; let productNames = ""; let orderItems = []; let primaryImg = "";
 
             if (source === 'cart') {
-                total = cart.reduce((sum, item) => sum + item.price, 0);
+                total = cart.reduce((sum, item) => sum + Number(item.price), 0);
                 productNames = cart.map(i => `${i.name} (Size: ${i.size}${i.color ? `, Color: ${i.color}` : ''})`).join(", ");
                 primaryImg = cart[0].img;
                 orderItems = cart.map(i => ({ name: i.name || '', size: i.size || '', color: i.color || '', price: i.price || 0, img: i.img || '', isFlipkart: i.isFlipkart || 'false' }));
             } else {
                 const product = products.find(p => p.id === source);
-                total = product.price;
+                const finalPrice = currentSelectedPrice !== null ? Number(currentSelectedPrice) : Number(product.price);
+                total = finalPrice;
                 const finalColorName = currentSelectedColor ? currentSelectedColor.name : '';
                 productNames = `${product.name} (Size: ${currentSelectedSize}${finalColorName ? `, Color: ${finalColorName}` : ''})`;
                 primaryImg = currentSelectedColor ? currentSelectedColor.img : product.img;
-                orderItems = [{ name: product.name || '', size: currentSelectedSize || '', color: finalColorName || '', price: product.price || 0, img: primaryImg || '', isFlipkart: product.isFlipkart || 'false' }];
+                orderItems = [{ name: product.name || '', size: currentSelectedSize || '', color: finalColorName || '', price: finalPrice, img: primaryImg || '', isFlipkart: product.isFlipkart || 'false' }];
             }
 
             let hasFlipkart = orderItems.some(item => item.isFlipkart === 'true' || item.isFlipkart === true);
