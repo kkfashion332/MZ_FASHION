@@ -828,8 +828,8 @@
                     <div class="p-5">
                         
                         <!-- 2. PRODUCT NAME -->
-                        <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-100 mb-4 relative text-center">
-                            <h1 class="text-xl font-extrabold text-gray-900 leading-tight">${product.name}</h1>
+                        <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-100 mb-4 relative">
+                            <h1 class="text-xl font-extrabold text-gray-900 leading-tight pr-10">${product.name}</h1>
                         </div>
 
                         <!-- 3. COLOR VARIANTS -->
@@ -842,7 +842,7 @@
                         </div>
 
                         <!-- 5. PRICE -->
-                        <div class="bg-white p-5 rounded-xl shadow-sm border border-gray-100 mb-6 flex flex-col items-center justify-center">
+                        <div class="bg-white p-5 rounded-xl shadow-sm border border-gray-100 mb-6 flex flex-col items-start">
                             <span class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-1">Total Price</span>
                             <div class="flex items-center gap-2.5">
                                 <span id="productDiscount" class="discount-text text-lg font-extrabold flex items-center tracking-tight" style="${displayDiscount ? '' : 'display:none;'}"><i class="fa-solid fa-arrow-down text-[13px] mr-1"></i><span id="discountValText">${displayDiscount}</span></span>
@@ -945,6 +945,7 @@
             window.scrollTo(0,0);
         }
 
+        // Extremely robust validation checking which inputs are actually rendered in the DOM
         function getValidatedSize(product) {
             const hasComboShirt = document.querySelector('input[name="comboShirt"]');
             const hasComboJeans = document.querySelector('input[name="comboJeans"]');
@@ -1065,22 +1066,20 @@
             let total = 0; let productNames = ""; let orderItems = []; let primaryImg = "";
 
             if (source === 'cart') {
-                total = cart.reduce((sum, item) => sum + Number(item.price), 0);
+                total = cart.reduce((sum, item) => sum + item.price, 0);
                 productNames = cart.map(i => `${i.name} (Size: ${i.size}${i.color ? `, Color: ${i.color}` : ''})`).join(", ");
                 primaryImg = cart[0].img;
-                orderItems = cart.map(i => ({ name: i.name || '', size: i.size || '', color: i.color || '', price: i.price || 0, img: i.img || '', isFlipkart: i.isFlipkart || 'false' }));
+                orderItems = cart.map(i => ({ name: i.name, size: i.size, color: i.color || '', price: i.price, img: i.img }));
             } else {
                 const product = products.find(p => p.id === source);
-                const finalPrice = currentSelectedPrice !== null ? Number(currentSelectedPrice) : Number(product.price);
-                total = finalPrice;
+                total = product.price;
                 const finalColorName = currentSelectedColor ? currentSelectedColor.name : '';
                 productNames = `${product.name} (Size: ${currentSelectedSize}${finalColorName ? `, Color: ${finalColorName}` : ''})`;
                 primaryImg = currentSelectedColor ? currentSelectedColor.img : product.img;
-                orderItems = [{ name: product.name || '', size: currentSelectedSize || '', color: finalColorName || '', price: finalPrice, img: primaryImg || '', isFlipkart: product.isFlipkart || 'false' }];
+                orderItems = [{ name: product.name, size: currentSelectedSize, color: finalColorName, price: product.price, img: primaryImg }];
             }
 
-            let hasFlipkart = orderItems.some(item => item.isFlipkart === 'true' || item.isFlipkart === true);
-            tempCheckoutData = { names: productNames, price: total, img: primaryImg, items: orderItems, hasFlipkart: hasFlipkart };
+            tempCheckoutData = { names: productNames, price: total, img: primaryImg, items: orderItems };
 
             appDiv.innerHTML = `
                 <div class="fade-in p-5 pb-24 bg-gray-50 min-h-screen">
@@ -1282,6 +1281,7 @@
                             statusBadge = `<span class="inline-flex items-center gap-1 px-2 py-1 bg-yellow-50 text-yellow-600 text-[9px] rounded border border-yellow-200 uppercase font-extrabold"><i class="fa-solid fa-clock"></i> ${currentStatus}</span>`;
                         }
 
+                        // MULTIPLE ITEMS RENDERING LOGIC
                         let itemsHTML = "";
                         if (order.items && order.items.length > 0) {
                             itemsHTML = `<div class="mt-3 flex flex-col gap-2">` + order.items.map(item => `
