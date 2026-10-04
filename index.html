@@ -33,7 +33,7 @@
         .strike-anim {
             position: relative;
             display: inline-block;
-            color: #878787; 
+            color: #878787; /* Gray color for old price */
         }
         .strike-anim::after {
             content: '';
@@ -52,7 +52,7 @@
         }
 
         .discount-text {
-            color: #16a34a; 
+            color: #16a34a; /* Flipkart Green */
             animation: pulseText 1.2s infinite alternate ease-in-out;
         }
         @keyframes pulseText {
@@ -80,6 +80,7 @@
             </div>
 
             <div class="flex items-center gap-4 text-white text-[18px] flex-shrink-0">
+                <!-- Search icon removed from here -->
                 <div class="relative cursor-pointer hover:text-yellow-500 transition drop-shadow-md" onclick="showCart()">
                     <i class="fa-solid fa-cart-shopping"></i>
                     <span id="topCartBadge" class="absolute -top-1.5 -right-2 bg-red-500 text-white text-[9px] font-bold px-1.5 py-0.5 rounded-full hidden border border-black shadow-sm">0</span>
@@ -135,14 +136,11 @@
         let activeCategory = ""; 
         let tempCheckoutData = null; 
         
-        // --- SELECTION STATES ---
         let currentSelectedSize = null; 
         let currentComboSize1 = null; 
         let currentComboSize2 = null; 
         let currentSelectedColor = null; 
-        let currentSelectedPrice = null; // NEW: Track selected color price
-        let currentSelectedMrp = null; // NEW: Track selected color MRP
-        let currentSelectedDiscount = null; // NEW: Track selected color discount
+        let currentColorSizesArr = [];
         
         const appDiv = document.getElementById('app');
         const topNav = document.getElementById('topNav');
@@ -207,13 +205,14 @@
             try {
                 const CACHE_KEY = 'mz_data_cache';
                 const CACHE_EXPIRY_KEY = 'mz_data_cache_expiry';
-                const CACHE_TIME = 24 * 60 * 60 * 1000; 
+                const CACHE_TIME = 24 * 60 * 60 * 1000; // 24 hours in milliseconds
                 const now = Date.now();
                 
                 const expiry = localStorage.getItem(CACHE_EXPIRY_KEY);
                 const cachedData = localStorage.getItem(CACHE_KEY);
 
                 if (cachedData && expiry && now < parseInt(expiry)) {
+                    // Load data from Local Storage (Cache)
                     console.log("Loading data from Local Storage...");
                     const parsedData = JSON.parse(cachedData);
                     categories = parsedData.categories || [];
@@ -221,6 +220,7 @@
                     banners = parsedData.banners || [];
                     if(parsedData.paymentSettings) paymentSettings = parsedData.paymentSettings;
                 } else {
+                    // Fetch fresh data from Firebase
                     console.log("Fetching fresh data from Firebase...");
                     const setupCheck = await db.ref('settings/payment').once('value');
                     if (!setupCheck.exists()) await seedInitialData();
@@ -252,6 +252,7 @@
                     const paySnap = await db.ref('settings/payment').once('value');
                     if(paySnap.exists()) paymentSettings = paySnap.val();
 
+                    // Save data to Local Storage for next 24 hours
                     const dataToCache = { categories, products, banners, paymentSettings };
                     localStorage.setItem(CACHE_KEY, JSON.stringify(dataToCache));
                     localStorage.setItem(CACHE_EXPIRY_KEY, (now + CACHE_TIME).toString());
@@ -431,6 +432,7 @@
                 </div>
             `).join('');
             
+            // --- SINGLE COLUMN PRODUCT CARDS WITH FLIPKART STYLE PRICE ---
             let prodHTML = displayProducts.map(item => {
                 const isLiked = likedItems.includes(item.id);
                 const discountVal = item.discount ? String(item.discount).replace(/OFF/gi, '').trim() : '';
@@ -446,6 +448,7 @@
                     <div class="p-5 flex flex-col flex-grow border-t border-gray-100">
                         <h3 onclick="viewProduct('${item.id}')" class="text-xl font-extrabold truncate text-gray-900 cursor-pointer hover:text-yellow-600 transition tracking-tight">${item.name}</h3>
                         
+                        <!-- NEW PRICE ORDER & ANIMATION (Flipkart Style) -->
                         <div class="mt-3 flex items-center gap-2">
                             <span class="discount-text text-[15px] font-extrabold flex items-center tracking-tight"><i class="fa-solid fa-arrow-down text-[11px] mr-0.5"></i>${discountVal}</span>
                             <span class="text-gray-400 font-bold text-[15px] strike-anim tracking-tight">₹${item.mrp}</span>
@@ -496,19 +499,21 @@
 
             if(window.bannerScrollInterval) clearInterval(window.bannerScrollInterval);
             if(banners.length > 1) {
-                window.bannerScrollInterval = setInterval(() => {
-                    const slider = document.getElementById('bannerSlider');
-                    if(!slider) {
-                        clearInterval(window.bannerScrollInterval);
-                        return;
-                    }
-                    const maxScrollLeft = slider.scrollWidth - slider.clientWidth;
-                    if(slider.scrollLeft >= maxScrollLeft - 5) {
-                        slider.scrollTo({ left: 0, behavior: 'smooth' });
-                    } else {
-                        slider.scrollBy({ left: slider.clientWidth, behavior: 'smooth' });
-                    }
-                }, 3000); 
+                setTimeout(() => {
+                    window.bannerScrollInterval = setInterval(() => {
+                        const slider = document.getElementById('bannerSlider');
+                        if(!slider) {
+                            clearInterval(window.bannerScrollInterval);
+                            return;
+                        }
+                        const maxScrollLeft = slider.scrollWidth - slider.clientWidth;
+                        if(slider.scrollLeft >= maxScrollLeft - 5) {
+                            slider.scrollTo({ left: 0, behavior: 'smooth' });
+                        } else {
+                            slider.scrollBy({ left: slider.clientWidth, behavior: 'smooth' });
+                        }
+                    }, 3000); 
+                }, 500);
             }
         }
 
@@ -630,74 +635,16 @@
             }
         }
 
-        // --- PRODUCT PAGE & DYNAMIC COMBO SIZES ---
+        // --- PRODUCT PAGE & COLOR SELECTOR ---
         function selectSize(size) { currentSelectedSize = size; }
         function selectComboSize1(size) { currentComboSize1 = size; }
         function selectComboSize2(size) { currentComboSize2 = size; }
         
-        // Advanced logic: Checks Shirt & Jeans sizes. Also accounts for Color Specific sizes if provided in admin.
-        function generateSizeHTML(index, product) {
-            let sizeHTML = "";
-            let sArr = [];
-            let jArr = [];
-
-            // Interpret Shirt Sizes for current color (or fallback to global)
-            if (product.colorSizes && product.colorSizes.trim() !== "") {
-                let cSizes = product.colorSizes.split('|').map(s => s.trim());
-                if (cSizes.length > index && cSizes[index]) {
-                    sArr = cSizes[index].split(',').map(s => s.trim()).filter(s => s);
-                }
-            } else if (product.shirtSizes && product.shirtSizes.trim() !== "") {
-                sArr = product.shirtSizes.split(',').map(s => s.trim()).filter(s => s);
-            }
-
-            // Interpret Jeans Sizes for current color (or fallback to global)
-            if (product.colorJeansSizes && product.colorJeansSizes.trim() !== "") {
-                let cjSizes = product.colorJeansSizes.split('|').map(s => s.trim());
-                if (cjSizes.length > index && cjSizes[index]) {
-                    jArr = cjSizes[index].split(',').map(s => s.trim()).filter(s => s);
-                }
-            } else if (product.jeansSizes && product.jeansSizes.trim() !== "") {
-                jArr = product.jeansSizes.split(',').map(s => s.trim()).filter(s => s);
-            }
-
-            // Render Combo if BOTH exist, else render single items.
-            if (sArr.length > 0 && jArr.length > 0) {
-                sizeHTML += `<div class="mb-3"><span class="text-xs font-bold text-gray-500 block mb-1">Top / Shirt Size:</span><div class="flex flex-wrap gap-2">${sArr.map(s => {
-                    let safeId = 'shirt-' + index + '-' + s.replace(/[^a-zA-Z0-9]/g, '-');
-                    return `<div><input type="radio" name="comboShirt" id="${safeId}" value="${s}" class="hidden size-radio" onclick="selectComboSize1('${s}')" onchange="selectComboSize1('${s}')"><label for="${safeId}" class="cursor-pointer border border-gray-300 text-gray-700 bg-white font-bold px-3 py-1.5 text-xs rounded-md shadow-sm hover:border-yellow-500 transition block text-center min-w-[40px]">${s}</label></div>`;
-                }).join('')}</div></div>`;
-
-                sizeHTML += `<div class="mb-3"><span class="text-xs font-bold text-gray-500 block mb-1">Bottom / Jeans Size:</span><div class="flex flex-wrap gap-2">${jArr.map(s => {
-                    let safeId = 'jeans-' + index + '-' + s.replace(/[^a-zA-Z0-9]/g, '-');
-                    return `<div><input type="radio" name="comboJeans" id="${safeId}" value="${s}" class="hidden size-radio" onclick="selectComboSize2('${s}')" onchange="selectComboSize2('${s}')"><label for="${safeId}" class="cursor-pointer border border-gray-300 text-gray-700 bg-white font-bold px-3 py-1.5 text-xs rounded-md shadow-sm hover:border-yellow-500 transition block text-center min-w-[40px]">${s}</label></div>`;
-                }).join('')}</div></div>`;
-            } else if (sArr.length > 0) {
-                sizeHTML += `<div class="flex flex-wrap gap-2 mb-3">${sArr.map(s => {
-                    let safeId = 'sz-' + index + '-' + s.replace(/[^a-zA-Z0-9]/g, '-');
-                    return `<div><input type="radio" name="productSize" id="${safeId}" value="${s}" class="hidden size-radio" onclick="selectSize('${s}')" onchange="selectSize('${s}')"><label for="${safeId}" class="cursor-pointer border border-gray-300 text-gray-700 bg-white font-bold px-3 py-1.5 text-xs rounded-md shadow-sm hover:border-yellow-500 transition block text-center min-w-[40px]">${s}</label></div>`;
-                }).join('')}</div>`;
-            } else if (jArr.length > 0) {
-                sizeHTML += `<div class="flex flex-wrap gap-2 mb-3">${jArr.map(s => {
-                    let safeId = 'sz-' + index + '-' + s.replace(/[^a-zA-Z0-9]/g, '-');
-                    return `<div><input type="radio" name="productSize" id="${safeId}" value="${s}" class="hidden size-radio" onclick="selectSize('${s}')" onchange="selectSize('${s}')"><label for="${safeId}" class="cursor-pointer border border-gray-300 text-gray-700 bg-white font-bold px-3 py-1.5 text-xs rounded-md shadow-sm hover:border-yellow-500 transition block text-center min-w-[40px]">${s}</label></div>`;
-                }).join('')}</div>`;
-            } else {
-                sizeHTML += `<div class="flex flex-wrap gap-3"><div><input type="radio" name="productSize" id="size-Free" value="Free Size" class="hidden size-radio" onclick="selectSize('Free Size')" onchange="selectSize('Free Size')"><label for="size-Free" class="cursor-pointer border border-gray-300 text-gray-700 bg-white font-bold px-4 py-2 rounded-md shadow-sm hover:border-yellow-500 transition block">Free Size</label></div></div>`;
-            }
-            return sizeHTML;
-        }
-
-        function selectColor(index, name, imgUrl, productId) {
-            const product = products.find(p => p.id === productId);
-            if(!product) return;
-
+        function selectColor(index, name, imgUrl) {
             currentSelectedColor = { name: name, img: imgUrl };
             document.getElementById('mainProductImage').src = imgUrl;
             document.getElementById('selectedColorText').innerText = name;
-            
-            let wrapper = document.getElementById('mainImageWrapper');
-            if(wrapper) wrapper.setAttribute('onclick', `openImage('${imgUrl}')`);
+            document.getElementById('mainImageWrapper').setAttribute('onclick', `openImage('${imgUrl}')`);
             
             const thumbs = document.querySelectorAll('[id^="colorThumb-"]');
             thumbs.forEach(t => {
@@ -711,66 +658,18 @@
                 activeThumb.classList.add('border-gray-800', 'shadow-md');
             }
 
-            // --- DYNAMIC PRICE UPDATE ---
-            let currentPrice = product.price;
-            let currentMrp = product.mrp;
-
-            if (product.colorPrices && product.colorPrices.trim() !== "") {
-                let cPrices = product.colorPrices.split(',').map(p => p.trim());
-                if (cPrices.length > index && cPrices[index] !== "") {
-                    currentPrice = Number(cPrices[index]);
+            if (currentColorSizesArr.length > index && currentColorSizesArr[index]) {
+                let szs = currentColorSizesArr[index].split(',').map(s=>s.trim()).filter(s=>s);
+                if (szs.length > 0) {
+                    currentSelectedSize = null; 
+                    let dHtml = `<div class="flex flex-wrap gap-2 mb-3">` + szs.map(s => {
+                        let safeId = s.replace(/\s+/g, '-');
+                        return `<div><input type="radio" name="productSize" id="size-${safeId}" value="${s}" class="hidden size-radio" onchange="selectSize('${s}')"><label for="size-${safeId}" class="cursor-pointer border border-gray-300 text-gray-700 bg-white font-bold px-3 py-1.5 text-xs rounded-md shadow-sm hover:border-yellow-500 transition block text-center min-w-[40px]">${s}</label></div>`;
+                    }).join('') + `</div>`;
+                    let container = document.getElementById('dynamicSizeContainer');
+                    if (container) container.innerHTML = dHtml;
                 }
             }
-
-            if (product.colorMRPs && product.colorMRPs.trim() !== "") {
-                let cMrps = product.colorMRPs.split(',').map(p => p.trim());
-                if (cMrps.length > index && cMrps[index] !== "") {
-                    currentMrp = Number(cMrps[index]);
-                }
-            }
-
-            let currentDiscount = "";
-            if (currentMrp > currentPrice && currentPrice > 0) {
-                currentDiscount = Math.round(((currentMrp - currentPrice) * 100) / currentMrp) + "% OFF";
-            } else if (product.discount && currentPrice === Number(product.price)) {
-                currentDiscount = product.discount;
-            }
-
-            currentSelectedPrice = currentPrice;
-            currentSelectedMrp = currentMrp;
-            currentSelectedDiscount = currentDiscount;
-
-            let priceEl = document.getElementById('productPrice');
-            let mrpEl = document.getElementById('productMrp');
-            let discountContainerEl = document.getElementById('productDiscount');
-            let discountTextEl = document.getElementById('discountValText');
-
-            if (priceEl) priceEl.innerText = "₹" + currentPrice;
-            if (mrpEl) {
-                if (currentMrp && currentMrp > 0) {
-                    mrpEl.innerText = "₹" + currentMrp;
-                    mrpEl.style.display = "inline-block";
-                } else {
-                    mrpEl.style.display = "none";
-                }
-            }
-
-            if (discountContainerEl && discountTextEl) {
-                let cleanDiscount = currentDiscount ? String(currentDiscount).replace(/OFF/gi, '').trim() : '';
-                if (cleanDiscount !== "") {
-                    discountTextEl.innerText = cleanDiscount;
-                    discountContainerEl.style.display = "flex";
-                } else {
-                    discountContainerEl.style.display = "none";
-                }
-            }
-            // --- END DYNAMIC PRICE UPDATE ---
-
-            // RE-RENDER SPECIFIC SIZES FOR THIS COLOR
-            document.getElementById('dynamicSizeContainer').innerHTML = generateSizeHTML(index, product);
-            currentSelectedSize = null;
-            currentComboSize1 = null;
-            currentComboSize2 = null;
         }
 
         function _viewProduct(id) {
@@ -779,15 +678,15 @@
             if(!product) { goHome(); return; }
             
             currentSelectedSize = null; currentComboSize1 = null; currentComboSize2 = null; currentSelectedColor = null;
-            currentSelectedPrice = null; currentSelectedMrp = null; currentSelectedDiscount = null;
+            currentColorSizesArr = [];
             
             let colorHTML = "";
             let hasColors = !!product.colorNames && !!product.colorImages && product.colorNames.trim() !== "";
             
-            let displayPrice = product.price;
-            let displayMrp = product.mrp;
-            let displayDiscount = product.discount ? String(product.discount).replace(/OFF/gi, '').trim() : '';
-
+            if (hasColors && product.colorSizes && product.colorSizes.trim() !== "") {
+                currentColorSizesArr = product.colorSizes.split('|').map(s => s.trim());
+            }
+            
             if (hasColors) {
                 let names = product.colorNames.split(',').map(n => n.trim());
                 let images = product.colorImages.split(',').map(i => i.trim());
@@ -795,30 +694,13 @@
                 if (names.length > 0 && images.length > 0 && names.length === images.length) {
                     currentSelectedColor = { name: names[0], img: images[0] };
                     
-                    if (product.colorPrices && product.colorPrices.trim() !== "") {
-                        let cP = product.colorPrices.split(',').map(p=>p.trim());
-                        if (cP[0]) { displayPrice = cP[0]; currentSelectedPrice = cP[0]; }
-                    }
-                    if (product.colorMRPs && product.colorMRPs.trim() !== "") {
-                        let cM = product.colorMRPs.split(',').map(p=>p.trim());
-                        if (cM[0]) { displayMrp = cM[0]; currentSelectedMrp = cM[0]; }
-                    }
-                    
-                    if (Number(displayMrp) > Number(displayPrice) && Number(displayPrice) > 0) {
-                        displayDiscount = Math.round(((Number(displayMrp) - Number(displayPrice)) * 100) / Number(displayMrp));
-                        currentSelectedDiscount = displayDiscount + "% OFF";
-                    } else if (Number(displayPrice) !== Number(product.price)) {
-                        displayDiscount = "";
-                        currentSelectedDiscount = "";
-                    }
-
                     colorHTML = `
                     <div class="bg-white p-5 rounded-xl shadow-sm border border-gray-100 mb-6">
                         <p class="font-bold text-gray-800 text-sm mb-3">Selected Color: <span id="selectedColorText" class="font-medium text-gray-600">${names[0]}</span></p>
                         <div class="flex gap-3 overflow-x-auto no-scrollbar pb-2">
                             ${names.map((n, idx) => {
                                 let safeName = n.replace(/'/g, "\\'");
-                                return `<div onclick="selectColor(${idx}, '${safeName}', '${images[idx]}', '${product.id}')" id="colorThumb-${idx}" class="w-16 h-20 flex-shrink-0 border-2 ${idx === 0 ? 'border-gray-800 shadow-md' : 'border-gray-200 opacity-70'} rounded-lg overflow-hidden cursor-pointer transition hover:border-gray-800 hover:opacity-100">
+                                return `<div onclick="selectColor(${idx}, '${safeName}', '${images[idx]}')" id="colorThumb-${idx}" class="w-16 h-20 flex-shrink-0 border-2 ${idx === 0 ? 'border-gray-800 shadow-md' : 'border-gray-200 opacity-70'} rounded-lg overflow-hidden cursor-pointer transition hover:border-gray-800 hover:opacity-100">
                                     <img src="${images[idx]}" class="w-full h-full object-cover">
                                 </div>`;
                             }).join('')}
@@ -828,7 +710,32 @@
                 }
             }
 
-            let sizeHTML = generateSizeHTML(0, product);
+            let sizeHTML = "";
+            
+            if (hasColors && currentColorSizesArr.length > 0 && currentColorSizesArr[0]) {
+                let szs = currentColorSizesArr[0].split(',').map(s=>s.trim()).filter(s=>s);
+                if(szs.length > 0) {
+                    sizeHTML += `<div class="flex flex-wrap gap-2 mb-3">` + szs.map(s => {
+                        let safeId = s.replace(/\s+/g, '-');
+                        return `<div><input type="radio" name="productSize" id="size-${safeId}" value="${s}" class="hidden size-radio" onchange="selectSize('${s}')"><label for="size-${safeId}" class="cursor-pointer border border-gray-300 text-gray-700 bg-white font-bold px-3 py-1.5 text-xs rounded-md shadow-sm hover:border-yellow-500 transition block text-center min-w-[40px]">${s}</label></div>`;
+                    }).join('') + `</div>`;
+                }
+            } else {
+                let hasShirt = !!product.shirtSizes && product.shirtSizes.trim() !== "";
+                let hasJeans = !!product.jeansSizes && product.jeansSizes.trim() !== "";
+
+                if (hasShirt) {
+                    let sArr = product.shirtSizes.split(',').map(s => s.trim());
+                    sizeHTML += `<div class="flex flex-wrap gap-2 mb-3">${sArr.map(s => `<div><input type="radio" name="comboShirt" id="cs1-${s}" value="${s}" class="hidden size-radio" onchange="selectComboSize1('${s}')"><label for="cs1-${s}" class="cursor-pointer border border-gray-300 text-gray-700 bg-white font-bold px-3 py-1.5 text-xs rounded-md shadow-sm hover:border-yellow-500 transition block text-center min-w-[40px]">${s}</label></div>`).join('')}</div>`;
+                }
+                if (hasJeans) {
+                    let jArr = product.jeansSizes.split(',').map(s => s.trim());
+                    sizeHTML += `<div class="flex flex-wrap gap-2 mb-3">${jArr.map(s => `<div><input type="radio" name="comboJeans" id="cs2-${s}" value="${s}" class="hidden size-radio" onchange="selectComboSize2('${s}')"><label for="cs2-${s}" class="cursor-pointer border border-gray-300 text-gray-700 bg-white font-bold px-3 py-1.5 text-xs rounded-md shadow-sm hover:border-yellow-500 transition block text-center min-w-[40px]">${s}</label></div>`).join('')}</div>`;
+                }
+                if (!hasShirt && !hasJeans) {
+                    sizeHTML += `<div class="flex flex-wrap gap-3"><div><input type="radio" name="productSize" id="size-Free" value="Free Size" class="hidden size-radio" onchange="selectSize('Free Size')"><label for="size-Free" class="cursor-pointer border border-gray-300 text-gray-700 bg-white font-bold px-4 py-2 rounded-md shadow-sm hover:border-yellow-500 transition block">Free Size</label></div></div>`;
+                }
+            }
 
             let moreProducts = products.filter(p => p.id !== id).sort(() => 0.5 - Math.random()).slice(0, 4);
             let moreProdHTML = moreProducts.map(item => `
@@ -841,33 +748,34 @@
                 </div>
             `).join('');
 
+            const discountVal = product.discount ? String(product.discount).replace(/OFF/gi, '').trim() : '';
             const initialMainImage = currentSelectedColor ? currentSelectedColor.img : product.img;
 
             appDiv.innerHTML = `
                 <div class="fade-in relative pb-24 bg-gray-50 min-h-screen">
                     <button onclick="history.back()" class="absolute top-4 left-4 bg-white/90 border border-gray-200 text-gray-800 rounded-full w-10 h-10 z-10 flex items-center justify-center backdrop-blur-sm shadow-md hover:text-yellow-600 transition"><i class="fa-solid fa-arrow-left"></i></button>
-                    
-                    <div id="mainImageWrapper" onclick="openImage('${initialMainImage}')" class="relative cursor-zoom-in bg-white border-b border-gray-200 shadow-sm">
+                    <div onclick="openImage('${initialMainImage}')" class="relative cursor-zoom-in bg-white border-b border-gray-200 shadow-sm">
                         <img id="mainProductImage" src="${initialMainImage}" class="w-full h-[450px] object-cover">
                         <div class="absolute bottom-3 right-3 bg-white/90 rounded-full w-8 h-8 flex items-center justify-center text-gray-800 border border-gray-200 shadow-md"><i class="fa-solid fa-expand"></i></div>
                     </div>
                     
                     <div class="p-5">
-                        <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-100 mb-5 relative">
-                            <h1 class="text-xl font-extrabold text-gray-900 leading-tight pr-10">${product.name}</h1>
-                            
-                            <div class="mt-4 flex items-center gap-2.5">
-                                <span id="productDiscount" class="discount-text text-lg font-extrabold flex items-center tracking-tight" style="${displayDiscount ? '' : 'display:none;'}"><i class="fa-solid fa-arrow-down text-[13px] mr-1"></i><span id="discountValText">${displayDiscount}</span></span>
-                                <span id="productMrp" class="text-gray-400 font-bold text-lg strike-anim tracking-tight" style="${displayMrp ? '' : 'display:none;'}">₹${displayMrp}</span>
-                                <span id="productPrice" class="font-black text-gray-900 text-3xl ml-1 tracking-tight">₹${displayPrice}</span>
-                            </div>
-                        </div>
-
                         ${colorHTML}
 
                         <div class="bg-white p-5 rounded-xl shadow-sm border border-gray-100 mb-6">
                             <h3 class="font-extrabold text-gray-800 mb-3 text-sm flex items-center gap-2"><i class="fa-solid fa-ruler-combined text-yellow-500"></i> SELECT SIZE</h3>
                             <div id="dynamicSizeContainer">${sizeHTML}</div>
+                        </div>
+
+                        <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-100 mb-5 relative">
+                            <h1 class="text-xl font-extrabold text-gray-900 leading-tight pr-10">${product.name}</h1>
+                            
+                            <!-- NEW PRICE ORDER & ANIMATION (Flipkart Style) -->
+                            <div class="mt-4 flex items-center gap-2.5">
+                                <span class="discount-text text-lg font-extrabold flex items-center tracking-tight" style="${discountVal ? '' : 'display:none;'}"><i class="fa-solid fa-arrow-down text-[13px] mr-1"></i>${discountVal}</span>
+                                <span class="text-gray-400 font-bold text-lg strike-anim tracking-tight" style="${product.mrp ? '' : 'display:none;'}">₹${product.mrp}</span>
+                                <span class="font-black text-gray-900 text-3xl ml-1 tracking-tight">₹${product.price}</span>
+                            </div>
                         </div>
 
                         <div class="flex items-center gap-2 mb-4 mt-8">
@@ -918,7 +826,7 @@
 
             let total = 0;
             let cartHTML = cart.map((item, index) => {
-                total += Number(item.price);
+                total += item.price;
                 const discountVal = item.discount ? String(item.discount).replace(/OFF/gi, '').trim() : '';
                 return `
                     <div class="flex gap-4 items-center bg-white p-3 rounded-xl border border-gray-200 mb-3 shadow-sm relative">
@@ -928,8 +836,8 @@
                             <p class="text-[11px] text-gray-500 font-medium mb-1.5">Size: <span class="text-yellow-600 font-bold bg-yellow-50 px-1 rounded">${item.size}</span> ${item.color ? `| Color: <span class="text-gray-800 font-bold">${item.color}</span>` : ''}</p>
                             
                             <div class="flex items-center gap-1.5">
-                                <span class="discount-text text-[10px] font-extrabold flex items-center tracking-tight" style="${discountVal ? '' : 'display:none;'}"><i class="fa-solid fa-arrow-down text-[8px] mr-0.5"></i>${discountVal}</span>
-                                <span class="text-gray-400 font-bold text-[11px] strike-anim tracking-tight" style="${item.mrp ? '' : 'display:none;'}">₹${item.mrp}</span>
+                                <span class="discount-text text-[10px] font-extrabold flex items-center tracking-tight"><i class="fa-solid fa-arrow-down text-[8px] mr-0.5"></i>${discountVal}</span>
+                                <span class="text-gray-400 font-bold text-[11px] strike-anim tracking-tight">₹${item.mrp}</span>
                                 <span class="font-black text-gray-900 text-base tracking-tight ml-0.5">₹${item.price}</span>
                             </div>
                         </div>
@@ -963,21 +871,28 @@
             window.scrollTo(0,0);
         }
 
-        // Extremely robust validation checking which inputs are actually rendered in the DOM
         function getValidatedSize(product) {
-            const hasComboShirt = document.querySelector('input[name="comboShirt"]');
-            const hasComboJeans = document.querySelector('input[name="comboJeans"]');
-            const hasProductSize = document.querySelector('input[name="productSize"]');
-
-            if (hasComboShirt && hasComboJeans) {
-                if(!currentComboSize1 || !currentComboSize2) return null;
-                return `Top: ${currentComboSize1}, Bottom: ${currentComboSize2}`;
-            } else if (hasProductSize) {
+            if(product.colorSizes && product.colorSizes.trim() !== "") {
                 if(!currentSelectedSize) return null;
                 return currentSelectedSize;
             }
-            if (currentSelectedSize) return currentSelectedSize;
-            return null;
+
+            let hasShirt = !!product.shirtSizes && product.shirtSizes.trim() !== "";
+            let hasJeans = !!product.jeansSizes && product.jeansSizes.trim() !== "";
+            
+            if (hasShirt && hasJeans) {
+                if(!currentComboSize1 || !currentComboSize2) return null;
+                return `Top: ${currentComboSize1}, Bottom: ${currentComboSize2}`;
+            } else if (hasShirt) {
+                if(!currentComboSize1) return null;
+                return currentComboSize1;
+            } else if (hasJeans) {
+                if(!currentComboSize2) return null;
+                return currentComboSize2;
+            } else {
+                if(!currentSelectedSize) return null;
+                return currentSelectedSize;
+            }
         }
 
         function addToCart(id) {
@@ -988,12 +903,8 @@
 
             const finalColor = currentSelectedColor ? currentSelectedColor.name : null;
             const finalImg = currentSelectedColor ? currentSelectedColor.img : product.img;
-            
-            const finalPrice = currentSelectedPrice !== null ? Number(currentSelectedPrice) : Number(product.price);
-            const finalMrp = currentSelectedMrp !== null ? Number(currentSelectedMrp) : Number(product.mrp);
-            const finalDiscount = currentSelectedDiscount !== null ? currentSelectedDiscount : product.discount;
 
-            cart.push({ ...product, size: finalSize, color: finalColor || '', img: finalImg || '', price: finalPrice, mrp: finalMrp, discount: finalDiscount, cartId: Date.now(), isFlipkart: product.isFlipkart || 'false' });
+            cart.push({ ...product, size: finalSize, color: finalColor, img: finalImg, cartId: Date.now() });
             localStorage.setItem('mz_cart', JSON.stringify(cart));
             updateCartBadge();
             
@@ -1011,6 +922,7 @@
             }
         }
 
+        // --- GUEST CHECKOUT (BUY NOW DIRECTLY) ---
         function handleBuyNow(id) {
             const product = products.find(p => p.id === id);
             const finalSize = getValidatedSize(product);
@@ -1018,6 +930,7 @@
             if(!finalSize) { alert("Please select required sizes first!"); return; }
             currentSelectedSize = finalSize; 
             
+            // Go Directly to address (NO LOGIN REQUIRED)
             goToAddress(id);
         }
 
@@ -1080,26 +993,25 @@
             }
         }
 
+        // --- SPLIT CHECKOUT ---
         function _goToAddress(source) {
             let total = 0; let productNames = ""; let orderItems = []; let primaryImg = "";
 
             if (source === 'cart') {
-                total = cart.reduce((sum, item) => sum + Number(item.price), 0);
+                total = cart.reduce((sum, item) => sum + item.price, 0);
                 productNames = cart.map(i => `${i.name} (Size: ${i.size}${i.color ? `, Color: ${i.color}` : ''})`).join(", ");
                 primaryImg = cart[0].img;
-                orderItems = cart.map(i => ({ name: i.name || '', size: i.size || '', color: i.color || '', price: i.price || 0, img: i.img || '', isFlipkart: i.isFlipkart || 'false' }));
+                orderItems = cart.map(i => ({ name: i.name, size: i.size, color: i.color || '', price: i.price, img: i.img }));
             } else {
                 const product = products.find(p => p.id === source);
-                const finalPrice = currentSelectedPrice !== null ? Number(currentSelectedPrice) : Number(product.price);
-                total = finalPrice;
+                total = product.price;
                 const finalColorName = currentSelectedColor ? currentSelectedColor.name : '';
                 productNames = `${product.name} (Size: ${currentSelectedSize}${finalColorName ? `, Color: ${finalColorName}` : ''})`;
                 primaryImg = currentSelectedColor ? currentSelectedColor.img : product.img;
-                orderItems = [{ name: product.name || '', size: currentSelectedSize || '', color: finalColorName || '', price: finalPrice, img: primaryImg || '', isFlipkart: product.isFlipkart || 'false' }];
+                orderItems = [{ name: product.name, size: currentSelectedSize, color: finalColorName, price: product.price, img: primaryImg }];
             }
 
-            let hasFlipkart = orderItems.some(item => item.isFlipkart === 'true' || item.isFlipkart === true);
-            tempCheckoutData = { names: productNames, price: total, img: primaryImg, items: orderItems, hasFlipkart: hasFlipkart };
+            tempCheckoutData = { names: productNames, price: total, img: primaryImg, items: orderItems };
 
             appDiv.innerHTML = `
                 <div class="fade-in p-5 pb-24 bg-gray-50 min-h-screen">
@@ -1141,6 +1053,7 @@
             window.scrollTo(0,0);
         }
 
+        // --- SILENT AUTO REGISTER/LOGIN ON CHECKOUT ---
         function processAddressAndGoToPayment(event) {
             event.preventDefault();
             
@@ -1158,6 +1071,7 @@
             }
             tempCheckoutData.address = `${baseAddress}, ${village}, ${district}, ${state} (PIN: ${pincode})`;
             
+            // Background Auto Login/Registration
             if (!currentUser || currentUser.phone !== tempCheckoutData.phone) {
                 const phoneStr = tempCheckoutData.phone;
                 db.ref('users/' + phoneStr).once('value').then(snap => {
@@ -1192,8 +1106,13 @@
                     <form onsubmit="confirmOrder(event)">
                         <div class="mb-6">
                             <label class="flex items-center gap-3 bg-white p-4 rounded-xl border border-gray-200 mb-3 cursor-pointer shadow-sm hover:border-yellow-500 transition">
-                                <input type="radio" id="prepaid" name="payment" value="Prepaid" onchange="renderPaymentUI()" class="accent-yellow-500 w-5 h-5 cursor-pointer" checked>
+                                <input type="radio" id="prepaid" name="payment" value="Prepaid" onchange="renderPaymentUI()" class="accent-yellow-500 w-5 h-5 cursor-pointer">
                                 <span class="text-gray-800 font-bold text-sm w-full">Prepaid (Full Payment)</span>
+                            </label>
+                            
+                            <label class="flex items-center gap-3 bg-white p-4 rounded-xl border border-gray-200 mb-3 cursor-pointer shadow-sm hover:border-yellow-500 transition">
+                                <input type="radio" id="cod" name="payment" value="COD" onchange="renderPaymentUI()" class="accent-yellow-500 w-5 h-5 cursor-pointer" checked>
+                                <span class="text-gray-800 font-bold text-sm w-full">Cash on Delivery (C.O.D)</span>
                             </label>
                             
                             <div id="paymentUI" class="mt-5 p-5 bg-white border border-yellow-300 rounded-xl shadow-md hidden"></div>
@@ -1210,35 +1129,48 @@
         }
 
         function renderPaymentUI() {
+            const isCOD = document.getElementById('cod').checked;
             const uiDiv = document.getElementById('paymentUI');
             uiDiv.classList.remove('hidden');
             const totalAmount = tempCheckoutData.price;
-            
-            const qrUrl = tempCheckoutData.hasFlipkart && paymentSettings.flipkart_qr_url ? paymentSettings.flipkart_qr_url : paymentSettings.qr_url;
-            const activeUpi = tempCheckoutData.hasFlipkart && paymentSettings.flipkart_upi_id ? paymentSettings.flipkart_upi_id : paymentSettings.upi_id;
+            const qrUrl = paymentSettings.qr_url;
 
-            uiDiv.innerHTML = `
-                <p class="text-center text-sm text-gray-500 font-bold mb-2">Scan QR to pay Full Amount</p>
-                <p class="text-center font-black text-2xl text-gray-900 mb-5">₹${totalAmount}</p>
-                <p class="text-center text-xs font-bold text-gray-700 mb-4 bg-gray-100 py-1.5 rounded-md">UPI ID: <span class="text-green-600 select-all">${activeUpi || 'Not available'}</span></p>
-                <div class="flex justify-center mb-5"><img src="${qrUrl}" class="w-56 h-56 border-4 border-gray-100 rounded-xl p-2 bg-white shadow-md"></div>
-                <div class="bg-red-50 border border-red-200 p-3 rounded-lg mb-3">
-                    <p class="text-[11px] text-center text-red-600 font-bold">⚠️ Please complete the payment now.</p>
-                    <p class="text-[10px] text-center text-gray-600 mt-1 font-medium">You will need to send the screenshot on the next screen to confirm your order.</p>
-                </div>
-            `;
+            if (!isCOD) {
+                uiDiv.innerHTML = `
+                    <p class="text-center text-sm text-gray-500 font-bold mb-2">Scan QR to pay Full Amount</p>
+                    <p class="text-center font-black text-2xl text-gray-900 mb-5">₹${totalAmount}</p>
+                    <div class="flex justify-center mb-5"><img src="${qrUrl}" class="w-36 h-36 border-4 border-gray-100 rounded-xl p-1 bg-white shadow-sm"></div>
+                    <div class="bg-red-50 border border-red-200 p-3 rounded-lg mb-3">
+                        <p class="text-[11px] text-center text-red-600 font-bold">⚠️ Please complete the payment now.</p>
+                        <p class="text-[10px] text-center text-gray-600 mt-1 font-medium">You will need to send the screenshot on the next screen to confirm your order.</p>
+                    </div>
+                `;
+            } else {
+                const tokenAmount = Math.round(totalAmount * 0.30);
+                uiDiv.innerHTML = `
+                    <div class="bg-yellow-50 border border-yellow-200 p-3 rounded-lg mb-4 text-center shadow-sm">
+                        <p class="text-[11px] text-yellow-700 font-bold">For C.O.D, 30% advance token is required.</p>
+                        <p class="font-black text-xl text-gray-900 mt-1">Token: ₹${tokenAmount}</p>
+                    </div>
+                    <div class="flex justify-center mb-5"><img src="${qrUrl}" class="w-36 h-36 border-4 border-gray-100 rounded-xl p-1 bg-white shadow-sm"></div>
+                    <div class="bg-red-50 border border-red-200 p-3 rounded-lg mb-2">
+                        <p class="text-[11px] text-center text-red-600 font-bold">⚠️ Please complete the token payment now.</p>
+                        <p class="text-[10px] text-center text-gray-600 mt-1 font-medium">You will need to send the screenshot on the next screen to confirm your order.</p>
+                    </div>
+                `;
+            }
         }
 
         async function confirmOrder(event) {
             event.preventDefault();
-            const paymentType = "Prepaid";
+            const paymentType = document.getElementById('cod').checked ? "COD" : "Prepaid";
             const newOrder = {
                 id: Date.now().toString(), date: new Date().toLocaleString(),
-                name: tempCheckoutData.name || '', phone: tempCheckoutData.phone || '',
-                address: tempCheckoutData.address || '', payment: paymentType || 'Prepaid',
-                product_name: tempCheckoutData.names || '', price: tempCheckoutData.price || 0,
-                img: tempCheckoutData.img || '', 
-                items: tempCheckoutData.items || [], 
+                name: tempCheckoutData.name, phone: tempCheckoutData.phone,
+                address: tempCheckoutData.address, payment: paymentType,
+                product_name: tempCheckoutData.names, price: tempCheckoutData.price,
+                img: tempCheckoutData.img, 
+                items: tempCheckoutData.items, 
                 status: "Pending Verification" 
             };
             appDiv.innerHTML = `<div class="min-h-[70vh] flex flex-col items-center justify-center text-yellow-500 bg-gray-50"><i class="fa-solid fa-spinner fa-spin text-5xl mb-4"></i><p class="font-bold tracking-widest text-gray-800">PLACING ORDER...</p></div>`;
@@ -1246,10 +1178,11 @@
             try {
                 await db.ref('orders/' + newOrder.id).set(newOrder);
                 cart = []; localStorage.setItem('mz_cart', JSON.stringify(cart)); updateCartBadge();
-
+                
                 const waNum = paymentSettings.whatsapp;
                 const waText = encodeURIComponent(`Hello MZ Fashion, here is my payment screenshot for Order ID: ${newOrder.id}`);
 
+                // Replace state so back button goes home instead of payment screen
                 history.replaceState({ page: 'home', param: null }, '', '#home');
 
                 appDiv.innerHTML = `
@@ -1270,9 +1203,10 @@
                         <button onclick="goHome()" class="mt-4 bg-white border border-gray-300 text-gray-700 hover:bg-gray-100 px-8 py-3.5 rounded-xl font-extrabold shadow-sm transition-all w-full max-w-xs uppercase text-sm">Continue Shopping</button>
                     </div>
                 `;
-            } catch (error) { alert("Database Error! " + (error.message || "")); goHome(); }
+            } catch (error) { alert("Database Error!"); goHome(); }
         }
 
+        // --- MY ORDERS PAGE ---
         function _showMyOrders() {
             showNavs();
             appDiv.innerHTML = `<div class="min-h-[70vh] flex flex-col items-center justify-center text-yellow-500 bg-gray-50"><i class="fa-solid fa-spinner fa-spin text-5xl mb-4"></i><p class="font-bold tracking-widest text-gray-800">LOADING ORDERS...</p></div>`;
@@ -1301,6 +1235,7 @@
                             statusBadge = `<span class="inline-flex items-center gap-1 px-2 py-1 bg-yellow-50 text-yellow-600 text-[9px] rounded border border-yellow-200 uppercase font-extrabold"><i class="fa-solid fa-clock"></i> ${currentStatus}</span>`;
                         }
 
+                        // MULTIPLE ITEMS RENDERING LOGIC
                         let itemsHTML = "";
                         if (order.items && order.items.length > 0) {
                             itemsHTML = `<div class="mt-3 flex flex-col gap-2">` + order.items.map(item => `
@@ -1362,6 +1297,7 @@
             }).catch(() => { appDiv.innerHTML = `<div class="p-10 text-center text-red-500 font-bold">Error connecting to database.</div>`; });
         }
 
+        // Init App 
         initApp();
     </script>
 </body>
