@@ -841,15 +841,16 @@
                             <div id="dynamicSizeContainer">${sizeHTML}</div>
                         </div>
 
-                        <!-- 5. PRICE -->
-                        <div class="bg-white p-5 rounded-xl shadow-sm border border-gray-100 mb-6 flex flex-col items-start">
-                            <span class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-1">Total Price</span>
-                            <div class="flex items-center gap-2.5">
-                                <span id="productDiscount" class="discount-text text-lg font-extrabold flex items-center tracking-tight" style="${displayDiscount ? '' : 'display:none;'}"><i class="fa-solid fa-arrow-down text-[13px] mr-1"></i><span id="discountValText">${displayDiscount}</span></span>
-                                <span id="productMrp" class="text-gray-400 font-bold text-lg strike-anim tracking-tight" style="${displayMrp ? '' : 'display:none;'}">₹${displayMrp}</span>
-                                <span id="productPrice" class="font-black text-gray-900 text-4xl ml-1 tracking-tight">₹${displayPrice}</span>
-                            </div>
-                        </div>
+                      <!-- 5. PRICE -->
+                     <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-100 mb-6 flex flex-col items-start">
+                 <span class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">Total Price</span>
+               <div class="flex items-center gap-2">
+              <span id="productDiscount" class="discount-text text-[15px] font-extrabold flex items-center tracking-tight" style="${displayDiscount ? '' : 'display:none;'}"><i class="fa-solid fa-arrow-down text-[11px] mr-0.5"></i><span id="discountValText">${displayDiscount}</span></span>
+             <span id="productMrp" class="text-gray-400 font-bold text-[15px] strike-anim tracking-tight" style="${displayMrp ? '' : 'display:none;'}">₹${displayMrp}</span>
+            <span id="productPrice" class="font-black text-gray-900 text-[26px] ml-1 tracking-tight">₹${displayPrice}</span>
+                   </div>
+                   </div>
+
 
                         <!-- MORE PRODUCTS -->
                         <div class="flex items-center gap-2 mb-4 mt-8">
