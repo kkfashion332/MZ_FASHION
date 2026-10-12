@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Unique Fashion</title>
+    <title>MZ Fashion</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     
@@ -68,11 +68,11 @@
     <nav id="topNav" class="hidden bg-[#0a0a0a] py-2.5 px-3 flex justify-between items-center relative z-50 shadow-md border-b-[1.5px] border-yellow-500 rounded-b-[1.5rem]">
         <div class="flex items-center w-full justify-between relative px-1">
             <div class="flex-shrink-0">
-                <img id="secretLogo" src="logo.png" onerror="this.src='https://ui-avatars.com/api/?name=UF&background=000&color=D4AF37'" alt="Unique Fashion" class="w-10 h-10 rounded-full cursor-pointer border-[1.5px] border-yellow-500 object-cover shadow-[0_0_8px_rgba(212,175,55,0.4)]">
+                <img id="secretLogo" src="logo.png" onerror="this.src='https://ui-avatars.com/api/?name=MZ&background=000&color=D4AF37'" alt="MZ Fashion" class="w-10 h-10 rounded-full cursor-pointer border-[1.5px] border-yellow-500 object-cover shadow-[0_0_8px_rgba(212,175,55,0.4)]">
             </div>
             
             <div class="flex flex-col items-center justify-center cursor-pointer absolute left-1/2 transform -translate-x-1/2" onclick="goHome()">
-                <span class="font-black text-[20px] tracking-[0.08em] text-white leading-none mt-0.5">UNIQUE FASHION</span>
+                <span class="font-black text-[20px] tracking-[0.08em] text-white leading-none mt-0.5">MZ FASHION</span>
                 <div class="flex items-center gap-1.5 mt-1 w-full justify-center opacity-90">
                     <div class="w-5 h-[1px] bg-yellow-500"></div>
                     <span class="text-[6.5px] tracking-[0.2em] text-yellow-500 uppercase whitespace-nowrap font-bold">Style Your Story</span>
@@ -111,15 +111,15 @@
     <div id="imageModalContainer"></div>
 
     <script>
-        // --- FIREBASE INITIALIZATION FOR UNIQUE FASHION ---
+        // --- FIREBASE INITIALIZATION ---
         const firebaseConfig = {
-            apiKey: "YAHAN_UNIQUE_FASHION_KI_API_KEY_DAAL", // <-- APNI ASLI API KEY YAHAN DAALNA
-            authDomain: "ai-calling-agent-7caac.firebaseapp.com",
-            databaseURL: "https://ai-calling-agent-7caac-default-rtdb.firebaseio.com",
-            projectId: "ai-calling-agent-7caac",
-            storageBucket: "ai-calling-agent-7caac.appspot.com",
-            messagingSenderId: "YAHAN_SENDER_ID_DAAL", // Optional
-            appId: "YAHAN_APP_ID_DAAL" // Optional
+            apiKey: "AIzaSyDYbppZ6nR4qs9tTZswSnVwurPI-Z5EqJ8",
+            authDomain: "mzfashion.firebaseapp.com",
+            databaseURL: "https://mzfashion-default-rtdb.firebaseio.com",
+            projectId: "mzfashion",
+            storageBucket: "mzfashion.firebasestorage.app",
+            messagingSenderId: "355960541786",
+            appId: "1:355960541786:web:df4b50d44291d0dd0c3e63"
         };
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
@@ -130,9 +130,9 @@
         let banners = [];
         let paymentSettings = { qr_url: "", upi_id: "", whatsapp: "919982437489", flipkart_qr_url: "", flipkart_upi_id: "" };
         
-        let currentUser = JSON.parse(localStorage.getItem('uf_currentUser')) || null;
-        let cart = JSON.parse(localStorage.getItem('uf_cart')) || [];
-        let likedItems = JSON.parse(localStorage.getItem('uf_likes')) || [];
+        let currentUser = JSON.parse(localStorage.getItem('mz_currentUser')) || null;
+        let cart = JSON.parse(localStorage.getItem('mz_cart')) || [];
+        let likedItems = JSON.parse(localStorage.getItem('mz_likes')) || [];
         let activeCategory = ""; 
         let tempCheckoutData = null; 
         
@@ -247,11 +247,13 @@
         }
 
         async function seedInitialData() {
-            await db.ref('settings/payment').set({ qr_url: "https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=upi://pay?pa=dummy@upi&pn=UNIQUEFASHION", upi_id: "dummy@upi", whatsapp: "919982437489" });
-            await db.ref('banners').set({ b1: { id: "b1", img: "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=800&q=80", target_link: "#" } });
+            await db.ref('settings/payment').set({ qr_url: "https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=upi://pay?pa=dummy@upi&pn=MZFASHION", upi_id: "dummy@upi", whatsapp: "919982437489" });
+            await db.ref('banners').set({ b1: { id: "b1", img: "256328.jpg", target_link: "#" } });
             await db.ref('categories').set({ c1: { id: "c1", name: "T-Shirts", img: "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=150&q=80" }, c2: { id: "c2", name: "Jeans", img: "https://images.unsplash.com/photo-1541099649105-f69ad21f3246?w=150&q=80" }, c3: { id: "c3", name: "Combos", img: "https://images.unsplash.com/photo-1516257984-b1b4d707412e?w=150&q=80" }});
             await db.ref('products').set({ 
-                p1: { id: "p1", name: "Premium Black T-Shirt", price: 499, mrp: 999, discount: "50% OFF", category: "T-Shirts", img: "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=400&q=80", shirtSizes: "S, M, L, XL, XXL", jeansSizes: "" }
+                p1: { id: "p1", name: "Premium Black T-Shirt", price: 499, mrp: 999, discount: "50% OFF", category: "T-Shirts", img: "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=400&q=80", shirtSizes: "S, M, L, XL, XXL", jeansSizes: "" },
+                p2: { id: "p2", name: "Ripped Blue Jeans", price: 1099, mrp: 1999, discount: "45% OFF", category: "Jeans", img: "https://images.unsplash.com/photo-1541099649105-f69ad21f3246?w=400&q=80", shirtSizes: "", jeansSizes: "28, 30, 32, 34, 36" },
+                p3: { id: "p3", name: "Combo (Shirt + Jeans)", price: 1499, mrp: 3198, discount: "53% OFF", category: "Combos", img: "https://images.unsplash.com/photo-1516257984-b1b4d707412e?w=400&q=80", shirtSizes: "S, M, L, XL, XXL", jeansSizes: "28, 30, 32, 34, 36" }
             });
         }
 
@@ -276,7 +278,7 @@
                     <button onclick="history.back()" class="absolute top-6 left-6 text-gray-800 text-xl"><i class="fa-solid fa-arrow-left"></i></button>
                     <div class="text-center mb-10 mt-8">
                         <div class="w-24 h-24 mx-auto border-[3px] border-yellow-500 rounded-full overflow-hidden mb-4 shadow-[0_0_20px_rgba(212,175,55,0.4)]">
-                            <img src="logo.png" onerror="this.src='https://ui-avatars.com/api/?name=UF&background=000&color=D4AF37'" class="w-full h-full object-cover">
+                            <img src="logo.png" onerror="this.src='https://ui-avatars.com/api/?name=MZ&background=000&color=D4AF37'" class="w-full h-full object-cover">
                         </div>
                         <h1 class="text-3xl font-black text-gray-900 tracking-widest uppercase">Welcome Back</h1>
                         <p class="text-gray-500 mt-2 text-sm font-bold">Login to view your profile.</p>
@@ -330,7 +332,7 @@
                 const snapshot = await db.ref('users/' + phone).once('value');
                 if (snapshot.exists() && snapshot.val().password === pass) {
                     currentUser = snapshot.val();
-                    localStorage.setItem('uf_currentUser', JSON.stringify(currentUser));
+                    localStorage.setItem('mz_currentUser', JSON.stringify(currentUser));
                     
                     if(pendingCallback) {
                         const cb = pendingCallback; pendingCallback = null;
@@ -361,10 +363,10 @@
                     btn.innerHTML = "CREATE ACCOUNT";
                     return;
                 }
-                const newUser = { name, phone, password: pass, linkedEmail: "uniquefashion@gmail.com" };
+                const newUser = { name, phone, password: pass, linkedEmail: "mzfashion@gmail.com" };
                 await db.ref('users/' + phone).set(newUser);
                 currentUser = newUser;
-                localStorage.setItem('uf_currentUser', JSON.stringify(newUser));
+                localStorage.setItem('mz_currentUser', JSON.stringify(newUser));
                 
                 if(pendingCallback) {
                     const cb = pendingCallback; pendingCallback = null;
@@ -378,7 +380,7 @@
 
         function logout() {
             currentUser = null;
-            localStorage.removeItem('uf_currentUser');
+            localStorage.removeItem('mz_currentUser');
             goHome(); 
         }
 
@@ -508,7 +510,7 @@
                 likedItems.push(id);
                 btn.classList.remove('text-gray-300'); btn.classList.add('text-red-500');
             }
-            localStorage.setItem('uf_likes', JSON.stringify(likedItems));
+            localStorage.setItem('mz_likes', JSON.stringify(likedItems));
         }
 
         function _showLikes() {
@@ -605,7 +607,7 @@
             let newName = prompt("Enter your new name:", currentUser.name);
             if(newName && newName.trim() !== "") {
                 currentUser.name = newName.trim();
-                localStorage.setItem('uf_currentUser', JSON.stringify(currentUser));
+                localStorage.setItem('mz_currentUser', JSON.stringify(currentUser));
                 try { await db.ref('users/' + currentUser.phone).update({ name: currentUser.name }); } catch(e) {}
                 _showProfile();
             }
@@ -1008,7 +1010,7 @@
             const finalDiscount = currentSelectedDiscount !== null ? currentSelectedDiscount : product.discount;
 
             cart.push({ ...product, size: finalSize, color: finalColor || '', img: finalImg || '', price: finalPrice, mrp: finalMrp, discount: finalDiscount, cartId: Date.now(), isFlipkart: product.isFlipkart || 'false' });
-            localStorage.setItem('uf_cart', JSON.stringify(cart));
+            localStorage.setItem('mz_cart', JSON.stringify(cart));
             updateCartBadge();
             
             const btn = document.getElementById(`addBtn-${id}`);
@@ -1037,7 +1039,7 @@
 
         function removeFromCart(index) { 
             cart.splice(index, 1); 
-            localStorage.setItem('uf_cart', JSON.stringify(cart));
+            localStorage.setItem('mz_cart', JSON.stringify(cart));
             updateCartBadge(); 
             _showCart(); 
         }
@@ -1176,13 +1178,13 @@
                 const phoneStr = tempCheckoutData.phone;
                 db.ref('users/' + phoneStr).once('value').then(snap => {
                     if(!snap.exists()){
-                        const newUser = { name: tempCheckoutData.name, phone: phoneStr, password: "guest_user", linkedEmail: "uniquefashion@gmail.com" };
+                        const newUser = { name: tempCheckoutData.name, phone: phoneStr, password: "guest_user", linkedEmail: "mzfashion@gmail.com" };
                         db.ref('users/' + phoneStr).set(newUser);
                         currentUser = newUser;
                     } else {
                         currentUser = snap.val();
                     }
-                    localStorage.setItem('uf_currentUser', JSON.stringify(currentUser));
+                    localStorage.setItem('mz_currentUser', JSON.stringify(currentUser));
                 });
             }
 
@@ -1284,14 +1286,14 @@
                 await db.ref('orders/' + newOrder.id).set(newOrder);
                 
                 // --- TELEGRAM NOTIFICATION GATEWAY (Safe, No Token Exposed) ---
-                const pythonUrl = "https://uniquefashion001.pythonanywhere.com"; 
+                const pythonUrl = "https://mzfashion.pythonanywhere.com"; // <-- APNI MZ FASHION WALI LINK DAAL YAHAN
                 fetch(`${pythonUrl}/api/telegram_alert?id=${newOrder.id}&name=${encodeURIComponent(newOrder.name)}&price=${newOrder.price}`, { mode: 'no-cors' }).catch(() => {});
                 // --------------------------------------------------------------
 
-                cart = []; localStorage.setItem('uf_cart', JSON.stringify(cart)); updateCartBadge();
+                cart = []; localStorage.setItem('mz_cart', JSON.stringify(cart)); updateCartBadge();
 
                 const waNum = paymentSettings.whatsapp;
-                const waText = encodeURIComponent(`Hello Unique Fashion, here is my payment screenshot for Order ID: ${newOrder.id}`);
+                const waText = encodeURIComponent(`Hello MZ Fashion, here is my payment screenshot for Order ID: ${newOrder.id}`);
 
                 history.replaceState({ page: 'home', param: null }, '', '#home');
 
