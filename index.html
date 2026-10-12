@@ -1114,8 +1114,7 @@
                 orderItems = [{ name: product.name, size: currentSelectedSize, color: finalColorName, price: finalPrice, img: primaryImg, isFlipkart: product.isFlipkart || 'false' }];
             }
 
-            let hasFlipkart = orderItems.some(item => item.isFlipkart === 'true' || item.isFlipkart === true);
-            tempCheckoutData = { names: productNames, price: total, img: primaryImg, items: orderItems, hasFlipkart: hasFlipkart };
+            tempCheckoutData = { names: productNames, price: total, img: primaryImg, items: orderItems };
 
             appDiv.innerHTML = `
                 <div class="fade-in p-5 pb-24 bg-gray-50 min-h-screen">
@@ -1202,7 +1201,7 @@
                     
                     <div class="bg-white p-5 rounded-xl border border-gray-200 mb-6 flex justify-between items-center shadow-sm">
                         <span class="text-gray-500 font-bold text-sm uppercase">Total to Pay</span>
-                        <span class="font-black text-2xl text-gray-900">₹${tempCheckoutData.price}</span>
+                        <span id="displayTotalAmt" class="font-black text-2xl text-gray-900">₹${tempCheckoutData.price}</span>
                     </div>
                     
                     <form onsubmit="confirmOrder(event)">
@@ -1212,10 +1211,13 @@
                                 <span class="text-gray-800 font-bold text-sm w-full">Prepaid (Full Payment)</span>
                             </label>
 
-                            <!-- COD OPTION RESTORED -->
+                            <!-- COD OPTION ADDED -->
                             <label class="flex items-center gap-3 bg-white p-4 rounded-xl border border-gray-200 mb-3 cursor-pointer shadow-sm hover:border-yellow-500 transition">
                                 <input type="radio" id="cod" name="payment" value="COD" onchange="renderPaymentUI()" class="accent-yellow-500 w-5 h-5 cursor-pointer">
-                                <span class="text-gray-800 font-bold text-sm w-full">Cash on Delivery (C.O.D)</span>
+                                <div class="w-full">
+                                    <span class="text-gray-800 font-bold text-sm block">Cash on Delivery (C.O.D)</span>
+                                    <span class="text-red-500 text-[10px] font-bold mt-0.5 block">C.O.D. ME 90₹ JAYADA HOGE</span>
+                                </div>
                             </label>
                             
                             <div id="paymentUI" class="mt-5 p-5 bg-white border border-yellow-300 rounded-xl shadow-md hidden"></div>
@@ -1234,8 +1236,13 @@
         function renderPaymentUI() {
             const isCOD = document.getElementById('cod') && document.getElementById('cod').checked;
             const uiDiv = document.getElementById('paymentUI');
+            const displayTotal = document.getElementById('displayTotalAmt');
             uiDiv.classList.remove('hidden');
-            const totalAmount = tempCheckoutData.price;
+            
+            let baseAmount = Number(tempCheckoutData.price);
+            let finalAmount = isCOD ? baseAmount + 90 : baseAmount;
+            
+            if(displayTotal) displayTotal.innerText = '₹' + finalAmount;
             
             const qrUrl = tempCheckoutData.hasFlipkart && paymentSettings.flipkart_qr_url ? paymentSettings.flipkart_qr_url : paymentSettings.qr_url;
             const activeUpi = tempCheckoutData.hasFlipkart && paymentSettings.flipkart_upi_id ? paymentSettings.flipkart_upi_id : paymentSettings.upi_id;
@@ -1243,7 +1250,7 @@
             if (!isCOD) {
                 uiDiv.innerHTML = `
                     <p class="text-center text-sm text-gray-500 font-bold mb-2">Scan QR to pay Full Amount</p>
-                    <p class="text-center font-black text-2xl text-gray-900 mb-5">₹${totalAmount}</p>
+                    <p class="text-center font-black text-2xl text-gray-900 mb-5">₹${finalAmount}</p>
                     <p class="text-center text-xs font-bold text-gray-700 mb-4 bg-gray-100 py-1.5 rounded-md">UPI ID: <span class="text-green-600 select-all">${activeUpi || 'Not available'}</span></p>
                     <div class="flex justify-center mb-5"><img src="${qrUrl}" class="w-56 h-56 border-4 border-gray-100 rounded-xl p-2 bg-white shadow-md"></div>
                     <div class="bg-red-50 border border-red-200 p-3 rounded-lg mb-3">
@@ -1252,11 +1259,12 @@
                     </div>
                 `;
             } else {
-                const tokenAmount = Math.round(totalAmount * 0.30);
+                const tokenAmount = Math.round(finalAmount * 0.20);
                 uiDiv.innerHTML = `
                     <div class="bg-yellow-50 border border-yellow-200 p-3 rounded-lg mb-4 text-center shadow-sm">
-                        <p class="text-[11px] text-yellow-700 font-bold">For C.O.D, 30% advance token is required.</p>
+                        <p class="text-[11px] text-yellow-700 font-bold">For C.O.D, 20% advance token is required.</p>
                         <p class="font-black text-xl text-gray-900 mt-1">Token: ₹${tokenAmount}</p>
+                        <p class="text-[10px] text-gray-600 mt-1 font-bold">Total Order Value: ₹${finalAmount} (Includes ₹90 COD Charge)</p>
                     </div>
                     <p class="text-center text-xs font-bold text-gray-700 mb-4 bg-gray-100 py-1.5 rounded-md">UPI ID: <span class="text-green-600 select-all">${activeUpi || 'Not available'}</span></p>
                     <div class="flex justify-center mb-5"><img src="${qrUrl}" class="w-56 h-56 border-4 border-gray-100 rounded-xl p-2 bg-white shadow-md"></div>
@@ -1270,12 +1278,15 @@
 
         async function confirmOrder(event) {
             event.preventDefault();
-            const paymentType = document.getElementById('cod') && document.getElementById('cod').checked ? "COD" : "Prepaid";
+            const isCOD = document.getElementById('cod') && document.getElementById('cod').checked;
+            const paymentType = isCOD ? "COD" : "Prepaid";
+            const finalPrice = isCOD ? Number(tempCheckoutData.price) + 90 : Number(tempCheckoutData.price);
+
             const newOrder = {
                 id: Date.now().toString(), date: new Date().toLocaleString(),
                 name: tempCheckoutData.name || '', phone: tempCheckoutData.phone || '',
                 address: tempCheckoutData.address || '', payment: paymentType,
-                product_name: tempCheckoutData.names || '', price: tempCheckoutData.price || 0,
+                product_name: tempCheckoutData.names || '', price: finalPrice,
                 img: tempCheckoutData.img || '', 
                 items: tempCheckoutData.items || [], 
                 status: "Pending Verification" 
@@ -1286,7 +1297,7 @@
                 await db.ref('orders/' + newOrder.id).set(newOrder);
                 
                 // --- TELEGRAM NOTIFICATION GATEWAY (Safe, No Token Exposed) ---
-                const pythonUrl = "https://mzfashion.pythonanywhere.com"; // <-- APNI MZ FASHION WALI LINK DAAL YAHAN
+                const pythonUrl = "https://mzfashion.pythonanywhere.com"; 
                 fetch(`${pythonUrl}/api/telegram_alert?id=${newOrder.id}&name=${encodeURIComponent(newOrder.name)}&price=${newOrder.price}`, { mode: 'no-cors' }).catch(() => {});
                 // --------------------------------------------------------------
 
@@ -1330,7 +1341,7 @@
                     userOrders.forEach(order => {
                         let paymentStatus = ""; let tokenAmount = 0; let remainingAmount = 0;
                         if(order.payment === "COD") {
-                            tokenAmount = Math.round(order.price * 0.30); remainingAmount = order.price - tokenAmount;
+                            tokenAmount = Math.round(order.price * 0.20); remainingAmount = order.price - tokenAmount;
                             paymentStatus = `<p class="text-xs text-gray-500 mt-1 font-medium">Total: <span class="text-gray-800 font-bold">₹${order.price}</span></p><p class="text-xs text-green-600 font-bold mt-0.5">Paid Token: ₹${tokenAmount}</p><p class="text-xs text-red-500 font-bold mt-0.5">To Pay on Delivery: ₹${remainingAmount}</p>`;
                         } else {
                             paymentStatus = `<p class="text-xs text-gray-500 mt-1 font-medium">Total: <span class="text-gray-800 font-bold">₹${order.price}</span></p><p class="text-xs text-green-600 font-bold mt-0.5">Paid: ₹${order.price} (Full Payment)</p>`;
