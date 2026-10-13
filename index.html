@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
     <title>MZ Fashion</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
@@ -145,6 +145,7 @@
         let currentSelectedMrp = null; 
         let currentSelectedDiscount = null; 
         let currentColorSizesArr = [];
+        let currentSelectedColorIdx = 0;
         
         const appDiv = document.getElementById('app');
         const topNav = document.getElementById('topNav');
@@ -671,6 +672,7 @@
             const product = products.find(p => p.id === productId);
             if(!product) return;
 
+            currentSelectedColorIdx = index;
             currentSelectedColor = { name: name, img: imgUrl };
             document.getElementById('selectedColorText').innerText = name;
             
@@ -687,16 +689,17 @@
                 `;
             }
             
+            // AMAZON STYLE SELECTION: Clear visibility for all, strong black border for selected
             const thumbs = document.querySelectorAll('[id^="colorThumb-"]');
             thumbs.forEach(t => {
-                t.classList.remove('border-gray-800', 'shadow-md');
-                t.classList.add('border-gray-200', 'opacity-70');
+                t.classList.remove('border-black', 'ring-1', 'ring-black', 'shadow-md');
+                t.classList.add('border-gray-300');
             });
             
             let activeThumb = document.getElementById(`colorThumb-${index}`);
             if (activeThumb) {
-                activeThumb.classList.remove('border-gray-200', 'opacity-70');
-                activeThumb.classList.add('border-gray-800', 'shadow-md');
+                activeThumb.classList.remove('border-gray-300');
+                activeThumb.classList.add('border-black', 'ring-1', 'ring-black', 'shadow-md');
             }
 
             let currentPrice = product.price;
@@ -765,6 +768,7 @@
             
             currentSelectedSize = null; currentComboSize1 = null; currentComboSize2 = null; currentSelectedColor = null;
             currentSelectedPrice = null; currentSelectedMrp = null; currentSelectedDiscount = null;
+            currentSelectedColorIdx = 0;
             
             let colorHTML = "";
             let hasColors = !!product.colorNames && !!product.colorImages && product.colorNames.trim() !== "";
@@ -811,7 +815,7 @@
                         <div class="flex gap-3 overflow-x-auto no-scrollbar pb-2">
                             ${names.map((n, idx) => {
                                 let safeName = n.replace(/'/g, "\\'");
-                                return `<div onclick="selectColor(${idx}, '${safeName}', '${images[idx]}', '${product.id}')" id="colorThumb-${idx}" class="w-16 h-20 flex-shrink-0 border-2 ${idx === 0 ? 'border-gray-800 shadow-md' : 'border-gray-200 opacity-70'} rounded-lg overflow-hidden cursor-pointer transition hover:border-gray-800 hover:opacity-100">
+                                return `<div onclick="selectColor(${idx}, '${safeName}', '${images[idx]}', '${product.id}')" id="colorThumb-${idx}" class="w-16 h-20 flex-shrink-0 border-2 ${idx === 0 ? 'border-black ring-1 ring-black shadow-md' : 'border-gray-300'} rounded-md overflow-hidden cursor-pointer transition">
                                     <img src="${images[idx]}" class="w-full h-full object-cover">
                                 </div>`;
                             }).join('')}
@@ -903,14 +907,32 @@
             window.scrollTo(0,0);
         }
 
+        // FULL SCREEN IMAGE WITH ZOOM SYSTEM
+        let isImageZoomed = false;
         function openImage(url) {
+            isImageZoomed = false;
             const container = document.getElementById('imageModalContainer');
             container.innerHTML = `
-                <div class="fixed inset-0 z-[100] bg-black/95 flex items-center justify-center fade-in backdrop-blur-md">
-                    <button onclick="closeImage()" class="absolute top-6 right-6 text-white text-xl z-[101] bg-gray-800 border-2 border-gray-600 w-10 h-10 rounded-full flex items-center justify-center shadow-lg"><i class="fa-solid fa-xmark"></i></button>
-                    <img src="${url}" class="max-w-full max-h-full object-contain p-2">
+                <div class="fixed inset-0 z-[100] bg-black flex flex-col items-center justify-center fade-in overflow-hidden">
+                    <button onclick="closeImage()" class="absolute top-6 right-6 text-white text-xl z-[102] bg-gray-800/80 border border-gray-600 w-10 h-10 rounded-full flex items-center justify-center shadow-lg"><i class="fa-solid fa-xmark"></i></button>
+                    <p class="absolute bottom-6 text-white/70 text-xs z-[102] bg-black/50 px-3 py-1 rounded-full pointer-events-none">Tap image to Zoom In / Out</p>
+                    <div class="w-full h-full overflow-auto flex items-center justify-center p-2">
+                        <img id="zoomableModalImg" src="${url}" onclick="toggleImageZoom(this)" class="max-w-full max-h-full object-contain transition-transform duration-300 cursor-zoom-in" style="transform-origin: center center;">
+                    </div>
                 </div>
             `;
+        }
+        function toggleImageZoom(imgEl) {
+            isImageZoomed = !isImageZoomed;
+            if (isImageZoomed) {
+                imgEl.style.transform = "scale(2.2)";
+                imgEl.classList.remove('cursor-zoom-in');
+                imgEl.classList.add('cursor-zoom-out');
+            } else {
+                imgEl.style.transform = "scale(1)";
+                imgEl.classList.remove('cursor-zoom-out');
+                imgEl.classList.add('cursor-zoom-in');
+            }
         }
         function closeImage() { document.getElementById('imageModalContainer').innerHTML = ''; }
 
@@ -1009,7 +1031,7 @@
             const finalMrp = currentSelectedMrp !== null ? Number(currentSelectedMrp) : Number(product.mrp);
             const finalDiscount = currentSelectedDiscount !== null ? currentSelectedDiscount : product.discount;
 
-            cart.push({ ...product, size: finalSize, color: finalColor || '', img: finalImg || '', price: finalPrice, mrp: finalMrp, discount: finalDiscount, cartId: Date.now(), isFlipkart: product.isFlipkart || 'false' });
+            cart.push({ ...product, id: product.id, size: finalSize, color: finalColor || '', colorIdx: currentSelectedColorIdx, img: finalImg || '', price: finalPrice, mrp: finalMrp, discount: finalDiscount, cartId: Date.now(), isFlipkart: product.isFlipkart || 'false' });
             localStorage.setItem('mz_cart', JSON.stringify(cart));
             updateCartBadge();
             
@@ -1100,10 +1122,10 @@
             let total = 0; let productNames = ""; let orderItems = []; let primaryImg = "";
 
             if (source === 'cart') {
-                total = cart.reduce((sum, item) => sum + item.price, 0);
+                total = cart.reduce((sum, item) => sum + Number(item.price), 0);
                 productNames = cart.map(i => `${i.name} (Size: ${i.size}${i.color ? `, Color: ${i.color}` : ''})`).join(", ");
                 primaryImg = cart[0].img ? cart[0].img.split(',')[0].trim() : '';
-                orderItems = cart.map(i => ({ name: i.name, size: i.size, color: i.color || '', price: i.price, img: i.img ? i.img.split(',')[0].trim() : '', isFlipkart: i.isFlipkart || 'false' }));
+                orderItems = cart.map(i => ({ id: i.id || '', name: i.name, size: i.size, color: i.color || '', colorIdx: i.colorIdx || 0, price: i.price, img: i.img ? i.img.split(',')[0].trim() : '', isFlipkart: i.isFlipkart || 'false' }));
             } else {
                 const product = products.find(p => p.id === source);
                 const finalPrice = currentSelectedPrice !== null ? Number(currentSelectedPrice) : Number(product.price);
@@ -1111,10 +1133,11 @@
                 const finalColorName = currentSelectedColor ? currentSelectedColor.name : '';
                 productNames = `${product.name} (Size: ${currentSelectedSize}${finalColorName ? `, Color: ${finalColorName}` : ''})`;
                 primaryImg = currentSelectedColor ? currentSelectedColor.img : (product.img ? product.img.split(',')[0].trim() : '');
-                orderItems = [{ name: product.name, size: currentSelectedSize, color: finalColorName, price: finalPrice, img: primaryImg, isFlipkart: product.isFlipkart || 'false' }];
+                orderItems = [{ id: product.id || '', name: product.name, size: currentSelectedSize, color: finalColorName, colorIdx: currentSelectedColorIdx || 0, price: finalPrice, img: primaryImg, isFlipkart: product.isFlipkart || 'false' }];
             }
 
-            tempCheckoutData = { names: productNames, price: total, img: primaryImg, items: orderItems };
+            let hasFlipkart = orderItems.some(item => item.isFlipkart === 'true' || item.isFlipkart === true);
+            tempCheckoutData = { names: productNames, price: total, img: primaryImg, items: orderItems, hasFlipkart: hasFlipkart };
 
             appDiv.innerHTML = `
                 <div class="fade-in p-5 pb-24 bg-gray-50 min-h-screen">
@@ -1208,15 +1231,16 @@
                         <div class="mb-6">
                             <label class="flex items-center gap-3 bg-white p-4 rounded-xl border border-gray-200 mb-3 cursor-pointer shadow-sm hover:border-yellow-500 transition">
                                 <input type="radio" id="prepaid" name="payment" value="Prepaid" onchange="renderPaymentUI()" class="accent-yellow-500 w-5 h-5 cursor-pointer" checked>
-                                <span class="text-gray-800 font-bold text-sm w-full">Prepaid (Full Payment)</span>
+                                <span class="text-gray-900 font-bold text-sm w-full">Prepaid (Full Payment)</span>
                             </label>
 
-                            <!-- COD OPTION ADDED -->
+                            <!-- COD OPTION WITH BLACK 90₹ AND GREEN MONEY EMOJI -->
                             <label class="flex items-center gap-3 bg-white p-4 rounded-xl border border-gray-200 mb-3 cursor-pointer shadow-sm hover:border-yellow-500 transition">
                                 <input type="radio" id="cod" name="payment" value="COD" onchange="renderPaymentUI()" class="accent-yellow-500 w-5 h-5 cursor-pointer">
-                                <div class="w-full">
-                                    <span class="text-gray-800 font-bold text-sm block">Cash on Delivery (C.O.D)</span>
-                                    <span class="text-red-500 text-[10px] font-bold mt-0.5 block">C.O.D. ME 90₹ JAYADA HOGE</span>
+                                <div class="w-full flex items-center gap-1.5">
+                                    <span class="text-gray-900 font-bold text-sm">Cash on Delivery</span>
+                                    <span class="text-gray-900 font-extrabold text-sm">+90₹</span>
+                                    <span class="text-lg">💵</span>
                                 </div>
                             </label>
                             
@@ -1282,7 +1306,7 @@
             const paymentType = isCOD ? "COD" : "Prepaid";
             const finalPrice = isCOD ? Number(tempCheckoutData.price) + 90 : Number(tempCheckoutData.price);
 
-            const newOrder = {
+            const orderPayload = {
                 id: Date.now().toString(), date: new Date().toLocaleString(),
                 name: tempCheckoutData.name || '', phone: tempCheckoutData.phone || '',
                 address: tempCheckoutData.address || '', payment: paymentType,
@@ -1293,18 +1317,37 @@
             };
             appDiv.innerHTML = `<div class="min-h-[70vh] flex flex-col items-center justify-center text-yellow-500 bg-gray-50"><i class="fa-solid fa-spinner fa-spin text-5xl mb-4"></i><p class="font-bold tracking-widest text-gray-800">PLACING ORDER...</p></div>`;
             window.scrollTo(0,0);
+            
             try {
-                await db.ref('orders/' + newOrder.id).set(newOrder);
-                
-                // --- TELEGRAM NOTIFICATION GATEWAY (Safe, No Token Exposed) ---
                 const pythonUrl = "https://mzfashion.pythonanywhere.com"; 
-                fetch(`${pythonUrl}/api/telegram_alert?id=${newOrder.id}&name=${encodeURIComponent(newOrder.name)}&price=${newOrder.price}`, { mode: 'no-cors' }).catch(() => {});
-                // --------------------------------------------------------------
+                let finalOrderId = orderPayload.id;
+                let savedViaServer = false;
+
+                // 5. SECURE SERVER-SIDE ORDER PLACEMENT (Prevents F12 Tampering)
+                try {
+                    const res = await fetch(`${pythonUrl}/place-order`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(orderPayload)
+                    });
+                    const resData = await res.json();
+                    if (res.ok && resData.success) {
+                        finalOrderId = resData.order_id;
+                        savedViaServer = true;
+                    }
+                } catch (serverErr) {
+                    console.warn("Server API unreachable, using fallback.");
+                }
+
+                if (!savedViaServer) {
+                    await db.ref('orders/' + finalOrderId).set(orderPayload);
+                    fetch(`${pythonUrl}/api/telegram_alert?id=${finalOrderId}&name=${encodeURIComponent(orderPayload.name)}&price=${orderPayload.price}`, { mode: 'no-cors' }).catch(() => {});
+                }
 
                 cart = []; localStorage.setItem('mz_cart', JSON.stringify(cart)); updateCartBadge();
 
                 const waNum = paymentSettings.whatsapp;
-                const waText = encodeURIComponent(`Hello MZ Fashion, here is my payment screenshot for Order ID: ${newOrder.id}`);
+                const waText = encodeURIComponent(`Hello MZ Fashion, here is my payment screenshot for Order ID: ${finalOrderId}`);
 
                 history.replaceState({ page: 'home', param: null }, '', '#home');
 
@@ -1313,9 +1356,11 @@
                         <div class="w-20 h-20 bg-white border-[3px] border-yellow-500 text-yellow-500 rounded-full flex items-center justify-center text-4xl mb-5 shadow-lg"><i class="fa-solid fa-clock"></i></div>
                         <h1 class="text-2xl font-extrabold text-gray-900 uppercase">Verification Pending!</h1>
                         <p class="text-gray-500 mt-2 text-sm font-medium">Thank you, <span class="text-gray-800 font-bold">${tempCheckoutData.name}</span>.</p>
-                        <p class="text-gray-500 mt-1 text-sm font-medium">Order ID: <b class="text-gray-900 text-xs">${newOrder.id}</b></p>
+                        <p class="text-gray-500 mt-1 text-sm font-medium">Order ID: <b class="text-gray-900 text-xs">${finalOrderId}</b></p>
                         
-                        <div class="bg-white border-2 border-red-100 p-5 rounded-xl mt-6 mb-6 w-full max-w-sm shadow-md">
+                        <p class="text-gray-900 font-extrabold text-sm mt-3">Order 0-7 working days me mil jaaega.</p>
+                        
+                        <div class="bg-white border-2 border-red-100 p-5 rounded-xl mt-5 mb-6 w-full max-w-sm shadow-md">
                             <p class="text-sm text-red-500 font-extrabold mb-4 leading-snug">⚠️ Order will NOT be dispatched until payment screenshot is received.</p>
                             <a href="https://wa.me/${waNum}?text=${waText}" target="_blank" class="flex w-full items-center justify-center gap-2 bg-green-500 hover:bg-green-600 text-white font-bold py-3.5 px-4 rounded-xl shadow-md animate-pulse transition">
                                 <i class="fa-brands fa-whatsapp text-2xl"></i> SEND SCREENSHOT NOW
